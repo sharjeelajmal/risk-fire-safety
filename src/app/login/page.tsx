@@ -30,10 +30,10 @@ export default function LoginPage() {
       if (res.ok) {
         router.push('/dashboard');
       } else {
-        setError(data.error || 'Inloggen mislukt');
+        setError(data.error || 'Anmeldung fehlgeschlagen');
       }
     } catch (err) {
-      setError('Er is iets misgegaan. Probeer het opnieuw.');
+      setError('Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.');
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +77,7 @@ export default function LoginPage() {
               <h2 className="text-white text-2xl font-bold tracking-tight">Risk Fire Safety</h2>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-green-500 text-[10px] font-bold uppercase tracking-[2px]">Systeem Beveiligd</span>
+                <span className="text-green-500 text-[10px] font-bold uppercase tracking-[2px]">System Gesichert</span>
               </div>
             </div>
           </motion.div>
@@ -90,7 +90,7 @@ export default function LoginPage() {
               className="text-8xl font-black text-white leading-[0.95] tracking-[-4px]"
             >
               BRAND <br />
-              <span className="branding-gradient-text">VEILIGHEID</span>
+              <span className="branding-gradient-text">SCHUTZ</span>
             </motion.h1>
             <motion.p
               initial={{ y: 20, opacity: 0 }}
@@ -98,7 +98,7 @@ export default function LoginPage() {
               transition={{ delay: 0.5, duration: 0.8 }}
               className="text-gray-400 text-xl max-w-lg font-light leading-relaxed"
             >
-              Al meer dan <span className="text-white font-bold">15 jaar</span> de absolute standaard in risicobeheer en brandpreventie. Uw portaal voor precisie-inspecties.
+              Mehr als <span className="text-white font-bold">15 Jahre</span> der absolute Standard im Risikomanagement und Brandschutz. Ihr Portal für Präzisionsinspektionen.
             </motion.p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function LoginPage() {
             </div>
           </div>
           <p className="text-gray-500 text-xs font-medium tracking-wide">
-            Vertrouwd door <span className="text-white">honderden</span> <br /> professionele inspecteurs.
+            Vertraut von <span className="text-white">Hunderten</span> <br /> professioneller Inspektoren.
           </p>
         </div>
 
@@ -144,8 +144,8 @@ export default function LoginPage() {
               >
                 <ShieldCheck size={40} className="drop-shadow-[0_0_15px_rgba(255,0,0,0.5)]" />
               </motion.div>
-              <h2 className="text-4xl font-bold text-white mb-3">Welkom Terug</h2>
-              <p className="text-gray-500 font-medium">Log in met uw beveiligde gegevens</p>
+              <h2 className="text-4xl font-bold text-white mb-3">Willkommen Zurück</h2>
+              <p className="text-gray-500 font-medium">Melden Sie sich mit Ihren gesicherten Daten an</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8 relative z-20">
@@ -164,10 +164,10 @@ export default function LoginPage() {
               </AnimatePresence>
 
               <div className="space-y-2">
-                <label className="text-[10px] text-gray-500 uppercase tracking-[3px] font-bold ml-1">Gebruikersnaam</label>
+                <label className="text-[10px] text-gray-500 uppercase tracking-[3px] font-bold ml-1">Benutzername</label>
                 <input
                   type="email"
-                  placeholder="voer uw e-mailadres in"
+                  placeholder="Geben Sie Ihre E-Mail-Adresse ein"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -178,7 +178,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] text-gray-500 uppercase tracking-[3px] font-bold ml-1">Wachtwoord</label>
+                <label className="text-[10px] text-gray-500 uppercase tracking-[3px] font-bold ml-1">Passwort</label>
                 <div className="relative group/pass">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -211,7 +211,7 @@ export default function LoginPage() {
                     <Loader2 className="animate-spin" size={24} />
                   ) : (
                     <>
-                      <span>Authenticeren</span>
+                      <span>Authentifizieren</span>
                       <motion.div
                         animate={{ x: [0, 5, 0] }}
                         transition={{ repeat: Infinity, duration: 1.5 }}
@@ -228,7 +228,7 @@ export default function LoginPage() {
                   type="button"
                   className="text-gray-600 text-xs hover:text-white transition-all cursor-pointer font-bold tracking-widest uppercase py-2"
                 >
-                  Hulp nodig bij inloggen?
+                  Benötigen Sie Hilfe beim Einloggen?
                 </button>
               </div>
             </form>

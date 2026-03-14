@@ -27,12 +27,12 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(
-            { error: 'Invalid email or password' },
+            { error: 'Ungültige E-Mail oder Passwort' },
             { status: 401 }
         );
     } catch (error) {
         return NextResponse.json(
-            { error: 'Something went wrong' },
+            { error: 'Etwas ist schief gelaufen' },
             { status: 500 }
         );
     }

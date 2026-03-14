@@ -9,9 +9,9 @@ import MoreMenu from './MoreMenu';
 
 const navItems = [
   { name: 'Dashboard', icon: Home, path: '/dashboard' },
-  { name: 'Nieuw', icon: Plus, path: '/inspection/new', primary: true },
+  { name: 'Neu', icon: Plus, path: '/inspection/new', primary: true },
   { name: 'Team', icon: Users, path: '/users' },
-  { name: 'Menu', icon: Gear, path: 'menu' },
+  { name: 'Menü', icon: Gear, path: 'menu' },
 ];
 
 export default function Navbar() {
@@ -110,8 +110,8 @@ export default function Navbar() {
           })}
         </div>
 
-        <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 cursor-pointer hover:border-red-500 transition-colors">
-            <img src="https://i.pravatar.cc/150?u=robin" alt="Profile" className="w-full h-full object-cover" />
+        <div className="w-12 h-12 rounded-2xl overflow-hidden border border-white/10 cursor-pointer hover:border-red-500 transition-colors bg-white/5 p-1 flex items-center justify-center">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-xl" />
         </div>
       </aside>
 

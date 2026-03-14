@@ -13,7 +13,7 @@ export default function ActionHero() {
         </h1>
         <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div>
-            <p className="text-gray-500 text-xs font-black uppercase tracking-[3px]">Systeemstatus: Operationeel</p>
+            <p className="text-gray-500 text-xs font-black uppercase tracking-[3px]">Systemstatus: Betriebsbereit</p>
         </div>
       </div>
       
@@ -26,7 +26,7 @@ export default function ActionHero() {
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:rotate-90 transition-transform">
             <Plus size={20} />
           </div>
-          <span>Nieuwe Inspectie Starten</span>
+          <span>Neue Inspektion Starten</span>
         </motion.button>
       </Link>
     </div>

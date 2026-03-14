@@ -5,8 +5,8 @@ import { ClipboardList, Calendar, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 const mockDrafts = [
-  { id: 1, location: 'Hotel Nufenen', date: '12 Maart 2026', status: 'Draft' },
-  { id: 2, location: 'City Mall Center', date: '10 Maart 2026', status: 'In Progress' },
+  { id: 1, location: 'Hotel Nufenen', date: '12. März 2026', status: 'Entwurf' },
+  { id: 2, location: 'City Mall Center', date: '10. März 2026', status: 'In Bearbeitung' },
 ];
 
 export default function DraftsSection() {
@@ -17,9 +17,9 @@ export default function DraftsSection() {
           <div className="w-10 h-10 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20">
             <ClipboardList size={20} />
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Recent Drafts</h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Kürzliche Entwürfe</h2>
         </div>
-        <span className="text-[10px] font-black uppercase tracking-[3px] text-gray-500">{mockDrafts.length} Adhoori Reports</span>
+        <span className="text-[10px] font-black uppercase tracking-[3px] text-gray-500">{mockDrafts.length} Unvollständige Berichte</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -51,7 +51,7 @@ export default function DraftsSection() {
 
               <Link href={`/inspection/${draft.id}`}>
                 <button className="w-full py-4 rounded-2xl bg-white/5 group-hover:bg-amber-500 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer">
-                  Continue Inspection
+                  Inspektion fortsetzen
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </Link>
@@ -60,7 +60,7 @@ export default function DraftsSection() {
         ))}
         {mockDrafts.length === 0 && (
           <div className="col-span-2 py-12 text-center glass-premium rounded-[32px] border-dashed border-white/10">
-            <p className="text-gray-500 font-medium italic">Geen concepten gevonden...</p>
+            <p className="text-gray-500 font-medium italic">Keine Entwürfe gefunden...</p>
           </div>
         )}
       </div>

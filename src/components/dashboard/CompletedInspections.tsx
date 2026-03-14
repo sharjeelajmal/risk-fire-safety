@@ -4,8 +4,8 @@ import { motion } from 'framer-motion';
 import { FileCheck, Calendar, MapPin, Download, Eye, User } from 'lucide-react';
 
 const mockCompleted = [
-  { id: 101, location: 'Zurich Airport', date: '05 Maart 2026', client: 'Flughafen AG', status: 'Completed' },
-  { id: 102, location: 'Grand Hotel Les Trois Rois', date: '01 Maart 2026', client: 'Luxury Group', status: 'Completed' },
+  { id: 101, location: 'Zurich Airport', date: '05. März 2026', client: 'Flughafen AG', status: 'Abgeschlossen' },
+  { id: 102, location: 'Grand Hotel Les Trois Rois', date: '01. März 2026', client: 'Luxury Group', status: 'Abgeschlossen' },
 ];
 
 export default function CompletedInspections() {
@@ -16,7 +16,7 @@ export default function CompletedInspections() {
           <div className="w-10 h-10 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500 border border-green-500/20">
             <FileCheck size={20} />
           </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">Completed Inspections</h2>
+          <h2 className="text-2xl font-bold text-white tracking-tight">Abgeschlossene Inspektionen</h2>
         </div>
       </div>
 
@@ -35,11 +35,11 @@ export default function CompletedInspections() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-2 flex-1">
                 <div className="space-y-1">
-                  <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Location</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Standort</p>
                   <p className="text-white font-bold truncate">{report.location}</p>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Client</p>
+                  <p className="text-[10px] text-gray-500 uppercase font-black tracking-widest">Kunde</p>
                   <div className="flex items-center gap-2 text-white font-bold">
                     <User size={12} className="text-green-500" />
                     {report.client}
@@ -58,7 +58,7 @@ export default function CompletedInspections() {
             <div className="flex items-center gap-3 w-full md:w-auto">
               <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs transition-all cursor-pointer">
                 <Eye size={16} />
-                View Details
+                Details anzeigen
               </button>
               <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white font-bold text-xs border border-green-500/20 transition-all cursor-pointer">
                 <Download size={16} />

@@ -12,15 +12,21 @@ interface MoreMenuProps {
 export default function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
   const router = useRouter();
 
-  const handleLogout = () => {
-    document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    router.push('/login');
-    onClose();
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/login');
+      onClose();
+    } catch (err) {
+      console.error('Logout failed:', err);
+      router.push('/login');
+      onClose();
+    }
   };
 
   const menuItems = [
-    { name: 'Mijn Profiel', icon: User, desc: 'Wachtwoord & e-mail bijwerken' },
-    { name: 'App Instellingen', icon: Settings, desc: 'PDF logo & standaardinstellingen' },
+    { name: 'Mein Profil', icon: User, desc: 'Passwort & E-Mail aktualisieren' },
+    { name: 'App-Einstellungen', icon: Settings, desc: 'PDF-Logo & Standardeinstellungen' },
   ];
 
   return (
@@ -45,7 +51,7 @@ export default function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
             className="fixed bottom-0 left-0 right-0 lg:left-24 lg:right-auto lg:top-1/2 lg:-translate-y-1/2 lg:bottom-auto lg:w-96 glass-premium rounded-t-[3rem] lg:rounded-[3rem] p-8 pb-12 lg:pb-8 z-[70] border-t lg:border border-white/10"
           >
             <div className="flex items-center justify-between mb-8">
-              <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Meer Opties</h3>
+              <h3 className="text-2xl font-black text-white uppercase tracking-tighter">Mehr Optionen</h3>
               <button 
                 onClick={onClose}
                 className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:text-white transition-colors cursor-pointer"
@@ -79,7 +85,7 @@ export default function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
               className="w-full p-5 rounded-2xl bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white transition-all flex items-center justify-center gap-3 font-black text-xs uppercase tracking-[2px] cursor-pointer"
             >
               <LogOut size={18} />
-              Logout
+              Abmelden
             </button>
           </motion.div>
         </>

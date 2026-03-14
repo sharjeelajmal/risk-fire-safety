@@ -61,14 +61,14 @@ export async function POST(request: Request) {
       });
 
       return NextResponse.json({ 
-        message: 'Inspectie succesvol aangemaakt', 
+        message: 'Inspektion erfolgreich erstellt', 
         id: newInspection._id 
       }, { status: 201 });
 
     } catch (uploadErr: any) {
       console.error('Cloudinary Upload Call failed:', uploadErr);
       return NextResponse.json({ 
-        error: `Cloudinary Fout: ${uploadErr.message || 'Onbekende fout'}`,
+        error: `Cloudinary Fehler: ${uploadErr.message || 'Unbekannter Fehler'}`,
         details: uploadErr 
       }, { status: 500 });
     }

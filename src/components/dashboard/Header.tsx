@@ -7,9 +7,15 @@ import { useRouter } from 'next/navigation';
 export default function Header() {
   const router = useRouter();
 
-  const handleLogout = () => {
-    document.cookie = "auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    router.push('/login');
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/login');
+    } catch (err) {
+      console.error('Logout failed:', err);
+      // Fallback: forcefully redirect anyway
+      router.push('/login');
+    }
   };
 
   return (
@@ -34,13 +40,11 @@ export default function Header() {
             <p className="text-white text-sm font-black tracking-tight leading-none mb-1 group-hover:text-red-500 transition-colors">Robin Furrer</p>
             <div className="flex items-center gap-2 justify-end">
               <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-              <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest">Nu Actief</p>
+              <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest">Jetzt Aktiv</p>
             </div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-950 border border-white/10 p-0.5 shadow-xl group-hover:scale-105 transition-transform">
-            <div className="w-full h-full rounded-[14px] overflow-hidden">
-                <img src="https://i.pravatar.cc/150?u=robin" alt="Profile" className="w-full h-full object-cover" />
-            </div>
+          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 p-1 shadow-xl group-hover:scale-105 transition-transform overflow-hidden">
+             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-xl" />
           </div>
         </div>
 
@@ -53,7 +57,7 @@ export default function Header() {
           className="flex items-center gap-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-6 py-3 rounded-2xl transition-all cursor-pointer font-black text-xs uppercase tracking-widest border border-red-500/20 shadow-lg"
         >
           <LogOut size={18} />
-          <span className="hidden lg:inline">Uitloggen</span>
+          <span className="hidden lg:inline">Abmelden</span>
         </motion.button>
       </div>
     </header>
