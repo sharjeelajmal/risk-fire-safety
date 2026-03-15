@@ -10,11 +10,14 @@ import ImageUploader from './components/ImageUploader';
 import CustomSelect from './components/CustomSelect';
 
 const CONTRACTOR_OPTIONS = [
-  { label: 'Elektro Schneider GmbH', value: 'Elektro Schneider GmbH' },
-  { label: 'Trockenbau Meister', value: 'Trockenbau Meister' },
-  { label: 'Sanitär Müller & Söhne', value: 'Sanitär Müller & Söhne' },
-  { label: 'Bauleitung', value: 'Bauleitung' },
-  { label: 'Externer Prüfer', value: 'Externer Prüfer' },
+  { label: 'Architekt', value: 'Architect' },
+  { label: 'Fachplaner', value: 'specialist planner' },
+  { label: 'Installateur', value: 'installer' },
+  { label: 'Eigentümer-Nutzergruppe', value: 'owner-user group' },
+  { label: 'Bauleiter', value: 'site manager' },
+  { label: 'Elektriker', value: 'electrician' },
+  { label: 'QS Brandschutz', value: 'QS fire protection' },
+  { label: 'Gesamtleiter', value: 'overall manager' },
 ];
 
 function AddIssueForm() {
@@ -81,13 +84,15 @@ function AddIssueForm() {
           <div className="space-y-2"><label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Mängel / Beschreibung</label>
             <textarea required rows={4} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Was ist der Mangel?" className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-red-500/50 transition-all text-sm resize-none shadow-xl" />
           </div>
-          <div className="space-y-2"><label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Sofortmaßnahmen</label>
+          <div className="space-y-2"><label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Massnahmen</label>
             <textarea required rows={3} value={formData.measures} onChange={(e) => setFormData({...formData, measures: e.target.value})} placeholder="Was muss getan werden?" className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-red-500/50 transition-all text-sm resize-none shadow-xl" />
           </div>
           <div className="space-y-2"><label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Priorität</label>
-            <div className="flex gap-4">
-              {['1', '2', '3'].map(v => (
-                <button key={v} type="button" onClick={() => setFormData({...formData, priority: v as any})} className={`flex-1 py-4 rounded-2xl border-2 transition-all font-black text-xs ${formData.priority === v ? 'bg-red-500/10 text-red-500 border-red-500/50 scale-105' : 'bg-transparent border-white/5 text-zinc-600'}`}>STUFE {v}</button>
+            <div className="flex flex-wrap gap-4">
+              {['1', '2', '3', 'n/a'].map(v => (
+                <button key={v} type="button" onClick={() => setFormData({...formData, priority: v as any})} className={`flex-1 min-w-[80px] py-4 rounded-2xl border-2 transition-all font-black text-xs ${formData.priority === v ? 'bg-red-500/10 text-red-500 border-red-500/50 scale-105' : 'bg-transparent border-white/5 text-zinc-600'}`}>
+                  {v === 'n/a' ? 'N/A' : `STUFE ${v}`}
+                </button>
               ))}
             </div>
           </div>

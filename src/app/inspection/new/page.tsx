@@ -126,10 +126,38 @@ export default function NewInspectionPage() {
     datum: getLocalDate(),
     auftraggeber: '',
     teilnehmer: 'Robin Furrer',
+    documentType: 'Catalog of measures' as 'Catalog of measures' | 'QS protocol',
+    participants: '',
+    generalNotes: [] as string[],
   });
+  const [customNote, setCustomNote] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const defaultNotes = [
+    'Sämtliche im Protokoll festgehaltenen Sachverhalte sind auf vergleichbare Fälle zu übertragen.',
+    'Die im Protokoll aufgeführten Mängel werden durch uns lediglich dokumentiert. Die Behebung sowie die Abmeldung der erledigten Mängel liegen bei den Verantwortlichen.'
+  ];
+
+  const handleNoteToggle = (note: string) => {
+    setFormData(prev => ({
+      ...prev,
+      generalNotes: prev.generalNotes.includes(note)
+        ? prev.generalNotes.filter(n => n !== note)
+        : [...prev.generalNotes, note]
+    }));
+  };
+
+  const addCustomNote = () => {
+    if (customNote.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        generalNotes: [...prev.generalNotes, customNote.trim()]
+      }));
+      setCustomNote('');
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -143,8 +171,7 @@ export default function NewInspectionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!image) return alert('Bitte laden Sie zuerst den Grundriss hoch!');
-
+    
     setLoading(true);
     try {
       const data = new FormData();
@@ -152,7 +179,13 @@ export default function NewInspectionPage() {
       data.append('datum', formData.datum);
       data.append('auftraggeber', formData.auftraggeber);
       data.append('teilnehmer', formData.teilnehmer);
-      data.append('floorPlan', image);
+      data.append('documentType', formData.documentType);
+      data.append('participants', formData.participants);
+      data.append('generalNotes', JSON.stringify(formData.generalNotes));
+      
+      if (image) {
+        data.append('floorPlan', image);
+      }
 
       const res = await fetch('/api/inspections', {
         method: 'POST',
@@ -161,7 +194,11 @@ export default function NewInspectionPage() {
 
       if (res.ok) {
         const result = await res.json();
-        router.push(`/inspection/${result.id}/map`);
+        if (image) {
+          router.push(`/inspection/${result.id}/map`);
+        } else {
+          router.push(`/inspection/${result.id}/review`);
+        }
       } else {
         const errData = await res.json();
         alert(`Fehler: ${errData.error || 'Unbekannter Fehler'}`);
@@ -211,6 +248,36 @@ export default function NewInspectionPage() {
           onSubmit={handleSubmit}
           className="space-y-12 w-full max-w-5xl"
         >
+          {/* Document Type Selection */}
+          <div className="glass-premium rounded-[3rem] p-6 md:p-12 border border-white/5 space-y-8">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black uppercase tracking-tighter leading-none text-white">Dokumenttyp</h2>
+                <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mt-1">Bitte wählen Sie den Typ des Berichts</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {['Catalog of measures', 'QS protocol'].map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, documentType: type as any })}
+                  className={`py-6 px-8 rounded-2xl border-2 transition-all font-black text-sm uppercase tracking-widest flex items-center justify-between ${
+                    formData.documentType === type 
+                      ? 'bg-red-600/10 border-red-500 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' 
+                      : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20'
+                  }`}
+                >
+                  {type === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS Protokoll'}
+                  {formData.documentType === type && <CheckCircle2 size={20} />}
+                </button>
+              ))}
+            </div>
+          </div>
           {/* Stap 1: Basic Details */}
           <div className="glass-premium rounded-[3rem] p-6 md:p-12 border border-white/5 space-y-10 !overflow-visible relative z-20">
             <div className="flex items-center gap-4">
@@ -267,7 +334,23 @@ export default function NewInspectionPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Inspecteur (Deelnemer)</label>
+                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Teilnehmer</label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
+                    <User size={20} />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Namen der Teilnehmer eingeben..."
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-lg"
+                    value={formData.participants}
+                    onChange={(e) => setFormData({ ...formData, participants: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Erstellt von (Creator)</label>
                 <div className="relative group grayscale opacity-50">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 z-10">
                     <User size={20} />
@@ -280,6 +363,81 @@ export default function NewInspectionPage() {
                     disabled
                   />
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* New Section: General Notes */}
+          <div className="glass-premium rounded-[3rem] p-6 md:p-12 border border-white/5 space-y-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <Building size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black uppercase tracking-tighter leading-none text-white">Hinweis (General Notes)</h2>
+                <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mt-1">Zusätzliche Bemerkungen</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {defaultNotes.map((note, index) => (
+                <div 
+                  key={index} 
+                  onClick={() => handleNoteToggle(note)}
+                  className={`p-6 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${
+                    formData.generalNotes.includes(note)
+                      ? 'bg-red-600/10 border-red-500 text-white'
+                      : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
+                  }`}
+                >
+                  <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                    formData.generalNotes.includes(note) ? 'bg-red-600 border-red-600' : 'border-white/20'
+                  }`}>
+                    {formData.generalNotes.includes(note) && <CheckCircle2 size={14} className="text-white" />}
+                  </div>
+                  <p className="text-sm font-bold flex-1 leading-relaxed">{note}</p>
+                </div>
+              ))}
+
+              <div className="mt-8 space-y-4">
+                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Eigene Notiz hinzufügen</label>
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Spezifischen Hinweis eingeben..."
+                    className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-5 px-6 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-lg"
+                    value={customNote}
+                    onChange={(e) => setCustomNote(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomNote())}
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomNote}
+                    className="px-8 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-colors shadow-xl"
+                  >
+                    Hinzufügen
+                  </button>
+                </div>
+                
+                {formData.generalNotes.filter(n => !defaultNotes.includes(n)).length > 0 && (
+                  <div className="pt-4 space-y-3">
+                    <p className="text-[10px] uppercase font-black tracking-[2px] text-red-500 ml-2">Benutzerdefinierte Notizen:</p>
+                    {formData.generalNotes
+                      .filter(note => !defaultNotes.includes(note))
+                      .map((note, index) => (
+                        <div key={index} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                          <p className="text-sm font-bold text-white pr-4">{note}</p>
+                          <button 
+                            type="button"
+                            onClick={() => handleNoteToggle(note)}
+                            className="text-gray-500 hover:text-red-500 transition-colors"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -348,7 +506,7 @@ export default function NewInspectionPage() {
             <motion.button
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}
-              disabled={loading || !image}
+              disabled={loading}
               className="w-full max-w-2xl bg-gradient-to-r from-red-600 to-red-900 py-6 rounded-[2rem] flex items-center justify-center gap-4 text-white font-black uppercase tracking-[3px] shadow-[0_20px_50px_rgba(239,68,68,0.3)] hover:shadow-[0_30px_70px_rgba(239,68,68,0.5)] transition-all cursor-pointer disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
             >
               {loading ? (

@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Settings, LogOut, ChevronRight, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface MoreMenuProps {
   isOpen: boolean;
@@ -62,8 +63,10 @@ export default function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
 
             <div className="space-y-4 mb-8">
               {menuItems.map((item) => (
-                <button
+                <Link
                   key={item.name}
+                  href="/dashboard/settings"
+                  onClick={onClose}
                   className="w-full p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all flex items-center justify-between group cursor-pointer"
                 >
                   <div className="flex items-center gap-4">
@@ -76,7 +79,7 @@ export default function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-gray-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                </button>
+                </Link>
               ))}
             </div>
 

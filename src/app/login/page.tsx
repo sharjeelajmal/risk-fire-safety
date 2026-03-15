@@ -123,7 +123,7 @@ export default function LoginPage() {
       </motion.div>
 
       {/* Right Login Side (40%) */}
-      <div className="flex-1 lg:w-2/5 flex items-center justify-center p-8 relative z-10">
+      <div className="flex-1 lg:w-2/5 flex items-center justify-center p-4 sm:p-8 relative z-10">
         <div className="red-curve-top"></div>
         <div className="red-curve-bottom"></div>
 
@@ -133,19 +133,19 @@ export default function LoginPage() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="w-full max-w-md"
         >
-          <div className="glass-premium rounded-[48px] p-12">
+          <div className="glass-premium rounded-[32px] sm:rounded-[48px] p-6 sm:p-12">
             <div className="noise-overlay"></div>
             <div className="card-shine"></div>
 
-            <div className="mb-12 relative z-20 text-center lg:text-left">
+            <div className="mb-8 sm:mb-12 relative z-20 text-center lg:text-left">
               <motion.div
                 whileHover={{ rotate: 10, scale: 1.1 }}
-                className="w-20 h-20 rounded-3xl bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-8 mx-auto lg:ml-0"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500 mb-6 sm:mb-8 mx-auto lg:ml-0"
               >
-                <ShieldCheck size={40} className="drop-shadow-[0_0_15px_rgba(255,0,0,0.5)]" />
+                <ShieldCheck size={32} className="sm:w-10 sm:h-10 drop-shadow-[0_0_15px_rgba(255,0,0,0.5)]" />
               </motion.div>
-              <h2 className="text-4xl font-bold text-white mb-3">Willkommen Zurück</h2>
-              <p className="text-gray-500 font-medium">Melden Sie sich mit Ihren gesicherten Daten an</p>
+              <h2 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-3">Willkommen Zurück</h2>
+              <p className="text-gray-500 text-xs sm:text-base font-medium">Melden Sie sich mit Ihren gesicherten Daten an</p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8 relative z-20">
@@ -201,17 +201,17 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="pt-6">
+              <div className="pt-4 sm:pt-6">
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full btn-premium py-5 rounded-2xl flex items-center justify-center gap-3 cursor-pointer group disabled:opacity-50"
+                  className="w-full btn-premium py-4 sm:py-5 rounded-xl sm:rounded-2xl flex items-center justify-center gap-3 cursor-pointer group disabled:opacity-50"
                 >
                   {isLoading ? (
-                    <Loader2 className="animate-spin" size={24} />
+                    <Loader2 className="animate-spin" size={20} />
                   ) : (
                     <>
-                      <span>Authentifizieren</span>
+                      <span className="text-[10px] sm:text-xs">Authentifizieren</span>
                       <motion.div
                         animate={{ x: [0, 5, 0] }}
                         transition={{ repeat: Infinity, duration: 1.5 }}

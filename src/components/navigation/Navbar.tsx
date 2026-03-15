@@ -10,7 +10,7 @@ import MoreMenu from './MoreMenu';
 const navItems = [
   { name: 'Dashboard', icon: Home, path: '/dashboard' },
   { name: 'Neu', icon: Plus, path: '/inspection/new', primary: true },
-  { name: 'Team', icon: Users, path: '/users' },
+  { name: 'Team', icon: Users, path: '/dashboard/team' },
   { name: 'Menü', icon: Gear, path: 'menu' },
 ];
 

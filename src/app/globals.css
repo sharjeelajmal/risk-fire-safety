@@ -71,6 +71,16 @@
   font-weight: 800;
   box-shadow: 0 15px 30px -5px var(--accent-glow);
   transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  white-space: nowrap;
+}
+
+@media (max-width: 300px) {
+  .btn-premium {
+    letter-spacing: 1px;
+    font-size: 10px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
 .btn-premium:hover {

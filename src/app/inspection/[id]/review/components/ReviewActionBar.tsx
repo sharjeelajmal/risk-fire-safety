@@ -1,15 +1,20 @@
 'use client';
 
-import { ChevronLeft, FileDown, Printer } from 'lucide-react';
+import { ChevronLeft, FileDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { InspectionPDF } from '@/components/InspectionPDF';
 
 interface ReviewActionBarProps {
-  onGeneratePDF: () => void;
-  isGenerating: boolean;
+  inspection: any;
 }
 
-export default function ReviewActionBar({ onGeneratePDF, isGenerating }: ReviewActionBarProps) {
+export default function ReviewActionBar({ inspection }: ReviewActionBarProps) {
   const router = useRouter();
+
+  if (!inspection) return null;
+
+  const fileName = `Inspektionsbericht_${(inspection.ort || 'Bericht').replace(/\s+/g, '_')}.pdf`;
 
   return (
     <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4 pointer-events-none">
@@ -22,22 +27,25 @@ export default function ReviewActionBar({ onGeneratePDF, isGenerating }: ReviewA
           <span className="text-xs font-black uppercase tracking-widest">Zurück</span>
         </button>
 
-        <button 
-          onClick={onGeneratePDF}
-          disabled={isGenerating}
-          className={`flex items-center gap-3 bg-gradient-to-r from-red-600 to-red-800 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-[2px] shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer ${
-            isGenerating ? 'opacity-50 cursor-wait' : ''
-          }`}
+        <PDFDownloadLink
+          document={<InspectionPDF data={inspection} />}
+          fileName={fileName}
+          className="flex items-center gap-3 bg-gradient-to-r from-red-600 to-red-800 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-[2px] shadow-2xl transition-all hover:scale-105 active:scale-95 cursor-pointer"
         >
-          {isGenerating ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-          ) : (
-            <>
-              <span className="text-xs">PDF Generieren</span>
-              <FileDown size={18} />
-            </>
+          {({ loading }) => (
+            loading ? (
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <span className="text-xs">Wird generiert...</span>
+              </div>
+            ) : (
+              <>
+                <span className="text-xs">Download Bericht</span>
+                <FileDown size={18} />
+              </>
+            )
           )}
-        </button>
+        </PDFDownloadLink>
       </div>
     </div>
   );

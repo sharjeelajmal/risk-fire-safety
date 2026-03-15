@@ -9,7 +9,7 @@ export interface IIssue {
   responsibleContractor: string;
   description: string;
   measures: string;
-  priority: '1' | '2' | '3';
+  priority: '1' | '2' | '3' | 'n/a';
   images: string[];
   status: 'Open' | 'Resolved';
   createdAt: Date;
@@ -20,7 +20,10 @@ export interface IInspection extends Document {
   datum: Date;
   auftraggeber: string;
   teilnehmer: string;
-  floorPlanUrl: string;
+  documentType: 'Catalog of measures' | 'QS protocol';
+  participants: string;
+  generalNotes: string[];
+  floorPlanUrl?: string;
   issues: IIssue[];
   status: 'Draft' | 'In Progress' | 'Completed';
   createdAt: Date;
@@ -32,7 +35,10 @@ const InspectionSchema: Schema = new Schema({
   datum: { type: Date, default: Date.now },
   auftraggeber: { type: String, required: true },
   teilnehmer: { type: String, required: true },
-  floorPlanUrl: { type: String, required: true },
+  documentType: { type: String, enum: ['Catalog of measures', 'QS protocol'], default: 'Catalog of measures' },
+  participants: { type: String },
+  generalNotes: [{ type: String }],
+  floorPlanUrl: { type: String, required: false },
   issues: [
     {
       issueNumber: { type: Number, required: true },
@@ -42,7 +48,7 @@ const InspectionSchema: Schema = new Schema({
       responsibleContractor: { type: String, required: true },
       description: { type: String, required: true },
       measures: { type: String, required: true },
-      priority: { type: String, enum: ['1', '2', '3'], default: '1' },
+      priority: { type: String, enum: ['1', '2', '3', 'n/a'], default: '1' },
       images: [{ type: String }],
       status: { type: String, enum: ['Open', 'Resolved'], default: 'Open' },
       createdAt: { type: Date, default: Date.now }

@@ -6,68 +6,19 @@ import ReviewHeader from './components/ReviewHeader';
 import ReviewFloorPlan from './components/ReviewFloorPlan';
 import ReviewIssuesList from './components/ReviewIssuesList';
 import ReviewActionBar from './components/ReviewActionBar';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 function ReviewContent() {
   const params = useParams();
   const [inspection, setInspection] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     fetch(`/api/inspections/${params.id}`)
       .then(res => res.json())
       .then(data => { setInspection(data); setLoading(false); });
   }, [params.id]);
-
-  const generatePDF = async () => {
-    if (typeof window === 'undefined') return;
-    
-    const element = document.getElementById('pdf-content');
-    if (!element) {
-      alert('Content element not found');
-      return;
-    }
-
-    setIsGenerating(true);
-    
-    try {
-      console.log('Starting PDF generation...');
-      // Small delay to ensure all images/styles are settled
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // @ts-ignore
-      const html2pdfModule = await import('html2pdf.js');
-      const html2pdf = html2pdfModule.default || html2pdfModule;
-      
-      if (!html2pdf) {
-        throw new Error('html2pdf library could not be loaded');
-      }
-
-      const fileName = `Inspektionsbericht_${inspection.ort.replace(/\s+/g, '_')}.pdf`;
-      
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: fileName,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          scale: 1.5, 
-          useCORS: true,
-          logging: true,
-          letterRendering: true, // Often helps when used with font-variant-ligatures: none
-          windowWidth: 1200
-        },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-
-      await html2pdf().set(opt).from(element).save();
-    } catch (err: any) {
-      console.error('PDF Generation Error:', err);
-      alert(`Fehler beim Generieren der PDF: ${err.message || 'Unbekannter Fehler'}`);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
 
   if (loading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center"><div className="w-12 h-12 rounded-full border-t-2 border-red-600 animate-spin"></div></div>;
   if (!inspection) return <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">Error: Inspection not found</div>;
@@ -76,89 +27,79 @@ function ReviewContent() {
     <div className="min-h-screen bg-zinc-100 py-6 md:py-12 px-2 sm:px-4 pb-40">
       <div 
         id="pdf-content" 
-        className="max-w-[210mm] mx-auto bg-white shadow-2xl overflow-hidden min-h-[297mm] p-6 sm:p-10 md:p-[20mm] font-sans text-zinc-900 printable-content"
+        className="w-[794px] mx-auto bg-white shadow-2xl p-10 font-sans text-black printable-content"
       >
-        <ReviewHeader inspection={inspection} />
-        <ReviewFloorPlan floorPlanUrl={inspection.floorPlanUrl} issues={inspection.issues || []} />
-        <ReviewIssuesList issues={inspection.issues || []} />
-        
-        <div className="mt-20 pt-8 border-t border-zinc-100 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 sm:gap-0">
-          <div className="space-y-1">
-            <p className="text-[8px] font-black uppercase tracking-widest text-zinc-300">Bericht generiert am</p>
-            <p className="text-[10px] font-bold text-zinc-500">{new Date().toLocaleString('de-DE')}</p>
+        {/* PAGE 1: COVER PAGE */}
+        <div className="border-b-4 border-zinc-100 pb-12 mb-12">
+          <ReviewHeader inspection={inspection} />
+        </div>
+
+        {/* PAGE 2+: CONTENT */}
+        <div className="space-y-12">
+          {inspection.floorPlanUrl ? (
+            <ReviewFloorPlan floorPlanUrl={inspection.floorPlanUrl} issues={inspection.issues || []} />
+          ) : (
+            <div className="mb-12 p-10 bg-zinc-50 rounded-3xl border border-zinc-100 flex flex-col items-center justify-center gap-6">
+              <div className="w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center text-red-600">
+                <Plus size={32} />
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-black uppercase tracking-tight text-zinc-900">Kein Grundriss vorhanden</h3>
+              </div>
+            </div>
+          )}
+
+          {/* Hinweis Section (General Notes) */}
+          {inspection.generalNotes && inspection.generalNotes.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-4 flex items-center gap-3">
+                <span className="w-8 h-[2px] bg-red-600"></span>
+                Hinweis
+              </h2>
+              <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100 space-y-3">
+                {inspection.generalNotes.map((note: string, idx: number) => (
+                  <div key={idx} className="flex gap-3">
+                    <span className="text-red-600 font-black">•</span>
+                    <p className="text-sm text-zinc-700 font-medium leading-relaxed">{note}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Priority Legend */}
+          <div className="mb-12">
+            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-4 flex items-center gap-3">
+              <span className="w-8 h-[2px] bg-red-600"></span>
+              Prioritätenlegende
+            </h2>
+            <div className="flex flex-wrap gap-4">
+              <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
+                <span className="block text-[8px] font-black text-red-600 uppercase mb-1">Stufe 1</span>
+                <p className="text-[10px] font-bold text-zinc-900">Sofortmassnahmen</p>
+              </div>
+              <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
+                <span className="block text-[8px] font-black text-orange-600 uppercase mb-1">Stufe 2</span>
+                <p className="text-[10px] font-bold text-zinc-900">Kurzfristige Massnahmen (3 – 6 Monate)</p>
+              </div>
+              <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
+                <span className="block text-[8px] font-black text-green-600 uppercase mb-1">Stufe 3</span>
+                <p className="text-[10px] font-bold text-zinc-900">Mittelfristige Massnahmen (12 – 24 Monate)</p>
+              </div>
+              <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
+                <span className="block text-[8px] font-black text-zinc-400 uppercase mb-1">Stufe 4</span>
+                <p className="text-[10px] font-bold text-zinc-900">Langfristige Massnahmen (2 – 5 Jahre)</p>
+              </div>
+            </div>
           </div>
-          <div className="text-left sm:text-right">
-            <p className="text-xs font-black uppercase tracking-widest text-zinc-900">Risk Fire Safety & Solutions</p>
-            <p className="text-[10px] text-zinc-400">Handelend onder naam van RFS</p>
-          </div>
+        </div>
+
+        <div className="mt-12 pt-12 border-t border-zinc-100">
+          <ReviewIssuesList issues={inspection.issues || []} />
         </div>
       </div>
 
-      <ReviewActionBar onGeneratePDF={generatePDF} isGenerating={isGenerating} />
-      
-      <style jsx global>{`
-        @media print {
-          body { background: white !important; margin: 0; padding: 0; }
-          .printable-content { box-shadow: none !important; margin: 0 !important; width: 100% !important; max-width: none !important; }
-        }
-        
-        /* Ultimate Fix for html2canvas Range/Offset Errors */
-        #pdf-content {
-          color: #000000 !important;
-          background-color: #ffffff !important;
-          -webkit-print-color-adjust: exact;
-          font-family: Arial, Helvetica, sans-serif !important;
-          line-height: 1.2 !important;
-          text-rendering: geometricPrecision !important;
-        }
-        
-        #pdf-content *, 
-        #pdf-content *:before, 
-        #pdf-content *:after {
-          box-shadow: none !important;
-          text-shadow: none !important;
-          ring: none !important;
-          outline: none !important;
-          backdrop-filter: none !important;
-          letter-spacing: normal !important;
-          text-transform: none !important; 
-          transition: none !important;
-          font-family: Arial, Helvetica, sans-serif !important;
-          line-height: 1.2 !important;
-          font-variant-ligatures: none !important; /* Fix for ligatures causing range errors */
-          font-feature-settings: "liga" 0 !important;
-        }
-
-        /* Essential UI Colors (Hex only) */
-        #pdf-content .text-red-600 { color: #dc2626 !important; }
-        #pdf-content .bg-red-600 { background-color: #dc2626 !important; }
-        #pdf-content .border-red-600 { border-color: #dc2626 !important; }
-        #pdf-content .bg-red-100 { background-color: #fee2e2 !important; }
-        
-        #pdf-content .text-black { color: #000000 !important; }
-        #pdf-content .bg-black { background-color: #000000 !important; }
-        #pdf-content .text-white { color: #ffffff !important; }
-        #pdf-content .bg-white { background-color: #ffffff !important; }
-        
-        #pdf-content .text-zinc-900 { color: #18181b !important; }
-        #pdf-content .text-zinc-600 { color: #52525b !important; }
-        #pdf-content .text-zinc-500 { color: #71717a !important; }
-        #pdf-content .text-zinc-400 { color: #a1a1aa !important; }
-        #pdf-content .text-zinc-300 { color: #d4d4d8 !important; }
-        #pdf-content .text-zinc-200 { color: #e4e4e7 !important; }
-        
-        #pdf-content .bg-zinc-50 { background-color: #fafafa !important; }
-        #pdf-content .bg-zinc-100 { background-color: #f4f4f5 !important; }
-        #pdf-content .border-zinc-100 { border-color: #f4f4f5 !important; }
-        #pdf-content .border-zinc-200 { border-color: #e4e4e7 !important; }
-        
-        #pdf-content .text-orange-600 { color: #ea580c !important; }
-        #pdf-content .bg-orange-100 { background-color: #ffedd5 !important; }
-        #pdf-content .text-green-600 { color: #16a34a !important; }
-        #pdf-content .bg-green-100 { background-color: #dcfce7 !important; }
-        
-        .page-break-inside-avoid { page-break-inside: avoid; break-inside: avoid; }
-      `}</style>
+      <ReviewActionBar inspection={inspection} />
     </div>
   );
 }

@@ -7,6 +7,8 @@ interface ReviewHeaderProps {
     datum: string | Date;
     auftraggeber: string;
     teilnehmer: string;
+    documentType: string;
+    participants: string;
   };
 }
 
@@ -25,11 +27,11 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
   });
 
   return (
-    <div className="border-b-4 border-red-600 pb-8 mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start gap-6 md:gap-0">
+    <div className="avoid-page-break border-b-4 border-red-600 pb-8 mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start gap-6 md:gap-0">
       <div className="space-y-4 w-full md:w-auto">
         <div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter text-black break-words">
-            Inspektions<span className="text-red-600">bericht</span>
+            {inspection.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS Protokoll'}
           </h1>
           <p className="text-zinc-500 font-medium tracking-widest text-[10px] sm:text-xs mt-1">
             RISK FIRE SAFETY & SOLUTIONS
@@ -51,7 +53,11 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
           </div>
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Teilnehmer</label>
-            <p className="text-sm font-bold text-zinc-900 break-words">{inspection.teilnehmer}</p>
+            <p className="text-sm font-bold text-zinc-900 break-words">{inspection.participants || '-'}</p>
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Erstellt von</label>
+            <p className="text-sm font-bold text-zinc-900 break-words">Robin Furrer</p>
           </div>
         </div>
       </div>
@@ -59,7 +65,7 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
       <div className="w-full md:w-auto flex md:block justify-start">
         <div className="bg-black text-white px-6 py-4 rounded-xl inline-block min-w-[140px] shadow-lg">
           <span className="block text-[10px] font-black tracking-widest uppercase opacity-50">Bericht Nr.</span>
-          <span className="text-xl md:text-2xl font-black">{reportNumber || '...'}</span>
+          <span className="text-xl md:text-2xl font-black">#{reportNumber}</span>
         </div>
       </div>
     </div>

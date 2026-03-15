@@ -11,7 +11,7 @@ interface ReviewFloorPlanProps {
 
 export default function ReviewFloorPlan({ floorPlanUrl, issues }: ReviewFloorPlanProps) {
   return (
-    <div className="mb-16">
+    <div className="mb-16 avoid-page-break">
       <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-3">
         <span className="w-8 h-[2px] bg-red-600"></span>
         Übersichtsplan & Issue-Verortung
@@ -22,7 +22,7 @@ export default function ReviewFloorPlan({ floorPlanUrl, issues }: ReviewFloorPla
           src={floorPlanUrl} 
           alt="Floor Plan" 
           crossOrigin="anonymous"
-          className="w-full h-auto block"
+          className="w-full h-auto block max-h-[500px] object-contain"
         />
         
         {issues.map((issue, idx) => (
