@@ -27,6 +27,11 @@ const styles = StyleSheet.create({
     color: '#999999',
     letterSpacing: 1,
   },
+  logo: {
+    width: 150,
+    height: 54,
+    objectFit: 'contain',
+  },
   logoPlaceholder: {
     fontSize: 8,
     color: '#CCCCCC',
@@ -307,15 +312,14 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
       {/* PAGE 1: COVER PAGE */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header} fixed>
-          <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GMBH</Text>
-          <Text style={styles.logoPlaceholder}>RISK FIRE SAFETY</Text>
+          <Image src="public/logo.png" style={styles.logo} />
         </View>
 
         <View style={styles.coverContainer}>
           <Text style={styles.documentType}>
             {data.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS Protokoll'}
           </Text>
-          <Text style={styles.companySub}>RISK FIRE SAFETY & SOLUTIONS</Text>
+          <Image src="public/logo.png" style={styles.logo} />
 
           <View style={styles.projectGrid}>
             <View style={styles.gridItem}>
@@ -401,7 +405,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH | Brandschutz & Sicherheit</Text>
+          <Text style={styles.footerText}>RFS | Brandschutz & Sicherheit</Text>
           <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>
       </Page>
@@ -410,8 +414,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
       {data.floorPlans && data.floorPlans.map((fp, idx) => (
         <Page key={fp.id} size="A4" style={styles.page}>
           <View style={styles.header} fixed>
-            <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GMBH</Text>
-            <Text style={styles.logoPlaceholder}>RISK FIRE SAFETY</Text>
+            <Image src="public/logo.png" style={styles.logo} />
           </View>
 
           <View style={styles.sectionTitle}>
@@ -442,7 +445,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           </View>
 
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH | Brandschutz & Sicherheit</Text>
+            <Text style={styles.footerText}>RFS | Brandschutz & Sicherheit</Text>
             <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
           </View>
         </Page>
@@ -504,7 +507,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         ))}
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH | Brandschutz & Sicherheit</Text>
+          <Text style={styles.footerText}>RFS | Brandschutz & Sicherheit</Text>
           <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>
       </Page>

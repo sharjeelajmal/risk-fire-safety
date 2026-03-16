@@ -68,18 +68,13 @@ export default function LoginPage() {
             initial={{ y: -50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8 }}
-            className="flex items-center gap-4"
+            className="flex items-center"
           >
-            <div className="p-1 rounded-2xl ">
-              <img src="/logo.png" alt="Logo" className="w-16 h-16 rounded-xl object-cover" />
-            </div>
-            <div>
-              <h2 className="text-white text-2xl font-bold tracking-tight">Risk Fire Safety</h2>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-green-500 text-[10px] font-bold uppercase tracking-[2px]">System Gesichert</span>
-              </div>
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="Logo" 
+              className="w-[150px] h-[54px] object-contain" 
+            />
           </motion.div>
 
           <div className="space-y-6">
@@ -235,7 +230,7 @@ export default function LoginPage() {
 
             <div className="mt-16 text-center relative z-20">
               <p className="text-[#333] text-[9px] uppercase tracking-[4px] font-black">
-                Risk Fire Safety &copy; MMXXVI
+                RFS &copy; MMXXVI
               </p>
             </div>
           </div>

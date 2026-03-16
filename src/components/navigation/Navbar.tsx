@@ -111,7 +111,7 @@ export default function Navbar() {
         </div>
 
         <div className="w-12 h-12 rounded-2xl overflow-hidden border border-white/10 cursor-pointer hover:border-red-500 transition-colors bg-white/5 p-1 flex items-center justify-center">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-xl" />
+            <img src="/fire.png" alt="Fire Icon" className="w-full h-full object-contain" />
         </div>
       </aside>
 

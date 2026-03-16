@@ -22,14 +22,12 @@ export default function Header() {
     <header className="h-16 md:h-24 glass-premium border-b border-white/5 fixed top-0 right-0 left-0 lg:left-24 z-40 px-4 md:px-8 flex items-center justify-between">
       {/* Left Side: Logo and Text */}
       <div className="flex items-center gap-3 md:gap-4">
-        <div className="flex items-center gap-2 md:gap-3 group cursor-pointer">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-red-500 to-red-900 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)] group-hover:shadow-[0_0_30px_rgba(239,68,68,0.5)] transition-all">
-            <ShieldCheck className="text-white w-5 h-5 md:w-7 md:h-7" />
-          </div>
-          <div className="flex flex-col">
-            <h1 className="text-white font-black text-base md:text-xl tracking-tighter leading-none">RFS</h1>
-            <p className="text-gray-500 font-bold text-[8px] md:text-[10px] uppercase tracking-[1px] md:tracking-[2px]">Risk Fire Safety</p>
-          </div>
+        <div className="flex items-center group cursor-pointer">
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            className="w-[150px] h-[54px] object-contain"
+          />
         </div>
       </div>
 
@@ -43,8 +41,8 @@ export default function Header() {
               <p className="text-gray-500 text-[8px] md:text-[9px] uppercase font-black tracking-widest">Jetzt Aktiv</p>
             </div>
           </div>
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 p-0.5 md:p-1 shadow-xl group-hover:scale-105 transition-transform overflow-hidden">
-             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-lg md:rounded-xl" />
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 p-1 shadow-xl group-hover:scale-105 transition-transform overflow-hidden">
+             <img src="/fire.png" alt="User Icon" className="w-full h-full object-contain" />
           </div>
         </div>
 

@@ -29,13 +29,15 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
   return (
     <div className="avoid-page-break border-b-2 md:border-b-4 border-red-600 pb-6 md:pb-8 mb-6 md:mb-12 flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0">
       <div className="space-y-4 w-full md:w-auto">
-        <div>
+        <div className="flex flex-col gap-2">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter text-black break-words">
             {inspection.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS Protokoll'}
           </h1>
-          <p className="text-zinc-500 font-medium tracking-widest text-[10px] sm:text-xs mt-1">
-            RISK FIRE SAFETY & SOLUTIONS
-          </p>
+          <img 
+            src="/logo.png" 
+            alt="Logo" 
+            className="w-[150px] h-[54px] object-contain invert hue-rotate-180"
+          />
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 pt-4">
