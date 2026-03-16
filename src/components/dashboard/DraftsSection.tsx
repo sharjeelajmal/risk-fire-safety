@@ -90,20 +90,20 @@ export default function DraftsSection({ searchQuery }: DraftsSectionProps) {
   }
 
   return (
-    <section className="mb-12 relative">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-[20px] bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-lg shadow-amber-500/5">
-            <ClipboardList size={24} />
+    <section className="mb-6 md:mb-12 relative">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-[20px] bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-lg shadow-amber-500/5">
+            <ClipboardList className="w-5 h-5 md:w-6 md:h-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-black text-white tracking-tight uppercase">Kürzliche Entwürfe</h2>
-            <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">{drafts.length} Unvollständig</p>
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight uppercase">Kürzliche Entwürfe</h2>
+            <p className="text-zinc-500 text-[9px] md:text-[10px] font-bold uppercase tracking-widest">{drafts.length} Unvollständig</p>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-10">
         <AnimatePresence mode="popLayout">
           {currentDrafts.map((draft, idx) => (
             <motion.div
@@ -113,39 +113,39 @@ export default function DraftsSection({ searchQuery }: DraftsSectionProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: idx * 0.05 }}
-              className="glass-premium p-6 rounded-[32px] hover:border-amber-500/30 transition-all group relative overflow-hidden"
+              className="glass-premium p-4 md:p-6 rounded-2xl md:rounded-[32px] hover:border-amber-500/30 transition-all group relative overflow-hidden"
             >
               <div className="card-shine opacity-30"></div>
-              <div className="relative z-10 flex flex-col h-full justify-between gap-6">
+              <div className="relative z-10 flex flex-col h-full justify-between gap-4 md:gap-6">
                 <div className="flex items-start justify-between">
-                  <div className="space-y-3">
+                  <div className="space-y-2 md:space-y-3">
                     <div className="flex items-center gap-2 text-zinc-100">
-                      <MapPin size={14} className="text-amber-500" />
-                      <span className="text-sm font-black uppercase tracking-tight">{draft.ort}</span>
+                      <MapPin size={14} className="text-amber-500 w-3.5 h-3.5" />
+                      <span className="text-xs md:text-sm font-black uppercase tracking-tight">{draft.ort}</span>
                     </div>
                     <div className="flex items-center gap-2 text-zinc-500">
-                      <Calendar size={14} />
-                      <span className="text-xs font-bold tracking-widest uppercase">{new Date(draft.datum).toLocaleDateString('de-DE')}</span>
+                      <Calendar size={12} className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                      <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase">{new Date(draft.datum).toLocaleDateString('de-DE')}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <span className="px-3 py-1 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-widest">
+                    <span className="px-2 md:px-3 py-1 rounded-lg md:xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest">
                       {draft.status}
                     </span>
                     <button 
                       onClick={(e) => handleDeleteTrigger(draft._id, e)}
-                      className="p-2 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all cursor-pointer shadow-lg shadow-red-500/5 transition-colors"
+                      className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all cursor-pointer shadow-lg shadow-red-500/5 transition-colors"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
                     </button>
                   </div>
                 </div>
 
                 <Link href={`/inspection/${draft._id}/review`}>
-                  <button className="w-full py-4 rounded-2xl bg-white/5 border border-white/5 group-hover:bg-amber-500 group-hover:border-amber-400 group-hover:text-black text-white font-black uppercase tracking-[2px] text-xs transition-all flex items-center justify-center gap-3 cursor-pointer shadow-xl">
+                  <button className="w-full py-3 md:py-4 rounded-xl md:rounded-2xl bg-white/5 border border-white/5 group-hover:bg-amber-500 group-hover:border-amber-400 group-hover:text-black text-white font-black uppercase tracking-widest text-[10px] md:text-xs transition-all flex items-center justify-center gap-2 md:gap-3 cursor-pointer shadow-xl">
                     Fortsetzen
-                    <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="group-hover:translate-x-1 transition-transform w-3.5 h-3.5 md:w-4 md:h-4" />
                   </button>
                 </Link>
               </div>

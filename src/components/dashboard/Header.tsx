@@ -19,44 +19,44 @@ export default function Header() {
   };
 
   return (
-    <header className="h-24 glass-premium border-b border-white/5 fixed top-0 right-0 left-0 lg:left-24 z-40 px-8 flex items-center justify-between">
+    <header className="h-16 md:h-24 glass-premium border-b border-white/5 fixed top-0 right-0 left-0 lg:left-24 z-40 px-4 md:px-8 flex items-center justify-between">
       {/* Left Side: Logo and Text */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3 group cursor-pointer">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-red-900 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)] group-hover:shadow-[0_0_30px_rgba(239,68,68,0.5)] transition-all">
-            <ShieldCheck className="text-white" size={28} />
+      <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-3 group cursor-pointer">
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-gradient-to-br from-red-500 to-red-900 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.3)] group-hover:shadow-[0_0_30px_rgba(239,68,68,0.5)] transition-all">
+            <ShieldCheck className="text-white w-5 h-5 md:w-7 md:h-7" />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-white font-black text-xl tracking-tighter leading-none">RFS</h1>
-            <p className="text-gray-500 font-bold text-[10px] uppercase tracking-[2px]">Risk Fire Safety</p>
+            <h1 className="text-white font-black text-base md:text-xl tracking-tighter leading-none">RFS</h1>
+            <p className="text-gray-500 font-bold text-[8px] md:text-[10px] uppercase tracking-[1px] md:tracking-[2px]">Risk Fire Safety</p>
           </div>
         </div>
       </div>
 
       {/* Right Side: Profile and Logout */}
-      <div className="flex items-center gap-8">
-        <div className="hidden sm:flex items-center gap-4 p-2 rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group">
+      <div className="flex items-center gap-3 md:gap-8">
+        <div className="hidden sm:flex items-center gap-3 md:gap-4 p-1.5 md:p-2 rounded-xl md:rounded-2xl hover:bg-white/5 transition-colors cursor-pointer group">
           <div className="text-right">
-            <p className="text-white text-sm font-black tracking-tight leading-none mb-1 group-hover:text-red-500 transition-colors">Robin Furrer</p>
-            <div className="flex items-center gap-2 justify-end">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-              <p className="text-gray-500 text-[9px] uppercase font-black tracking-widest">Jetzt Aktiv</p>
+            <p className="text-white text-[12px] md:text-sm font-black tracking-tight leading-none mb-0.5 md:mb-1 group-hover:text-red-500 transition-colors">Robin Furrer</p>
+            <div className="flex items-center gap-1.5 md:gap-2 justify-end">
+              <div className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+              <p className="text-gray-500 text-[8px] md:text-[9px] uppercase font-black tracking-widest">Jetzt Aktiv</p>
             </div>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 p-1 shadow-xl group-hover:scale-105 transition-transform overflow-hidden">
-             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-xl" />
+          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 p-0.5 md:p-1 shadow-xl group-hover:scale-105 transition-transform overflow-hidden">
+             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover rounded-lg md:rounded-xl" />
           </div>
         </div>
 
-        <div className="h-10 w-[1px] bg-white/10 mx-2 hidden md:block"></div>
+        <div className="h-8 md:h-10 w-[1px] bg-white/10 mx-1 md:mx-2 hidden sm:block"></div>
 
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleLogout}
-          className="flex items-center gap-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-6 py-3 rounded-2xl transition-all cursor-pointer font-black text-xs uppercase tracking-widest border border-red-500/20 shadow-lg"
+          className="flex items-center gap-2 md:gap-3 bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl transition-all cursor-pointer font-black text-[10px] md:text-xs uppercase tracking-widest border border-red-500/20 shadow-lg"
         >
-          <LogOut size={18} />
+          <LogOut className="w-3.5 h-3.5 md:w-4.5 md:h-4.5" />
           <span className="hidden lg:inline">Abmelden</span>
         </motion.button>
       </div>

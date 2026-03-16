@@ -21,7 +21,7 @@ export default function Navbar() {
   return (
     <>
       {/* Mobile: Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-20 glass-premium border-t border-white/5 z-50 px-6 flex items-center justify-between safe-bottom">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 glass-premium border-t border-white/5 z-50 px-6 flex items-center justify-between pb-safe">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
           const isButton = item.path === 'menu';
@@ -31,9 +31,9 @@ export default function Navbar() {
               <Link key={item.path} href={item.path}>
                 <motion.div 
                   whileTap={{ scale: 0.9 }}
-                  className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-500 to-red-900 flex items-center justify-center text-white shadow-[0_0_25px_rgba(239,68,68,0.4)] -mt-10 border-4 border-[#050505] cursor-pointer"
+                  className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-red-900 flex items-center justify-center text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] -mt-6 border-4 border-[#050505] cursor-pointer"
                 >
-                  <item.icon size={28} />
+                  <item.icon size={20} />
                 </motion.div>
               </Link>
             );
@@ -46,7 +46,7 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(true)}
                 className="flex flex-col items-center gap-1 text-gray-500 hover:text-white transition-colors cursor-pointer"
               >
-                <item.icon size={24} />
+                <item.icon size={20} />
                 <span className="text-[10px] font-black uppercase tracking-widest">{item.name}</span>
               </button>
             );
@@ -55,7 +55,7 @@ export default function Navbar() {
           return (
             <Link key={item.path} href={item.path}>
               <div className={`flex flex-col items-center gap-1 transition-colors cursor-pointer ${isActive ? 'text-red-500' : 'text-gray-500'}`}>
-                <item.icon size={24} />
+                <item.icon size={20} />
                 <span className="text-[10px] font-black uppercase tracking-widest">{item.name}</span>
               </div>
             </Link>

@@ -11,18 +11,18 @@ interface ReviewFloorPlanProps {
 
 export default function ReviewFloorPlan({ floorPlanUrl, issues }: ReviewFloorPlanProps) {
   return (
-    <div className="mb-16 avoid-page-break">
-      <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 flex items-center gap-3">
-        <span className="w-8 h-[2px] bg-red-600"></span>
-        Übersichtsplan & Issue-Verortung
+    <div className="mb-8 md:mb-16 avoid-page-break">
+      <h2 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
+        <span className="w-6 md:w-8 h-[2px] bg-red-600"></span>
+        Übersichtsplan & Verortung
       </h2>
       
-      <div className="relative border-2 border-zinc-100 rounded-3xl overflow-hidden bg-zinc-50 shadow-sm">
+      <div className="relative border md:border-2 border-zinc-100 rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-50 shadow-sm">
         <img 
           src={floorPlanUrl} 
           alt="Floor Plan" 
           crossOrigin="anonymous"
-          className="w-full h-auto block max-h-[500px] object-contain"
+          className="w-full h-auto block max-h-[300px] md:max-h-[500px] object-contain"
         />
         
         {issues.map((issue, idx) => (
@@ -32,10 +32,10 @@ export default function ReviewFloorPlan({ floorPlanUrl, issues }: ReviewFloorPla
             style={{ left: `${issue.x}%`, top: `${issue.y}%` }}
           >
             <div className="relative group">
-              <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-[10px] font-black border-2 border-white">
+              <div className="w-6 h-6 md:w-8 md:h-8 bg-red-600 rounded-full flex items-center justify-center text-white text-[8px] md:text-[10px] font-black border border-white md:border-2">
                 {issue.issueNumber}
               </div>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-black text-white text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 md:mt-2 bg-black text-white text-[7px] md:text-[8px] font-black uppercase tracking-widest px-1.5 md:px-2 py-0.5 md:py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                 Issue {issue.issueNumber}
               </div>
             </div>

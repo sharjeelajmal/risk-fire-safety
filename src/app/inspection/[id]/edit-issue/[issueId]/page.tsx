@@ -19,6 +19,13 @@ const CONTRACTOR_OPTIONS = [
   { label: 'Gesamtleiter', value: 'overall manager' },
 ];
 
+const STATUS_OPTIONS = [
+  { label: 'Open', value: 'Open' },
+  { label: 'Completed', value: 'Completed' },
+  { label: 'Documentation', value: 'Documentation' },
+  { label: 'n/a', value: 'n/a' },
+];
+
 function EditIssueForm() {
   const router = useRouter();
   const params = useParams();
@@ -37,6 +44,8 @@ function EditIssueForm() {
     description: '',
     measures: '',
     priority: '1',
+    status: 'Open',
+    floorPlanId: '',
   });
 
   useEffect(() => {
@@ -53,6 +62,8 @@ function EditIssueForm() {
               description: issue.description,
               measures: issue.measures,
               priority: issue.priority,
+              status: issue.status || 'Open',
+              floorPlanId: issue.floorPlanId || '',
             });
             setExistingImages(issue.images || []);
           }
@@ -130,38 +141,38 @@ function EditIssueForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white flex flex-col pt-20 pb-32 lg:pb-12">
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col pt-16 md:pt-20 pb-24 md:pb-12">
       <Navbar />
-      <main className="flex-1 max-w-2xl mx-auto w-full px-4 sm:px-6">
-        <div className="mb-12">
+      <main className="flex-1 max-w-2xl mx-auto w-full px-3 md:px-6">
+        <div className="mb-8 md:mb-12">
           <button 
             onClick={() => router.back()}
-            className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors mb-6 group cursor-pointer"
+            className="flex items-center gap-1.5 md:gap-2 text-zinc-500 hover:text-white transition-colors mb-4 md:mb-6 group cursor-pointer"
           >
-            <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-black uppercase tracking-widest">Zurück</span>
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">Zurück</span>
           </button>
-          <h1 className="text-4xl font-black tracking-tight text-white mb-2 uppercase">Mangel bearbeiten</h1>
-          <p className="text-zinc-500 font-medium italic">Aktualisieren Sie die Details zu diesem Mangel.</p>
+          <h1 className="text-2xl md:text-4xl font-black tracking-tight text-white mb-1 md:mb-2 uppercase">Mangel bearbeiten</h1>
+          <p className="text-[11px] md:text-sm text-zinc-500 font-medium italic">Details aktualisieren.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6 lg:space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-5 md:space-y-8">
           {/* Image Section */}
-          <div className="space-y-4">
-            <label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Bilder</label>
+          <div className="space-y-3 md:space-y-4">
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Bilder</label>
             
             {/* Existing Images */}
             {existingImages.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-2 md:mb-4">
                 {existingImages.map((url, idx) => (
-                  <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group">
+                  <div key={idx} className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden group">
                     <img src={url} className="w-full h-full object-cover" alt="Existing" />
                     <button 
                       type="button"
                       onClick={() => removeExistingImage(url)}
-                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-xl opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                      className="absolute top-1.5 md:top-2 right-1.5 md:right-2 p-1.5 md:p-2 bg-red-600 text-white rounded-lg md:rounded-xl md:opacity-0 md:group-hover:opacity-100 transition-opacity cursor-pointer"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     </button>
                   </div>
                 ))}
@@ -176,16 +187,16 @@ function EditIssueForm() {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Standortbereich</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="space-y-1.5 md:space-y-2">
+              <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Standortbereich</label>
               <input 
                 required 
                 type="text" 
                 value={formData.location} 
                 onChange={(e) => setFormData({...formData, location: e.target.value})} 
                 placeholder="z.B. Flur 1. OG" 
-                className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-red-500/50 transition-all text-sm shadow-xl" 
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" 
               />
             </div>
             <CustomSelect 
@@ -197,43 +208,52 @@ function EditIssueForm() {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Mängel / Beschreibung</label>
+          <div className="space-y-1.5 md:space-y-2">
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mängel / Beschreibung</label>
             <textarea 
               required 
               rows={4} 
               value={formData.description} 
               onChange={(e) => setFormData({...formData, description: e.target.value})} 
               placeholder="Was ist der Mangel?" 
-              className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-red-500/50 transition-all text-sm resize-none shadow-xl" 
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm resize-none shadow-xl" 
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Massnahmen</label>
+          <div className="space-y-1.5 md:space-y-2">
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Massnahmen</label>
             <textarea 
               required 
               rows={3} 
               value={formData.measures} 
               onChange={(e) => setFormData({...formData, measures: e.target.value})} 
               placeholder="Was muss getan werden?" 
-              className="w-full bg-[#0a0a0a] border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:border-red-500/50 transition-all text-sm resize-none shadow-xl" 
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm resize-none shadow-xl" 
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="block text-xs font-black uppercase tracking-widest text-zinc-400">Priorität</label>
-            <div className="flex flex-wrap gap-4">
-              {['1', '2', '3', 'n/a'].map(v => (
-                <button 
-                  key={v} 
-                  type="button" 
-                  onClick={() => setFormData({...formData, priority: v as any})} 
-                  className={`flex-1 min-w-[80px] py-4 rounded-2xl border-2 transition-all font-black text-xs ${formData.priority === v ? 'bg-red-500/10 text-red-500 border-red-500/50 scale-105' : 'bg-transparent border-white/5 text-zinc-600'}`}
-                >
-                  {v === 'n/a' ? 'N/A' : `STUFE ${v}`}
-                </button>
-              ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <CustomSelect 
+              label="Status" 
+              options={STATUS_OPTIONS} 
+              value={formData.status} 
+              onChange={(val) => setFormData({...formData, status: val})} 
+              required 
+            />
+            <div className="space-y-1.5 md:space-y-2">
+              <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Priorität</label>
+              <div className="flex gap-1.5 md:gap-2">
+                {['1', '2', '3', 'n/a'].map(v => (
+                  <button 
+                    key={v} 
+                    type="button" 
+                    onClick={() => setFormData({...formData, priority: v as any})} 
+                    className={`flex-1 py-2.5 md:py-3 rounded-lg md:rounded-xl border transition-all font-black text-[9px] md:text-[10px] tracking-widest ${formData.priority === v ? 'bg-red-500/10 text-red-500 border-red-500/50' : 'bg-[#0a0a0a] border-white/5 text-zinc-600'}`}
+                  >
+                    {v === 'n/a' ? 'N/A' : v}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -241,12 +261,12 @@ function EditIssueForm() {
             disabled={loading} 
             whileHover={{ scale: 1.02 }} 
             whileTap={{ scale: 0.98 }} 
-            className={`w-full py-5 rounded-full font-black uppercase tracking-[3px] flex items-center justify-center gap-3 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}
+            className={`w-full py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest md:tracking-[3px] flex items-center justify-center gap-2 md:gap-3 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}
           >
             {loading ? (
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
             ) : (
-              <><span className="text-xs">Aktualisieren</span><Save size={18} /></>
+              <><span className="text-[10px] md:text-xs">Aktualisieren</span><Save className="w-4 h-4 md:w-4.5 md:h-4.5" /></>
             )}
           </motion.button>
         </form>

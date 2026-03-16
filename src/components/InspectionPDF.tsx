@@ -260,10 +260,18 @@ interface Issue {
   responsibleContractor: string;
   description: string;
   measures: string;
-  priority: '1' | '2' | '3';
+  priority: '1' | '2' | '3' | 'n/a';
   images: string[];
+  status?: string;
+  floorPlanId?: string;
   x?: number;
   y?: number;
+}
+
+interface FloorPlan {
+  id: string;
+  name: string;
+  url: string;
 }
 
 interface InspectionPDFProps {
@@ -273,10 +281,10 @@ interface InspectionPDFProps {
     ort: string;
     datum: string | Date;
     auftraggeber: string;
-    participants: string;
+    participantsList: { name: string; role: string }[];
     documentType: string;
     generalNotes?: string[];
-    floorPlanUrl?: string;
+    floorPlans: FloorPlan[];
     issues: Issue[];
   };
 }
@@ -324,7 +332,17 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
             </View>
             <View style={styles.gridItem}>
               <Text style={styles.label}>Teilnehmer</Text>
-              <Text style={styles.value}>{data.participants || '-'}</Text>
+              {Array.isArray(data.participantsList) && data.participantsList.length > 0 ? (
+                data.participantsList.map((p, i) => (
+                  <Text key={i} style={styles.value}>
+                    {p.name} <Text style={{ fontSize: 8, color: '#999999', fontWeight: 'normal' }}>— {p.role}</Text>
+                  </Text>
+                ))
+              ) : typeof (data as any).participants === 'string' && (data as any).participants ? (
+                <Text style={styles.value}>{(data as any).participants}</Text>
+              ) : (
+                <Text style={styles.value}>-</Text>
+              )}
             </View>
             <View style={styles.gridItem}>
               <Text style={styles.label}>Erstellt von</Text>
@@ -388,9 +406,9 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         </View>
       </Page>
 
-      {/* PAGE 2: FLOOR PLAN */}
-      {data.floorPlanUrl && (
-        <Page size="A4" style={styles.page}>
+      {/* PAGES: FLOOR PLANS */}
+      {data.floorPlans && data.floorPlans.map((fp, idx) => (
+        <Page key={fp.id} size="A4" style={styles.page}>
           <View style={styles.header} fixed>
             <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GMBH</Text>
             <Text style={styles.logoPlaceholder}>RISK FIRE SAFETY</Text>
@@ -398,27 +416,27 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
 
           <View style={styles.sectionTitle}>
             <View style={styles.sectionLine} />
-            <Text>Grundriss / Brandschutzplan</Text>
+            <Text>Grundriss / Brandschutzplan: {fp.name}</Text>
           </View>
 
           <View style={styles.mapContainer}>
-            <Image src={data.floorPlanUrl} style={styles.mapImage} />
+            <Image src={fp.url} style={styles.mapImage} />
             
-            {/* Map Pins overlay */}
-            {data.issues?.filter(i => i.x !== undefined && i.y !== undefined).map((issue, index) => (
+            {/* Map Pins overlay filtering by floorPlanId */}
+            {data.issues?.filter(i => i.floorPlanId === fp.id && i.x !== undefined && i.y !== undefined).map((issue, index) => (
               <View 
-                key={index} 
+                key={issue.issueNumber} 
                 style={[
                   styles.pin, 
                   { 
                     top: `${issue.y}%`, 
                     left: `${issue.x}%`,
-                    marginTop: -7, // Half of height to center
-                    marginLeft: -7 // Half of width to center
+                    marginTop: -7,
+                    marginLeft: -7
                   }
                 ]}
               >
-                <Text style={styles.pinText}>{issue.issueNumber || index + 1}</Text>
+                <Text style={styles.pinText}>{issue.issueNumber}</Text>
               </View>
             ))}
           </View>
@@ -428,7 +446,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
             <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
           </View>
         </Page>
-      )}
+      ))}
 
       {/* PAGE 3+: ISSUES LIST */}
       <Page size="A4" style={styles.page}>
@@ -449,8 +467,13 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                 <Text style={styles.issueNumber}>#{issue.issueNumber}</Text>
                 <Text style={styles.issueLocation}>{issue.location}</Text>
               </View>
-              <View style={[styles.priorityBadge, issue.priority === '3' ? styles.p3 : issue.priority === '2' ? styles.p2 : styles.p1]}>
-                <Text>Priorität {issue.priority}</Text>
+              <View style={{ flexDirection: 'row', gap: 5 }}>
+                <View style={[styles.priorityBadge, issue.priority === '3' ? styles.p3 : issue.priority === '2' ? styles.p2 : styles.p1]}>
+                  <Text>Priorität {issue.priority}</Text>
+                </View>
+                <View style={[styles.priorityBadge, { backgroundColor: '#000000', color: '#FFFFFF' }]}>
+                  <Text>{issue.status || 'Open'}</Text>
+                </View>
               </View>
             </View>
 

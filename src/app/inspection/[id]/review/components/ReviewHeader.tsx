@@ -8,7 +8,7 @@ interface ReviewHeaderProps {
     auftraggeber: string;
     teilnehmer: string;
     documentType: string;
-    participants: string;
+    participantsList: { name: string; role: string }[];
   };
 }
 
@@ -27,7 +27,7 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
   });
 
   return (
-    <div className="avoid-page-break border-b-4 border-red-600 pb-8 mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start gap-6 md:gap-0">
+    <div className="avoid-page-break border-b-2 md:border-b-4 border-red-600 pb-6 md:pb-8 mb-6 md:mb-12 flex flex-col md:flex-row justify-between items-start gap-4 md:gap-0">
       <div className="space-y-4 w-full md:w-auto">
         <div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black uppercase tracking-tighter text-black break-words">
@@ -52,8 +52,20 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
             <p className="text-sm font-bold text-zinc-900 break-words">{inspection.auftraggeber}</p>
           </div>
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Teilnehmer</label>
-            <p className="text-sm font-bold text-zinc-900 break-words">{inspection.participants || '-'}</p>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">Teilnehmer</label>
+            <div className="space-y-1">
+              {Array.isArray(inspection.participantsList) && inspection.participantsList.length > 0 ? (
+                inspection.participantsList.map((p, i) => (
+                  <p key={i} className="text-sm font-bold text-zinc-900 break-words">
+                    {p.name} <span className="text-zinc-400 font-medium text-xs ml-1">— {p.role}</span>
+                  </p>
+                ))
+              ) : typeof (inspection as any).participants === 'string' && (inspection as any).participants ? (
+                <p className="text-sm font-bold text-zinc-900 break-words">{(inspection as any).participants}</p>
+              ) : (
+                <p className="text-sm font-bold text-zinc-900">-</p>
+              )}
+            </div>
           </div>
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Erstellt von</label>

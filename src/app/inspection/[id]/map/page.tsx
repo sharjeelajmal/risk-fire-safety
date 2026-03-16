@@ -14,12 +14,19 @@ interface Issue {
   _id: string;
   x: number;
   y: number;
+  floorPlanId: string;
+}
+
+interface FloorPlan {
+  id: string;
+  name: string;
+  url: string;
 }
 
 interface InspectionData {
   _id: string;
   ort: string;
-  floorPlanUrl: string;
+  floorPlans: FloorPlan[];
   issues: Issue[];
 }
 
@@ -28,6 +35,7 @@ export default function InteractiveMapPage() {
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<InspectionData | null>(null);
+  const [activeFloorPlanId, setActiveFloorPlanId] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
   const mapRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +46,9 @@ export default function InteractiveMapPage() {
         if (res.ok) {
           const json = await res.json();
           setData(json);
+          if (json.floorPlans && json.floorPlans.length > 0) {
+            setActiveFloorPlanId(json.floorPlans[0].id);
+          }
         }
       } catch (err) {
         console.error(err);
@@ -48,8 +59,11 @@ export default function InteractiveMapPage() {
     if (params.id) fetchInspection();
   }, [params.id]);
 
+  const activeFloorPlan = data?.floorPlans.find(fp => fp.id === activeFloorPlanId);
+  const filteredIssues = data?.issues.filter(issue => issue.floorPlanId === activeFloorPlanId) || [];
+
   const handleMapClick = (x: number, y: number) => {
-    router.push(`/inspection/${params.id}/add-issue?x=${x.toFixed(2)}&y=${y.toFixed(2)}`);
+    router.push(`/inspection/${params.id}/add-issue?x=${x.toFixed(2)}&y=${y.toFixed(2)}&floorPlanId=${activeFloorPlanId}`);
   };
 
   if (loading) return (
@@ -79,12 +93,34 @@ export default function InteractiveMapPage() {
         </div>
         
         <Navbar />
-        <MapHeader title={data.ort} />
+        
+        <div className="relative z-[60]">
+          <MapHeader title={data.ort} />
+          
+          {/* Floor Plan Selector */}
+          {data.floorPlans.length > 1 && (
+            <div className="absolute top-20 md:top-24 left-1/2 -translate-x-1/2 flex gap-1.5 md:gap-2 bg-black/40 backdrop-blur-xl p-1 md:p-1.5 rounded-xl md:rounded-2xl border border-white/5 shadow-2xl">
+              {data.floorPlans.map((fp) => (
+                <button
+                  key={fp.id}
+                  onClick={() => setActiveFloorPlanId(fp.id)}
+                  className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all ${
+                    activeFloorPlanId === fp.id
+                      ? 'bg-red-600 text-white shadow-lg'
+                      : 'text-gray-500 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  {fp.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         
         <MapContent 
           mapRef={mapRef}
-          floorPlanUrl={data.floorPlanUrl}
-          issues={data.issues}
+          floorPlanUrl={activeFloorPlan?.url || ''}
+          issues={filteredIssues}
           imageError={imageError}
           setImageError={setImageError}
           onMapClick={handleMapClick}

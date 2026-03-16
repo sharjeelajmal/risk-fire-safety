@@ -21,7 +21,8 @@ export async function PATCH(
           'issues.$.measures': body.measures,
           'issues.$.priority': body.priority,
           'issues.$.images': body.images,
-          'issues.$.status': body.status || 'Open'
+          'issues.$.status': body.status || 'Open',
+          'issues.$.floorPlanId': body.floorPlanId
         } 
       }
     );

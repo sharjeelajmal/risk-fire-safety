@@ -102,17 +102,17 @@ export default function SettingsPage() {
       <Navbar />
       <Header />
 
-      <main className="lg:ml-24 pt-48 lg:pt-52 p-6 lg:p-12 min-h-screen relative z-10">
-        <div className="max-w-4xl mx-auto space-y-12">
+      <main className="lg:ml-24 pt-32 md:pt-52 p-4 md:p-12 min-h-screen relative z-10">
+        <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
           {/* Page Heading */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-[22px] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-xl shadow-red-600/5">
-                <Settings size={28} />
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl md:rounded-[22px] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-xl shadow-red-600/5">
+                <Settings className="w-6 h-6 md:w-7 md:h-7" />
               </div>
               <div>
-                <h1 className="text-3xl font-black text-white tracking-tighter uppercase">Einstellungen</h1>
-                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[3px]">Profil & App-Präferenzen</p>
+                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase">Einstellungen</h1>
+                <p className="text-zinc-500 text-[8px] md:text-[10px] font-black uppercase tracking-[2px] md:tracking-[3px]">Profil & App-Präferenzen</p>
               </div>
             </div>
 
@@ -140,78 +140,78 @@ export default function SettingsPage() {
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass-premium rounded-[40px] p-8 sm:p-10 border border-white/5 relative overflow-hidden group"
+              className="glass-premium rounded-[32px] md:rounded-[40px] p-5 md:p-10 border border-white/5 relative overflow-hidden group"
             >
               <div className="card-shine opacity-10"></div>
-              <div className="relative z-10 space-y-8">
-                <div className="flex items-center gap-4 mb-2">
-                  <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
-                    <User size={20} />
+              <div className="relative z-10 space-y-6 md:space-y-8">
+                <div className="flex items-center gap-3 md:gap-4 mb-1 md:mb-2">
+                  <div className="p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
+                    <User className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                  <h2 className="text-xl font-black text-white uppercase tracking-tight">Mein Profil</h2>
+                  <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">Mein Profil</h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">Vollständiger Name</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  <div className="space-y-1.5 md:space-y-2">
+                    <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">Vollständiger Name</label>
                     <div className="relative">
-                      <User size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <User size={14} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500 md:w-4 md:h-4 md:left-6" />
                       <input
                         type="text"
                         value={profile.name}
                         onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-14 pr-6 py-4 text-white text-sm outline-none focus:border-red-600/50 transition-all"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-12 md:pl-14 pr-5 md:pr-6 py-3.5 md:py-4 text-white text-[13px] md:text-sm outline-none focus:border-red-600/50 transition-all"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">E-Mail Adresse</label>
+                  <div className="space-y-1.5 md:space-y-2">
+                    <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">E-Mail Adresse</label>
                     <div className="relative">
-                      <Mail size={16} className="absolute left-6 top-1/2 -translate-y-1/2 text-zinc-500" />
+                      <Mail size={14} className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-500 md:w-4 md:h-4 md:left-6" />
                       <input
                         type="email"
                         value={profile.email}
                         onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl pl-14 pr-6 py-4 text-white text-sm outline-none focus:border-red-600/50 transition-all"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl pl-12 md:pl-14 pr-5 md:pr-6 py-3.5 md:py-4 text-white text-[13px] md:text-sm outline-none focus:border-red-600/50 transition-all"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/5 space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
-                      <Shield size={20} />
+                <div className="pt-4 md:pt-6 border-t border-white/5 space-y-6 md:space-y-8">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
+                      <Shield className="w-4 h-4 md:w-5 md:h-5" />
                     </div>
-                    <h2 className="text-lg font-black text-white uppercase tracking-tight">Passwort ändern</h2>
+                    <h2 className="text-base md:text-lg font-black text-white uppercase tracking-tight">Passwort ändern</h2>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">Aktuelles Passwort</label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">Aktuelles Passwort</label>
                       <input
                         type="password"
                         placeholder="••••••••"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm outline-none focus:border-red-600/50 transition-all"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-white text-[13px] md:text-sm outline-none focus:border-red-600/50 transition-all"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">Neues Passwort</label>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">Neues Passwort</label>
                       <div className="relative">
                         <input
                           type={showPassword ? "text" : "password"}
                           placeholder="Neues Passwort (optional)"
                           value={profile.newPassword}
                           onChange={(e) => setProfile({ ...profile, newPassword: e.target.value })}
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm outline-none focus:border-red-600/50 transition-all pr-14"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-white text-[13px] md:text-sm outline-none focus:border-red-600/50 transition-all pr-12 md:pr-14"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                          className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-500 hover:text-white transition-colors cursor-pointer"
                         >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                       </div>
                     </div>
@@ -225,53 +225,53 @@ export default function SettingsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass-premium rounded-[40px] p-8 sm:p-10 border border-white/5 relative overflow-hidden"
+              className="glass-premium rounded-[32px] md:rounded-[40px] p-5 md:p-10 border border-white/5 relative overflow-hidden"
             >
               <div className="card-shine opacity-10"></div>
-              <div className="relative z-10 space-y-8">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
-                    <Settings size={20} />
+              <div className="relative z-10 space-y-6 md:space-y-8">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
+                    <Settings className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                  <h2 className="text-xl font-black text-white uppercase tracking-tight">App-Einstellungen</h2>
+                  <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">App-Einstellungen</h2>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {/* Toggle: PDF-Logo */}
-                  <div className="flex items-center justify-between p-6 rounded-[28px] bg-white/5 border border-white/5 hover:border-red-600/20 transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-red-600/10 flex items-center justify-center text-red-500">
-                        <FileText size={20} />
+                  <div className="flex items-center justify-between p-4 md:p-6 rounded-2xl md:rounded-[28px] bg-white/5 border border-white/5 hover:border-red-600/20 transition-all group">
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-red-600/10 flex items-center justify-center text-red-500">
+                        <FileText className="w-4 h-4 md:w-5 md:h-5" />
                       </div>
                       <div>
-                        <p className="text-white font-bold text-sm">Standard-PDF-Logo anzeigen</p>
-                        <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-0.5">Logo auf Berichten einblenden</p>
+                        <p className="text-white font-bold text-[13px] md:text-sm">Standard-PDF-Logo</p>
+                        <p className="text-[8px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-0.5">Logo einblenden</p>
                       </div>
                     </div>
                     <button 
                       onClick={() => setAppSettings({ ...appSettings, showPdfLogo: !appSettings.showPdfLogo })}
-                      className={`w-12 h-6 rounded-full transition-all relative ${appSettings.showPdfLogo ? 'bg-red-600' : 'bg-zinc-800'} cursor-pointer`}
+                      className={`w-10 h-5 md:w-12 md:h-6 rounded-full transition-all relative ${appSettings.showPdfLogo ? 'bg-red-600' : 'bg-zinc-800'} cursor-pointer`}
                     >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${appSettings.showPdfLogo ? 'left-7' : 'left-1'}`} />
+                      <div className={`absolute top-0.5 md:top-1 w-4 h-4 bg-white rounded-full transition-all ${appSettings.showPdfLogo ? 'left-5.5 md:left-7' : 'left-0.5 md:left-1'}`} />
                     </button>
                   </div>
 
                   {/* Toggle: Notifications */}
-                  <div className="flex items-center justify-between p-6 rounded-[28px] bg-white/5 border border-white/5 hover:border-red-600/20 transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-red-600/10 flex items-center justify-center text-red-500">
-                        <Bell size={20} />
+                  <div className="flex items-center justify-between p-4 md:p-6 rounded-2xl md:rounded-[28px] bg-white/5 border border-white/5 hover:border-red-600/20 transition-all group">
+                    <div className="flex items-center gap-3 md:gap-4">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-red-600/10 flex items-center justify-center text-red-500">
+                        <Bell className="w-4 h-4 md:w-5 md:h-5" />
                       </div>
                       <div>
-                        <p className="text-white font-bold text-sm">Benachrichtigungen</p>
-                        <p className="text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-0.5">Echtzeit-Systemupdates</p>
+                        <p className="text-white font-bold text-[13px] md:text-sm">Benachrichtigungen</p>
+                        <p className="text-[8px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-0.5">Systemupdates</p>
                       </div>
                     </div>
                     <button 
                       onClick={() => setAppSettings({ ...appSettings, notifications: !appSettings.notifications })}
-                      className={`w-12 h-6 rounded-full transition-all relative ${appSettings.notifications ? 'bg-red-600' : 'bg-zinc-800'} cursor-pointer`}
+                      className={`w-10 h-5 md:w-12 md:h-6 rounded-full transition-all relative ${appSettings.notifications ? 'bg-red-600' : 'bg-zinc-800'} cursor-pointer`}
                     >
-                      <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${appSettings.notifications ? 'left-7' : 'left-1'}`} />
+                      <div className={`absolute top-0.5 md:top-1 w-4 h-4 bg-white rounded-full transition-all ${appSettings.notifications ? 'left-5.5 md:left-7' : 'left-0.5 md:left-1'}`} />
                     </button>
                   </div>
                 </div>
@@ -283,12 +283,12 @@ export default function SettingsPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="flex justify-end pt-4"
+              className="flex justify-end pt-2 md:pt-4"
             >
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="px-12 py-5 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[2px] text-xs transition-all flex items-center justify-center gap-3 cursor-pointer shadow-xl shadow-red-600/20 active:scale-[0.98] disabled:opacity-50 min-w-[200px]"
+                className="w-full md:w-auto px-8 md:px-12 py-3.5 md:py-5 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest md:tracking-[2px] text-[10px] md:text-xs transition-all flex items-center justify-center gap-2 md:gap-3 cursor-pointer shadow-xl shadow-red-600/20 active:scale-[0.98] disabled:opacity-50 min-w-[160px] md:min-w-[200px]"
               >
                 {saving ? (
                   <>

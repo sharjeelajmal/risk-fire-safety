@@ -7,6 +7,7 @@ interface Issue {
   _id: string;
   x: number;
   y: number;
+  floorPlanId: string;
 }
 
 interface MapContentProps {

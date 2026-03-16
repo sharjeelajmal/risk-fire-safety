@@ -11,7 +11,8 @@ export interface IIssue {
   measures: string;
   priority: '1' | '2' | '3' | 'n/a';
   images: string[];
-  status: 'Open' | 'Resolved';
+  status: 'Open' | 'Completed' | 'Documentation' | 'n/a';
+  floorPlanId: string;
   createdAt: Date;
 }
 
@@ -21,14 +22,25 @@ export interface IInspection extends Document {
   auftraggeber: string;
   teilnehmer: string;
   documentType: 'Catalog of measures' | 'QS protocol';
-  participants: string;
+  participantsList: { name: string; role: string }[];
   generalNotes: string[];
-  floorPlanUrl?: string;
+  floorPlans: { id: string; name: string; url: string }[];
   issues: IIssue[];
   status: 'Draft' | 'In Progress' | 'Completed';
   createdAt: Date;
   updatedAt: Date;
 }
+
+const ParticipantSchema = new Schema({
+  name: { type: String },
+  role: { type: String }
+}, { _id: false });
+
+const FloorPlanSchema = new Schema({
+  id: { type: String },
+  name: { type: String },
+  url: { type: String }
+}, { _id: false });
 
 const InspectionSchema: Schema = new Schema({
   ort: { type: String, required: true },
@@ -36,9 +48,9 @@ const InspectionSchema: Schema = new Schema({
   auftraggeber: { type: String, required: true },
   teilnehmer: { type: String, required: true },
   documentType: { type: String, enum: ['Catalog of measures', 'QS protocol'], default: 'Catalog of measures' },
-  participants: { type: String },
+  participantsList: [ParticipantSchema],
   generalNotes: [{ type: String }],
-  floorPlanUrl: { type: String, required: false },
+  floorPlans: [FloorPlanSchema],
   issues: [
     {
       issueNumber: { type: Number, required: true },
@@ -50,11 +62,19 @@ const InspectionSchema: Schema = new Schema({
       measures: { type: String, required: true },
       priority: { type: String, enum: ['1', '2', '3', 'n/a'], default: '1' },
       images: [{ type: String }],
-      status: { type: String, enum: ['Open', 'Resolved'], default: 'Open' },
+      status: { type: String, enum: ['Open', 'Completed', 'Documentation', 'n/a'], default: 'Open' },
+      floorPlanId: { type: String },
       createdAt: { type: Date, default: Date.now }
     }
   ],
   status: { type: String, enum: ['Draft', 'In Progress', 'Completed'], default: 'Draft' },
 }, { timestamps: true });
 
-export default mongoose.models.Inspection || mongoose.model<IInspection>('Inspection', InspectionSchema);
+// Force model refresh for development
+if (process.env.NODE_ENV === 'development') {
+  delete mongoose.models.Inspection;
+}
+
+const Inspection = mongoose.models.Inspection || mongoose.model<IInspection>('Inspection', InspectionSchema);
+
+export default Inspection;

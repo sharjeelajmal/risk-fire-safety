@@ -98,26 +98,26 @@ export default function TeamPage() {
       <Navbar />
       <Header />
 
-      <main className="lg:ml-24 pt-48 lg:pt-52 p-6 lg:p-12 min-h-screen relative z-10">
-        <div className="max-w-7xl mx-auto space-y-12">
+      <main className="lg:ml-24 pt-32 md:pt-52 p-4 md:p-12 min-h-screen relative z-10">
+        <div className="max-w-7xl mx-auto space-y-8 md:space-y-12">
           {/* Top Actions */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-[22px] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-xl shadow-red-600/5">
-                <Users size={28} />
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl md:rounded-[22px] bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500 shadow-xl shadow-red-600/5">
+                <Users className="w-6 h-6 md:w-7 md:h-7" />
               </div>
               <div>
-                <h1 className="text-3xl font-black text-white tracking-tighter uppercase">Team-Verwaltung</h1>
-                <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[3px]">{users.length} Registrierte Benutzer</p>
+                <h1 className="text-2xl md:text-3xl font-black text-white tracking-tighter uppercase">Team-Verwaltung</h1>
+                <p className="text-zinc-500 text-[8px] md:text-[10px] font-black uppercase tracking-[2px] md:tracking-[3px]">{users.length} Benutzer</p>
               </div>
             </div>
 
             <button
               onClick={() => setIsAddModalOpen(true)}
-              className="px-8 py-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[2px] text-xs transition-all flex items-center justify-center gap-3 cursor-pointer shadow-xl shadow-red-600/20"
+              className="w-full md:w-auto px-6 md:px-8 py-3.5 md:py-4 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest md:tracking-[2px] text-[10px] md:text-xs transition-all flex items-center justify-center gap-2 md:gap-3 cursor-pointer shadow-xl shadow-red-600/20"
             >
-              <UserPlus size={18} />
-              Benutzer Hinzufügen
+              <UserPlus className="w-4 h-4 md:w-[18px] md:h-[18px]" />
+              Hinzufügen
             </button>
           </div>
 
@@ -139,19 +139,19 @@ export default function TeamPage() {
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="glass-premium p-6 rounded-[32px] border border-white/5 hover:border-red-600/20 transition-all group relative overflow-hidden"
+                      className="glass-premium p-5 md:p-6 rounded-[28px] md:rounded-[32px] border border-white/5 hover:border-red-600/20 transition-all group relative overflow-hidden"
                     >
                        <div className="card-shine opacity-20"></div>
-                       <div className="relative z-10 space-y-6">
+                       <div className="relative z-10 space-y-4 md:space-y-6">
                         <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400">
-                              <User size={24} />
+                          <div className="flex items-center gap-3 md:gap-4">
+                            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400">
+                              <User className="w-5 h-5 md:w-6 md:h-6" />
                             </div>
                             <div>
-                              <p className="text-white font-black uppercase text-sm tracking-tight">{user.name}</p>
-                              <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-red-600/10 border border-red-600/20 text-red-500 text-[8px] font-black uppercase tracking-widest w-fit mt-1">
-                                <Shield size={8} />
+                              <p className="text-white font-black uppercase text-[13px] md:text-sm tracking-tight">{user.name}</p>
+                              <div className="flex items-center gap-1.5 md:gap-2 px-1.5 py-0.5 rounded-md md:rounded-lg bg-red-600/10 border border-red-600/20 text-red-500 text-[7px] md:text-[8px] font-black uppercase tracking-widest w-fit mt-0.5 md:mt-1">
+                                <Shield className="w-2 h-2 md:w-2 md:h-2" />
                                 {user.role}
                               </div>
                             </div>
@@ -159,15 +159,15 @@ export default function TeamPage() {
                           
                           <button
                             onClick={() => handleDeleteTrigger(user)}
-                            className="p-3 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all cursor-pointer shadow-lg shadow-red-500/5 group-hover:scale-110"
+                            className="p-2.5 md:p-3 rounded-lg md:rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all cursor-pointer shadow-lg shadow-red-500/5 md:group-hover:scale-110"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                           </button>
                         </div>
 
-                        <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                          <Mail size={14} className="text-zinc-500" />
-                          <span className="text-xs text-zinc-400 font-medium truncate">{user.email}</span>
+                        <div className="flex items-center gap-2.5 md:gap-3 p-3 md:p-4 rounded-xl md:rounded-2xl bg-white/[0.03] border border-white/5">
+                          <Mail className="w-3 h-3 md:w-3.5 md:h-3.5 text-zinc-500" />
+                          <span className="text-[11px] md:text-xs text-zinc-400 font-medium truncate">{user.email}</span>
                         </div>
                        </div>
                     </motion.div>
@@ -200,56 +200,56 @@ export default function TeamPage() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-[40px] p-10 shadow-[0_0_80px_rgba(239,68,68,0.1)] overflow-hidden"
+              className="relative w-full max-w-md bg-[#0a0a0a] border border-white/10 rounded-[32px] md:rounded-[40px] p-6 md:p-10 shadow-[0_0_80px_rgba(239,68,68,0.1)] overflow-hidden"
             >
               <div className="absolute -top-32 -right-32 w-64 h-64 bg-red-600/5 blur-[100px] rounded-full pointer-events-none" />
               
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500">
-                      <UserPlus size={24} />
+                <div className="flex items-center justify-between mb-6 md:mb-8">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500">
+                      <UserPlus className="w-5 h-5 md:w-6 md:h-6" />
                     </div>
-                    <h2 className="text-2xl font-black text-white uppercase tracking-tighter">Neuer Benutzer</h2>
+                    <h2 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter">Neuer Benutzer</h2>
                   </div>
                   <button onClick={() => setIsAddModalOpen(false)} className="text-zinc-600 hover:text-white transition-colors cursor-pointer">
-                    <X size={24} />
+                    <X className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
                 </div>
 
-                <form onSubmit={handleAddUser} className="space-y-6">
+                <form onSubmit={handleAddUser} className="space-y-4 md:space-y-6">
                   {formError && (
-                    <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-red-500 text-xs font-bold">
-                      <AlertCircle size={16} />
+                    <div className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center gap-2 md:gap-3 text-red-500 text-[11px] md:text-xs font-bold font-black uppercase tracking-tight">
+                      <AlertCircle className="w-4 h-4" />
                       {formError}
                     </div>
                   )}
 
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">Vollständiger Name</label>
+                  <div className="space-y-3 md:space-y-4">
+                    <div className="space-y-1.5 md:space-y-2">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">Vollständiger Name</label>
                       <input
                         required
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="Z.B. Robin Schmid"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-zinc-600"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-white text-[13px] md:text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-zinc-600 uppercase font-bold tracking-wide"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">E-Mail Adresse</label>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">E-Mail Adresse</label>
                       <input
                         required
                         type="email"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="name@rfs.gmbh"
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-zinc-600"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-white text-[13px] md:text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-zinc-600"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-4">Passwort</label>
+                    <div className="space-y-1.5 md:space-y-2">
+                      <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">Passwort</label>
                       <div className="relative">
                         <input
                           required
@@ -257,14 +257,14 @@ export default function TeamPage() {
                           value={formData.password}
                           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                           placeholder="••••••••"
-                          className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-zinc-600 pr-14"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-5 md:px-6 py-3.5 md:py-4 text-white text-[13px] md:text-sm outline-none focus:border-red-600/50 transition-all placeholder:text-zinc-600 pr-12 md:pr-14"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                          className="absolute right-3 md:right-4 top-1/2 -translate-y-1/2 p-2 text-zinc-500 hover:text-white transition-colors cursor-pointer"
                         >
-                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          {showPassword ? <EyeOff className="w-4 h-4 md:w-[18px] md:h-[18px]" /> : <Eye className="w-4 h-4 md:w-[18px] md:h-[18px]" />}
                         </button>
                       </div>
                     </div>
@@ -273,9 +273,9 @@ export default function TeamPage() {
                   <button
                     disabled={formLoading}
                     type="submit"
-                    className="w-full py-5 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-[2px] text-xs transition-all flex items-center justify-center gap-3 cursor-pointer shadow-xl shadow-red-600/20 disabled:opacity-50 mt-4 active:scale-[0.98]"
+                    className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest md:tracking-[2px] text-[10px] md:text-xs transition-all flex items-center justify-center gap-2 md:gap-3 cursor-pointer shadow-xl shadow-red-600/20 disabled:opacity-50 mt-2 md:mt-4 active:scale-[0.98]"
                   >
-                    {formLoading ? <Loader2 className="animate-spin" size={18} /> : 'Benutzer Erstellen'}
+                    {formLoading ? <Loader2 className="animate-spin w-4 h-4 md:w-4.5 md:h-4.5" /> : 'Benutzer Erstellen'}
                   </button>
                 </form>
               </div>

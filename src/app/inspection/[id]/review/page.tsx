@@ -24,10 +24,10 @@ function ReviewContent() {
   if (!inspection) return <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">Error: Inspection not found</div>;
 
   return (
-    <div className="min-h-screen bg-zinc-100 py-6 md:py-12 px-2 sm:px-4 pb-40">
+    <div className="min-h-screen bg-zinc-100 py-4 md:py-12 px-2 md:px-4 pb-40">
       <div 
         id="pdf-content" 
-        className="w-[794px] mx-auto bg-white shadow-2xl p-10 font-sans text-black printable-content"
+        className="w-full max-w-[794px] mx-auto bg-white shadow-2xl p-4 sm:p-6 md:p-10 font-sans text-black printable-content"
       >
         {/* PAGE 1: COVER PAGE */}
         <div className="border-b-4 border-zinc-100 pb-12 mb-12">
@@ -36,8 +36,22 @@ function ReviewContent() {
 
         {/* PAGE 2+: CONTENT */}
         <div className="space-y-12">
-          {inspection.floorPlanUrl ? (
-            <ReviewFloorPlan floorPlanUrl={inspection.floorPlanUrl} issues={inspection.issues || []} />
+          {inspection.floorPlans && inspection.floorPlans.length > 0 ? (
+            inspection.floorPlans.map((fp: any, idx: number) => {
+              const fpIssues = (inspection.issues || [])
+                .filter((issue: any) => issue.floorPlanId === fp.id)
+                .map((issue: any) => ({
+                  x: issue.x,
+                  y: issue.y,
+                  issueNumber: issue.issueNumber,
+                }));
+              return (
+                <div key={fp.id} className={idx > 0 ? "pt-12 border-t border-zinc-100" : ""}>
+                  <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900 mb-4">{fp.name}</h3>
+                  <ReviewFloorPlan floorPlanUrl={fp.url} issues={fpIssues} />
+                </div>
+              );
+            })
           ) : (
             <div className="mb-12 p-10 bg-zinc-50 rounded-3xl border border-zinc-100 flex flex-col items-center justify-center gap-6">
               <div className="w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center text-red-600">

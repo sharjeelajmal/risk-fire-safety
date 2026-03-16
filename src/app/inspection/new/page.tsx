@@ -55,13 +55,13 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
     <div className="relative" ref={containerRef}>
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 focus-within:border-red-500/50 focus-within:bg-white/[0.08] outline-none transition-all font-bold text-lg cursor-pointer flex items-center justify-between group"
+        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-10 md:pl-14 pr-4 focus-within:border-red-500/50 focus-within:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg cursor-pointer flex items-center justify-between group"
       >
-        <div className="flex items-center gap-4">
-          <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-red-500 transition-colors" size={20} />
+        <div className="flex items-center gap-3 md:gap-4">
+          <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-red-500 transition-colors w-4 h-4 md:w-5 md:h-5" />
           <span>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
         </div>
-        <ChevronRight size={18} className={`text-gray-600 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+        <ChevronRight className={`text-gray-600 transition-transform w-4 h-4 md:w-[18px] md:h-[18px] ${isOpen ? 'rotate-90' : ''}`} />
       </div>
 
       <AnimatePresence>
@@ -127,12 +127,14 @@ export default function NewInspectionPage() {
     auftraggeber: '',
     teilnehmer: 'Robin Furrer',
     documentType: 'Catalog of measures' as 'Catalog of measures' | 'QS protocol',
-    participants: '',
+    participants: [{ name: '', role: '' }],
     generalNotes: [] as string[],
   });
   const [customNote, setCustomNote] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
+  
+  // Multiple Floor Plans State
+  const [floorPlans, setFloorPlans] = useState<{ id: string, name: string, file: File | null, preview: string | null }[]>([]);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const defaultNotes = [
@@ -159,14 +161,52 @@ export default function NewInspectionPage() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result as string);
-      reader.readAsDataURL(file);
+  // Participant Handlers
+  const addParticipant = () => {
+    setFormData(prev => ({
+      ...prev,
+      participants: [...prev.participants, { name: '', role: '' }]
+    }));
+  };
+
+  const updateParticipant = (index: number, field: 'name' | 'role', value: string) => {
+    const newParticipants = [...formData.participants];
+    newParticipants[index][field] = value;
+    setFormData(prev => ({ ...prev, participants: newParticipants }));
+  };
+
+  const removeParticipant = (index: number) => {
+    if (formData.participants.length > 1) {
+      setFormData(prev => ({
+        ...prev,
+        participants: prev.participants.filter((_, i) => i !== index)
+      }));
     }
+  };
+
+  // Floor Plan Handlers
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newPlans = Array.from(files).map(file => ({
+        id: crypto.randomUUID(),
+        name: '',
+        file: file,
+        preview: URL.createObjectURL(file)
+      }));
+      setFloorPlans(prev => [...prev, ...newPlans]);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const updateFloorPlanName = (index: number, name: string) => {
+    const newPlans = [...floorPlans];
+    newPlans[index].name = name;
+    setFloorPlans(newPlans);
+  };
+
+  const removeFloorPlan = (index: number) => {
+    setFloorPlans(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -180,12 +220,23 @@ export default function NewInspectionPage() {
       data.append('auftraggeber', formData.auftraggeber);
       data.append('teilnehmer', formData.teilnehmer);
       data.append('documentType', formData.documentType);
-      data.append('participants', formData.participants);
+      
+      // Filter out empty participants
+      const validParticipants = formData.participants.filter(p => p.name.trim());
+      data.append('participants', JSON.stringify(validParticipants));
+      
       data.append('generalNotes', JSON.stringify(formData.generalNotes));
       
-      if (image) {
-        data.append('floorPlan', image);
-      }
+      // Floor Plans Data (IDs and Names)
+      const floorPlansMeta = floorPlans.map(fp => ({ id: fp.id, name: fp.name }));
+      data.append('floorPlansData', JSON.stringify(floorPlansMeta));
+
+      // Append Files
+      floorPlans.forEach((fp, index) => {
+        if (fp.file) {
+          data.append(`file_${index}`, fp.file);
+        }
+      });
 
       const res = await fetch('/api/inspections', {
         method: 'POST',
@@ -194,7 +245,7 @@ export default function NewInspectionPage() {
 
       if (res.ok) {
         const result = await res.json();
-        if (image) {
+        if (floorPlans.length > 0) {
           router.push(`/inspection/${result.id}/map`);
         } else {
           router.push(`/inspection/${result.id}/review`);
@@ -219,146 +270,184 @@ export default function NewInspectionPage() {
       <Navbar />
 
       {/* Header */}
-      <header className="fixed top-0 left-0 lg:left-24 right-0 h-24 glass-premium border-b border-white/5 z-50 px-6 md:px-12 flex items-center">
+      <header className="fixed top-0 left-0 lg:left-24 right-0 h-16 md:h-24 glass-premium border-b border-white/5 z-50 px-4 md:px-12 flex items-center">
         <div className="flex-1 flex items-center justify-start">
           <Link href="/dashboard">
             <motion.div
               whileHover={{ x: -4 }}
               className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors cursor-pointer group"
             >
-              <ChevronLeft size={24} className="group-hover:text-red-500" />
-              <span className="font-bold text-sm uppercase tracking-widest hidden md:inline">Zurück</span>
+              <ChevronLeft className="group-hover:text-red-500 w-5 h-5 md:w-6 md:h-6" />
+              <span className="font-bold text-xs md:text-sm uppercase tracking-widest hidden md:inline">Zurück</span>
             </motion.div>
           </Link>
         </div>
         
-        <h1 className="text-xl font-black uppercase tracking-[4px] text-white truncate max-w-[200px] md:max-w-none text-center">
+        <h1 className="text-sm md:text-xl font-black uppercase tracking-[2px] md:tracking-[4px] text-white truncate max-w-[180px] md:max-w-none text-center">
           Neue Inspektion
         </h1>
         
         <div className="flex-1 flex justify-end">
-          <div className="w-10 h-10 lg:hidden"></div> {/* Mobile Spacer */}
+          <div className="w-8 h-8 lg:hidden"></div> {/* Mobile Spacer */}
         </div>
       </header>
 
-      <main className="lg:pl-24 pt-32 pb-32 px-6 md:px-12 lg:px-20 relative z-10 min-h-screen flex flex-col items-center">
+      <main className="lg:pl-24 pt-24 md:pt-32 pb-32 px-4 md:px-12 lg:px-20 relative z-10 min-h-screen flex flex-col items-center">
         <motion.form
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           onSubmit={handleSubmit}
-          className="space-y-12 w-full max-w-5xl"
+          className="space-y-6 md:space-y-12 w-full max-w-5xl"
         >
           {/* Document Type Selection */}
-          <div className="glass-premium rounded-[3rem] p-6 md:p-12 border border-white/5 space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
-                <CheckCircle2 size={24} />
+          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-6 md:space-y-8">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter leading-none text-white">Dokumenttyp</h2>
-                <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mt-1">Bitte wählen Sie den Typ des Berichts</p>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Dokumenttyp</h2>
+                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Bericht auswählen</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {['Catalog of measures', 'QS protocol'].map((type) => (
                 <button
                   key={type}
                   type="button"
                   onClick={() => setFormData({ ...formData, documentType: type as any })}
-                  className={`py-6 px-8 rounded-2xl border-2 transition-all font-black text-sm uppercase tracking-widest flex items-center justify-between ${
+                  className={`py-4 md:py-6 px-6 md:px-8 rounded-xl md:rounded-2xl border-2 transition-all font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-between ${
                     formData.documentType === type 
                       ? 'bg-red-600/10 border-red-500 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' 
                       : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20'
                   }`}
                 >
                   {type === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS Protokoll'}
-                  {formData.documentType === type && <CheckCircle2 size={20} />}
+                  {formData.documentType === type && <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-red-500" />}
                 </button>
               ))}
             </div>
           </div>
           {/* Stap 1: Basic Details */}
-          <div className="glass-premium rounded-[3rem] p-6 md:p-12 border border-white/5 space-y-10 !overflow-visible relative z-20">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
-                <Building size={24} />
+          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10 !overflow-visible relative z-20">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <Building className="w-5 h-5 md:w-6 md:h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter leading-none text-white">Gebäudedetails</h2>
-                <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mt-1">Schritt 1: Basisinformationen</p>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Gebäudedetails</h2>
+                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Basisinformationen</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 !overflow-visible">
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Locatie (Ort)</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 !overflow-visible">
+              <div className="space-y-2 md:space-y-3">
+                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Locatie (Ort)</label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
-                    <Building size={20} />
+                    <Building className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                   <input
                     required
                     type="text"
                     placeholder="z.B. Hotel Nufenen"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-lg"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg"
                     value={formData.ort}
                     onChange={(e) => setFormData({ ...formData, ort: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="space-y-3 relative !overflow-visible z-50">
-                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Datum</label>
+              <div className="space-y-2 md:space-y-3 relative !overflow-visible z-50">
+                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Datum</label>
                 <CustomCalendar
                   selectedDate={formData.datum}
                   onChange={(date) => setFormData({ ...formData, datum: date })}
                 />
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Opdrachtgeber</label>
+              <div className="space-y-2 md:space-y-3">
+                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Opdrachtgeber</label>
                 <div className="relative group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
-                    <User size={20} />
+                    <User className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
                   <input
                     required
                     type="text"
-                    placeholder="Namen des Auftraggebers eingeben..."
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-lg"
+                    placeholder="Auftraggeber..."
+                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg"
                     value={formData.auftraggeber}
                     onChange={(e) => setFormData({ ...formData, auftraggeber: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Teilnehmer</label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
-                    <User size={20} />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Namen der Teilnehmer eingeben..."
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-lg"
-                    value={formData.participants}
-                    onChange={(e) => setFormData({ ...formData, participants: e.target.value })}
-                  />
+              <div className="space-y-4 md:space-y-6 md:col-span-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Teilnehmer</label>
+                  <button
+                    type="button"
+                    onClick={addParticipant}
+                    className="text-[9px] md:text-[10px] uppercase font-black tracking-widest text-red-500 hover:text-red-400 transition-colors flex items-center gap-2"
+                  >
+                    + Hinzufügen
+                  </button>
+                </div>
+                <div className="space-y-3 md:space-y-4">
+                  {formData.participants.map((p, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 items-start bg-white/[0.02] p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5">
+                      <div className="relative group">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
+                          <User className="w-4 h-4 md:w-4.5 md:h-4.5" />
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Name"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 md:py-4 pl-10 md:pl-12 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-xs md:text-sm"
+                          value={p.name}
+                          onChange={(e) => updateParticipant(index, 'name', e.target.value)}
+                        />
+                      </div>
+                      <div className="relative group flex gap-2 md:gap-3">
+                        <div className="relative flex-1">
+                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
+                            <Building className="w-4 h-4 md:w-4.5 md:h-4.5" />
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="Funktion"
+                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 md:py-4 pl-10 md:pl-12 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-xs md:text-sm"
+                            value={p.role}
+                            onChange={(e) => updateParticipant(index, 'role', e.target.value)}
+                          />
+                        </div>
+                        {formData.participants.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeParticipant(index)}
+                            className="p-3 md:p-4 rounded-xl bg-red-600/10 text-red-500 hover:bg-red-600/20 transition-colors"
+                          >
+                            <X className="w-4 h-4 md:w-4.5 md:h-4.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Erstellt von (Creator)</label>
+              <div className="space-y-2 md:space-y-3">
+                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Erstellt von</label>
                 <div className="relative group grayscale opacity-50">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 z-10">
-                    <User size={20} />
+                    <User className="w-[18px] h-[18px] md:w-5 md:h-5" />
                   </div>
                   <input
                     required
                     type="text"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-4 outline-none font-bold text-lg cursor-not-allowed"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-4 outline-none font-bold text-xs md:text-lg cursor-not-allowed"
                     value={formData.teilnehmer}
                     disabled
                   />
@@ -368,44 +457,44 @@ export default function NewInspectionPage() {
           </div>
 
           {/* New Section: General Notes */}
-          <div className="glass-premium rounded-[3rem] p-6 md:p-12 border border-white/5 space-y-10">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
-                <Building size={24} />
+          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <Building className="w-5 h-5 md:w-6 md:h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter leading-none text-white">Hinweis (General Notes)</h2>
-                <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mt-1">Zusätzliche Bemerkungen</p>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Hinweise</h2>
+                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Zusätzliche Bemerkungen</p>
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {defaultNotes.map((note, index) => (
                 <div 
                   key={index} 
                   onClick={() => handleNoteToggle(note)}
-                  className={`p-6 rounded-2xl border transition-all cursor-pointer flex items-center gap-4 ${
+                  className={`p-4 md:p-6 rounded-xl md:rounded-2xl border transition-all cursor-pointer flex items-center gap-3 md:gap-4 ${
                     formData.generalNotes.includes(note)
                       ? 'bg-red-600/10 border-red-500 text-white'
                       : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/20'
                   }`}
                 >
-                  <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+                  <div className={`w-5 h-5 md:w-6 md:h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
                     formData.generalNotes.includes(note) ? 'bg-red-600 border-red-600' : 'border-white/20'
                   }`}>
-                    {formData.generalNotes.includes(note) && <CheckCircle2 size={14} className="text-white" />}
+                    {formData.generalNotes.includes(note) && <CheckCircle2 className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />}
                   </div>
-                  <p className="text-sm font-bold flex-1 leading-relaxed">{note}</p>
+                  <p className="text-xs md:text-sm font-bold flex-1 leading-relaxed">{note}</p>
                 </div>
               ))}
 
-              <div className="mt-8 space-y-4">
-                <label className="text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Eigene Notiz hinzufügen</label>
-                <div className="flex gap-4">
+              <div className="mt-6 md:mt-8 space-y-3 md:space-y-4">
+                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Eigene Notiz</label>
+                <div className="flex flex-col md:flex-row gap-3 md:gap-4">
                   <input
                     type="text"
-                    placeholder="Spezifischen Hinweis eingeben..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-2xl py-5 px-6 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-lg"
+                    placeholder="Hinweis..."
+                    className="flex-1 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 px-5 md:px-6 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg"
                     value={customNote}
                     onChange={(e) => setCustomNote(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomNote())}
@@ -413,7 +502,7 @@ export default function NewInspectionPage() {
                   <button
                     type="button"
                     onClick={addCustomNote}
-                    className="px-8 bg-red-600 text-white font-black uppercase tracking-widest rounded-2xl hover:bg-red-700 transition-colors shadow-xl"
+                    className="w-full md:w-auto px-6 md:px-8 py-4 md:py-0 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl hover:bg-red-700 transition-colors shadow-xl text-center"
                   >
                     Hinzufügen
                   </button>
@@ -443,81 +532,92 @@ export default function NewInspectionPage() {
           </div>
 
           {/* Stap 2: Map Upload */}
-          <div className="glass-premium rounded-[3rem] p-6 md:p-12 border border-white/5 space-y-10">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
-                <Map size={24} />
+          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <Map className="w-5 h-5 md:w-6 md:h-6" />
               </div>
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter leading-none text-white">Grundriss (Karte)</h2>
-                <p className="text-gray-500 text-[10px] uppercase font-black tracking-widest mt-1">Schritt 2: Plan hochladen</p>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Grundriss</h2>
+                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Plan hochladen</p>
               </div>
             </div>
 
-            {!preview ? (
+            <div className="space-y-8">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full aspect-[16/9] bg-white/[0.02] rounded-[3rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer"
+                className="w-full py-8 md:py-12 bg-white/[0.02] rounded-2xl md:rounded-[3rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-4 md:gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer"
               >
                 <motion.div
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="w-20 h-20 md:w-24 md:h-24 rounded-3xl bg-red-600/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform"
+                  className="w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-red-600/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform"
                 >
-                  <Upload size={40} />
+                  <Upload className="w-6 h-6 md:w-8 md:h-8" />
                 </motion.div>
                 <div className="text-center px-4">
-                  <p className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">Grundriss hochladen</p>
-                  <p className="text-gray-500 text-[10px] font-black mt-2 uppercase tracking-[3px]">JPG, PNG (MAX. 10MB)</p>
+                  <p className="text-sm md:text-xl font-black uppercase tracking-tight text-white">Pläne hochladen</p>
+                  <p className="text-gray-500 text-[8px] md:text-[10px] font-black mt-2 uppercase tracking-[2px] md:tracking-[3px]">JPG, PNG (Mehrere)</p>
                 </div>
                 <input
                   type="file"
+                  multiple
                   ref={fileInputRef}
                   className="hidden"
                   accept="image/*"
-                  onChange={handleImageChange}
+                  onChange={handleImagesChange}
                 />
               </div>
-            ) : (
-              <div className="relative glass-premium rounded-[3rem] overflow-hidden border border-white/10 group">
-                <img src={preview} alt="Map Preview" className="w-full h-auto object-cover max-h-[500px]" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity">
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => { setImage(null); setPreview(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
-                    className="bg-red-600 text-white flex items-center gap-3 px-8 py-4 rounded-2xl font-black uppercase tracking-widest shadow-2xl transition-transform cursor-pointer"
-                  >
-                    <X size={20} />
-                    Ersetzen
-                  </motion.button>
+
+              {floorPlans.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {floorPlans.map((plan, index) => (
+                    <div key={plan.id} className="glass-premium rounded-3xl border border-white/10 overflow-hidden flex flex-col">
+                      <div className="relative aspect-[16/9] bg-black">
+                        <img src={plan.preview!} alt={plan.name} className="w-full h-full object-contain" />
+                        <button
+                          type="button"
+                          onClick={() => removeFloorPlan(index)}
+                          className="absolute top-2 md:top-4 right-2 md:right-4 p-1.5 md:p-2 rounded-lg md:rounded-xl bg-black/60 backdrop-blur-md text-white hover:text-red-500 transition-colors"
+                        >
+                          <X className="w-4 h-4 md:w-4.5 md:h-4.5" />
+                        </button>
+                      </div>
+                      <div className="p-3 md:p-6 space-y-2 md:space-y-3">
+                        <label className="text-[9px] md:text-[10px] uppercase font-black tracking-widest text-gray-500 ml-1">Plan Bezeichnung</label>
+                        <input
+                          required
+                          type="text"
+                          placeholder="z.B. Erdgeschoss"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 md:py-4 px-4 md:px-5 focus:border-red-500/50 outline-none transition-all font-bold text-xs md:text-sm"
+                          value={plan.name}
+                          onChange={(e) => updateFloorPlanName(index, e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="absolute top-6 right-6 flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-xl">
-                  <CheckCircle2 size={14} />
-                  Ausgewählt
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
 
           {/* Fixed Footer Action */}
-          <div className="fixed bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-32 glass-premium border-t border-white/5 z-50 flex items-center justify-center px-6 md:px-8">
+          <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-24 md:h-32 glass-premium border-t border-white/5 z-50 flex items-center justify-center px-4 md:px-8">
             <motion.button
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}
               disabled={loading}
-              className="w-full max-w-2xl bg-gradient-to-r from-red-600 to-red-900 py-6 rounded-[2rem] flex items-center justify-center gap-4 text-white font-black uppercase tracking-[3px] shadow-[0_20px_50px_rgba(239,68,68,0.3)] hover:shadow-[0_30px_70px_rgba(239,68,68,0.5)] transition-all cursor-pointer disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
+              className="w-full max-w-2xl bg-gradient-to-r from-red-600 to-red-900 py-4 md:py-6 rounded-xl md:rounded-[2rem] flex items-center justify-center gap-3 md:gap-4 text-white font-black uppercase tracking-[2px] md:tracking-[3px] text-xs md:text-base shadow-[0_20px_50px_rgba(239,68,68,0.3)] hover:shadow-[0_30px_70px_rgba(239,68,68,0.5)] transition-all cursor-pointer disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
-                  <Loader2 className="animate-spin" size={24} />
-                  <span>Inspektion wird erstellt...</span>
+                  <Loader2 className="animate-spin w-5 h-5 md:w-6 md:h-6" />
+                  <span>Wird erstellt...</span>
                 </>
               ) : (
                 <>
                   <span>Inspektion starten</span>
-                  <ArrowRight size={20} />
+                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                 </>
               )}
             </motion.button>

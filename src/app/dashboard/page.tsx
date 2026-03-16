@@ -21,25 +21,25 @@ export default function DashboardPage() {
       <Navbar />
       <Header />
 
-      <main className="lg:ml-24 pt-48 lg:pt-52 p-6 lg:p-12 min-h-screen relative z-10">
-        <div className="max-w-7xl mx-auto space-y-16">
+      <main className="pt-32 md:pt-40 lg:pt-52 lg:ml-24 p-4 md:p-8 lg:p-12 min-h-screen relative z-10">
+        <div className="max-w-7xl mx-auto space-y-12 md:space-y-16">
           <ActionHero />
           
           {/* Search Bar */}
           <div className="relative max-w-2xl mx-auto">
-            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-red-500">
-              <Search size={20} />
+            <div className="absolute inset-y-0 left-5 md:left-6 flex items-center pointer-events-none text-red-500">
+              <Search className="w-[18px] h-[18px] md:w-5 md:h-5" />
             </div>
             <input 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Suchen nach Standort, Auftraggeber oder Datum..."
-              className="w-full bg-white/5 border border-white/10 rounded-[2rem] pl-16 pr-8 py-6 text-white text-sm outline-none focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-zinc-600 shadow-2xl backdrop-blur-xl"
+              placeholder="Suchen nach Standort..."
+              className="w-full bg-white/5 border border-white/10 rounded-2xl md:rounded-[2rem] pl-12 md:pl-16 pr-6 md:pr-8 py-4 md:py-6 text-white text-xs md:text-sm outline-none focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-zinc-600 shadow-2xl backdrop-blur-xl"
             />
           </div>
 
-          <div className="space-y-20 pb-20">
+          <div className="space-y-12 md:space-y-20 pb-12 md:pb-20">
             <DraftsSection searchQuery={searchQuery} />
             <CompletedInspections searchQuery={searchQuery} />
           </div>

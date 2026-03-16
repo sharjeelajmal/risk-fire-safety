@@ -37,16 +37,16 @@ export default function CustomSelect({
       
       <div 
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full bg-[#0a0a0a] border ${isOpen ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-5 py-4 flex items-center justify-between cursor-pointer transition-all shadow-xl group hover:border-white/20`}
+        className={`w-full bg-[#0a0a0a] border ${isOpen ? 'border-red-500/50' : 'border-white/10'} rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 flex items-center justify-between cursor-pointer transition-all shadow-xl group hover:border-white/20`}
       >
-        <span className={`${!selectedOption ? 'text-zinc-600' : 'text-white'} text-sm truncate uppercase font-bold tracking-wide`}>
+        <span className={`${!selectedOption ? 'text-zinc-600' : 'text-white'} text-[13px] md:text-sm truncate uppercase font-bold tracking-wide`}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           className="text-zinc-500 group-hover:text-white transition-colors"
         >
-          <ChevronDown size={18} />
+          <ChevronDown className="w-4 h-4 md:w-[18px] md:h-[18px]" />
         </motion.div>
       </div>
 
@@ -63,7 +63,7 @@ export default function CustomSelect({
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
               className="absolute left-0 right-0 top-full mt-2 bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 overflow-hidden max-h-60 overflow-y-auto backdrop-blur-3xl"
             >
-              <div className="p-2 space-y-1">
+              <div className="p-1.5 md:p-2 space-y-1">
                 {options.map((option) => {
                   const isSelected = option.value === value;
                   return (
@@ -74,16 +74,16 @@ export default function CustomSelect({
                         onChange(option.value);
                         setIsOpen(false);
                       }}
-                      className={`px-4 py-3 rounded-xl cursor-pointer flex items-center justify-between group/opt ${
+                      className={`px-3 md:px-4 py-2.5 md:py-3 rounded-lg md:rounded-xl cursor-pointer flex items-center justify-between group/opt ${
                         isSelected ? 'bg-red-500/10 text-red-500' : 'text-zinc-400 hover:text-white'
                       }`}
                     >
-                      <span className="text-sm font-bold uppercase tracking-wider transition-colors">
+                      <span className="text-[12px] md:text-sm font-black uppercase tracking-widest transition-colors">
                         {option.label}
                       </span>
                       {isSelected && (
                         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                          <Check size={16} />
+                          <Check className="w-3.5 h-3.5 md:w-4 md:h-4" />
                         </motion.div>
                       )}
                     </motion.div>

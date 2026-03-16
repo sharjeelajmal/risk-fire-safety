@@ -36,12 +36,30 @@ export async function POST(request: Request) {
     const auftraggeber = formData.get('auftraggeber') as string;
     const teilnehmer = formData.get('teilnehmer') as string;
     const documentType = formData.get('documentType') as string;
-    const participants = formData.get('participants') as string;
+    const participantsRaw = formData.get('participants') as string;
+    const floorPlansDataRaw = formData.get('floorPlansData') as string;
     const generalNotesRaw = formData.get('generalNotes') as string;
-    const file = formData.get('floorPlan') as File | null;
 
     if (!ort || !auftraggeber) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    let participants = [];
+    try {
+      if (participantsRaw) {
+        participants = JSON.parse(participantsRaw);
+      }
+    } catch (e) {
+      console.error('Error parsing participants:', e);
+    }
+
+    let floorPlansData = [];
+    try {
+      if (floorPlansDataRaw) {
+        floorPlansData = JSON.parse(floorPlansDataRaw);
+      }
+    } catch (e) {
+      console.error('Error parsing floorPlansData:', e);
     }
 
     let generalNotes: string[] = [];
@@ -53,33 +71,40 @@ export async function POST(request: Request) {
       console.error('Error parsing generalNotes:', e);
     }
 
-    let floorPlanUrl: string | undefined = undefined;
+    const floorPlans = [];
 
-    if (file && file.size > 0) {
-      // Convert file to base64 for Cloudinary uploader.upload
-      const arrayBuffer = await file.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-      const base64Data = buffer.toString('base64');
-      const fileUri = `data:${file.type};base64,${base64Data}`;
+    // Loop through floorPlansData and find corresponding files in formData
+    for (let i = 0; i < floorPlansData.length; i++) {
+        const planData = floorPlansData[i];
+        const file = formData.get(`file_${i}`) as File | null;
 
-      console.log(`Uploading to Cloudinary: ${ort}, Size: ${buffer.length} bytes`);
+        if (file && file.size > 0) {
+            const arrayBuffer = await file.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+            const base64Data = buffer.toString('base64');
+            const fileUri = `data:${file.type};base64,${base64Data}`;
 
-      try {
-        const uploadResponse = await cloudinary.uploader.upload(fileUri, {
-          folder: 'risk-fire-safety/floor-plans',
-          resource_type: 'auto',
-          timeout: 60000, 
-        });
+            console.log(`Uploading floor plan ${planData.name} to Cloudinary...`);
 
-        floorPlanUrl = uploadResponse.secure_url;
-        console.log('Upload successful:', floorPlanUrl);
-      } catch (uploadErr: any) {
-        console.error('Cloudinary Upload Call failed:', uploadErr);
-        return NextResponse.json({ 
-          error: `Cloudinary Fehler: ${uploadErr.message || 'Unbekannter Fehler'}`,
-          details: uploadErr 
-        }, { status: 500 });
-      }
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(fileUri, {
+                    folder: 'risk-fire-safety/floor-plans',
+                    resource_type: 'auto',
+                    timeout: 60000,
+                });
+
+                floorPlans.push({
+                    id: planData.id,
+                    name: planData.name,
+                    url: uploadResponse.secure_url
+                });
+            } catch (uploadErr: any) {
+                console.error(`Cloudinary Upload for ${planData.name} failed:`, uploadErr);
+                return NextResponse.json({ 
+                    error: `Cloudinary Fehler (${planData.name}): ${uploadErr.message || 'Unbekannter Fehler'}`
+                }, { status: 500 });
+            }
+        }
     }
       
     // Save to MongoDB
@@ -89,9 +114,9 @@ export async function POST(request: Request) {
       auftraggeber,
       teilnehmer,
       documentType,
-      participants,
+      participantsList: participants,
       generalNotes,
-      floorPlanUrl,
+      floorPlans,
       status: 'Draft'
     });
 
