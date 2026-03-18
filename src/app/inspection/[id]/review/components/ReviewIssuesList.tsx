@@ -7,7 +7,7 @@ import DeleteConfirmModal from '@/components/modals/DeleteConfirmModal';
 
 interface Issue {
   _id?: string;
-  issueNumber: number;
+  issueNumber: string;
   location: string;
   responsibleContractor: string;
   description: string;
@@ -110,11 +110,15 @@ export default function ReviewIssuesList({ issues }: { issues: Issue[] }) {
               <div className="space-y-4 md:space-y-6">
                 <div>
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Problembeschreibung</label>
-                  <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-medium">{issue.description}</p>
+                  <div className="h-auto whitespace-pre-wrap break-words">
+                    <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-medium">{issue.description}</p>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Massnahmen</label>
-                  <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-medium italic">{issue.measures}</p>
+                  <div className="h-auto">
+                    <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-medium italic">{issue.measures}</p>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Verantwortlichkeit</label>
@@ -136,7 +140,6 @@ export default function ReviewIssuesList({ issues }: { issues: Issue[] }) {
               </div>
             </div>
             
-            <div className="h-[1px] w-full bg-zinc-100 mt-6 md:mt-12"></div>
           </div>
         ))
       )}

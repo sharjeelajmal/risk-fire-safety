@@ -5,7 +5,7 @@ interface ReviewFloorPlanProps {
   issues: Array<{
     x: number;
     y: number;
-    issueNumber: number;
+    issueNumber: string;
   }>;
 }
 
@@ -19,7 +19,7 @@ export default function ReviewFloorPlan({ floorPlanUrl, issues }: ReviewFloorPla
       
       <div className="relative border md:border-2 border-zinc-100 rounded-2xl md:rounded-3xl overflow-hidden bg-zinc-50 shadow-sm">
         <img 
-          src={floorPlanUrl} 
+          src={floorPlanUrl.replace(/\.pdf$/i, '.jpg')} 
           alt="Floor Plan" 
           crossOrigin="anonymous"
           className="w-full h-auto block max-h-[300px] md:max-h-[500px] object-contain"

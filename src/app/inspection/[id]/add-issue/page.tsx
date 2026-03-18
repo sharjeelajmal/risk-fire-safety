@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Save } from 'lucide-react';
@@ -8,6 +8,7 @@ import Navbar from '@/components/navigation/Navbar';
 import FormHeader from './components/FormHeader';
 import ImageUploader from './components/ImageUploader';
 import CustomSelect from './components/CustomSelect';
+import CreatableMultiSelect from '@/components/ui/CreatableMultiSelect';
 
 const CONTRACTOR_OPTIONS = [
   { label: 'Architekt', value: 'Architect' },
@@ -21,10 +22,17 @@ const CONTRACTOR_OPTIONS = [
 ];
 
 const STATUS_OPTIONS = [
-  { label: 'Open', value: 'Open' },
-  { label: 'Completed', value: 'Completed' },
-  { label: 'Documentation', value: 'Documentation' },
-  { label: 'n/a', value: 'n/a' },
+  { label: 'Offen', value: 'Offen' },
+  { label: 'in Arbeit', value: 'in Arbeit' },
+  { label: 'abgeschlossen', value: 'abgeschlossen' },
+  { label: 'N/A', value: 'N/A' },
+];
+
+const MEASURE_OPTIONS = [
+  'Brandschutzabschottung erstellen',
+  'Leitungen nachisolieren',
+  'Brandschutzklappe einbauen',
+  'Fugen abdichten'
 ];
 
 function AddIssueForm() {
@@ -35,14 +43,31 @@ function AddIssueForm() {
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [formData, setFormData] = useState({
+    issueNumber: '',
     location: '',
-    responsibleContractor: '',
+    responsibleContractor: [] as string[],
     description: '',
-    measures: '',
+    measures: [] as string[],
     priority: '1',
-    status: 'Open',
+    status: 'Offen',
     floorPlanId: searchParams.get('floorPlanId') || '',
   });
+
+  useEffect(() => {
+    const fetchInspection = async () => {
+      try {
+        const res = await fetch(`/api/inspections/${params.id}`);
+        if (res.ok) {
+          const json = await res.json();
+          const nextNum = (json.issues?.length || 0) + 1;
+          setFormData(prev => ({ ...prev, issueNumber: nextNum.toString() }));
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchInspection();
+  }, [params.id]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -72,6 +97,8 @@ function AddIssueForm() {
         method: 'POST',
         body: JSON.stringify({ 
           ...formData, 
+          responsibleContractor: formData.responsibleContractor.join(', '),
+          measures: formData.measures.join(', '),
           x: parseFloat(searchParams.get('x') || '0'), 
           y: parseFloat(searchParams.get('y') || '0'), 
           images: uploadedUrls,
@@ -88,6 +115,10 @@ function AddIssueForm() {
       <main className="flex-1 max-w-2xl mx-auto w-full px-3 md:px-6">
         <FormHeader x={searchParams.get('x')} y={searchParams.get('y')} />
         <form onSubmit={handleSubmit} className="space-y-5 md:space-y-8">
+          <div className="space-y-1.5 md:space-y-2">
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mangel-Nummer</label>
+            <input required type="text" value={formData.issueNumber} onChange={(e) => setFormData({...formData, issueNumber: e.target.value})} placeholder="z.B. 1, 2024-01A" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" />
+          </div>
           <ImageUploader previews={previews} onAddImages={handleImageChange} onRemoveImage={removeImage} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -95,7 +126,13 @@ function AddIssueForm() {
               <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Standortbereich</label>
               <input required type="text" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} placeholder="z.B. Flur 1. OG" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" />
             </div>
-            <CustomSelect label="Unternehmer" options={CONTRACTOR_OPTIONS} value={formData.responsibleContractor} onChange={(val) => setFormData({...formData, responsibleContractor: val})} required />
+            <CreatableMultiSelect
+                label="Unternehmer"
+                values={formData.responsibleContractor}
+                onChange={(vals) => setFormData({...formData, responsibleContractor: vals})}
+                options={CONTRACTOR_OPTIONS.map(o => o.label)}
+                placeholder="Unternehmer auswählen..."
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -118,7 +155,12 @@ function AddIssueForm() {
           </div>
           <div className="space-y-1.5 md:space-y-2">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Massnahmen</label>
-            <textarea required rows={3} value={formData.measures} onChange={(e) => setFormData({...formData, measures: e.target.value})} placeholder="Was muss getan werden?" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm resize-none shadow-xl" />
+            <CreatableMultiSelect
+                values={formData.measures}
+                onChange={(vals) => setFormData({...formData, measures: vals})}
+                options={MEASURE_OPTIONS}
+                placeholder="Massnahmen auswählen oder tippen..."
+            />
           </div>
 
           <motion.button disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={`w-full py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest md:tracking-[3px] flex items-center justify-center gap-2 md:gap-3 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}>

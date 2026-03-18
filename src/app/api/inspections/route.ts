@@ -31,7 +31,6 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
-    const ort = formData.get('ort') as string;
     const datum = formData.get('datum') as string;
     const auftraggeber = formData.get('auftraggeber') as string;
     const teilnehmer = formData.get('teilnehmer') as string;
@@ -40,7 +39,7 @@ export async function POST(request: Request) {
     const floorPlansDataRaw = formData.get('floorPlansData') as string;
     const generalNotesRaw = formData.get('generalNotes') as string;
 
-    if (!ort || !auftraggeber) {
+    if (!auftraggeber) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -109,7 +108,6 @@ export async function POST(request: Request) {
       
     // Save to MongoDB
     const newInspection = await Inspection.create({
-      ort,
       datum: new Date(datum),
       auftraggeber,
       teilnehmer,

@@ -18,6 +18,8 @@ import {
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/navigation/Navbar';
+import CreatableSingleSelect from '@/components/ui/CreatableSingleSelect';
+import { FileText } from 'lucide-react';
 
 // Custom Modern Animated Calendar Component
 const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onChange: (date: string) => void }) => {
@@ -122,7 +124,6 @@ export default function NewInspectionPage() {
   };
 
   const [formData, setFormData] = useState({
-    ort: '',
     datum: getLocalDate(),
     auftraggeber: '',
     teilnehmer: 'Robin Furrer',
@@ -131,8 +132,15 @@ export default function NewInspectionPage() {
     generalNotes: [] as string[],
   });
   const [customNote, setCustomNote] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
   
-  // Multiple Floor Plans State
+  const clientOptions = ['Musterfirma AG', 'Immobilien Verwaltung GmbH', 'Swiss Property Management', 'City Real Estate'];
+  const noteOptions = [
+    'Sämtliche im Protokoll festgehaltenen Sachverhalte sind auf vergleichbare Fälle zu übertragen.',
+    'Die im Protokoll aufgeführten Mängel werden durch uns lediglich dokumentiert. Die Behebung sowie die Abmeldung der erledigten Mängel liegen bei den Verantwortlichen.',
+    'Die brandschutztechnische Abnahme erfolgt nach Behebung der Mängel.',
+    'Der Brandschutzplan ist entsprechend zu aktualisieren.'
+  ];
   const [floorPlans, setFloorPlans] = useState<{ id: string, name: string, file: File | null, preview: string | null }[]>([]);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -185,18 +193,41 @@ export default function NewInspectionPage() {
   };
 
   // Floor Plan Handlers
-  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
+    let files: FileList | null = null;
+    
+    if ('target' in e && (e.target as HTMLInputElement).files) {
+      files = (e.target as HTMLInputElement).files;
+    } else if ('dataTransfer' in e) {
+      files = (e as React.DragEvent).dataTransfer.files;
+    }
+
     if (files) {
       const newPlans = Array.from(files).map(file => ({
         id: crypto.randomUUID(),
-        name: '',
+        name: file.name.split('.')[0], // Default name from filename
         file: file,
-        preview: URL.createObjectURL(file)
+        preview: file.type.includes('pdf') ? 'pdf' : URL.createObjectURL(file)
       }));
       setFloorPlans(prev => [...prev, ...newPlans]);
     }
     if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const onDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleImagesChange(e);
   };
 
   const updateFloorPlanName = (index: number, name: string) => {
@@ -342,22 +373,6 @@ export default function NewInspectionPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 !overflow-visible">
-              <div className="space-y-2 md:space-y-3">
-                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Locatie (Ort)</label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
-                    <Building className="w-4 h-4 md:w-5 md:h-5" />
-                  </div>
-                  <input
-                    required
-                    type="text"
-                    placeholder="z.B. Hotel Nufenen"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg"
-                    value={formData.ort}
-                    onChange={(e) => setFormData({ ...formData, ort: e.target.value })}
-                  />
-                </div>
-              </div>
 
               <div className="space-y-2 md:space-y-3 relative !overflow-visible z-50">
                 <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Datum</label>
@@ -368,20 +383,14 @@ export default function NewInspectionPage() {
               </div>
 
               <div className="space-y-2 md:space-y-3">
-                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Opdrachtgeber</label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
-                    <User className="w-4 h-4 md:w-5 md:h-5" />
-                  </div>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Auftraggeber..."
-                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg"
-                    value={formData.auftraggeber}
-                    onChange={(e) => setFormData({ ...formData, auftraggeber: e.target.value })}
-                  />
-                </div>
+                <CreatableSingleSelect
+                  label="Opdrachtgeber"
+                  icon={<User className="w-4 h-4 md:w-5 md:h-5" />}
+                  value={formData.auftraggeber}
+                  onChange={(val) => setFormData({ ...formData, auftraggeber: val })}
+                  options={clientOptions}
+                  placeholder="Auftraggeber auswählen oder tippen..."
+                />
               </div>
 
               <div className="space-y-4 md:space-y-6 md:col-span-2">
@@ -488,25 +497,22 @@ export default function NewInspectionPage() {
                 </div>
               ))}
 
-              <div className="mt-6 md:mt-8 space-y-3 md:space-y-4">
-                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Eigene Notiz</label>
-                <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-                  <input
-                    type="text"
-                    placeholder="Hinweis..."
-                    className="flex-1 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 px-5 md:px-6 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg"
-                    value={customNote}
-                    onChange={(e) => setCustomNote(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomNote())}
-                  />
-                  <button
-                    type="button"
-                    onClick={addCustomNote}
-                    className="w-full md:w-auto px-6 md:px-8 py-4 md:py-0 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl hover:bg-red-700 transition-colors shadow-xl text-center"
-                  >
-                    Hinzufügen
-                  </button>
-                </div>
+              <div className="mt-2 space-y-3 md:space-y-4">
+                <CreatableSingleSelect
+                  label="Eigene Notiz hinzufügen"
+                  placeholder="Hinweis auswählen oder neu tippen..."
+                  value={customNote}
+                  onChange={(val) => setCustomNote(val)}
+                  options={noteOptions}
+                />
+                <button
+                  type="button"
+                  onClick={addCustomNote}
+                  className="w-full px-6 md:px-8 py-4 bg-red-600 text-white font-black uppercase tracking-widest text-[10px] md:text-xs rounded-xl md:rounded-2xl hover:bg-red-700 transition-colors shadow-xl text-center"
+                >
+                  Hinweis zur Liste hinzufügen
+                </button>
+              </div>
                 
                 {formData.generalNotes.filter(n => !defaultNotes.includes(n)).length > 0 && (
                   <div className="pt-4 space-y-3">
@@ -529,7 +535,6 @@ export default function NewInspectionPage() {
                 )}
               </div>
             </div>
-          </div>
 
           {/* Stap 2: Map Upload */}
           <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10">
@@ -546,7 +551,12 @@ export default function NewInspectionPage() {
             <div className="space-y-8">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-8 md:py-12 bg-white/[0.02] rounded-2xl md:rounded-[3rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-4 md:gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer"
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
+                className={`w-full py-8 md:py-12 bg-white/[0.02] rounded-2xl md:rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 md:gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer ${
+                  isDragging ? 'border-red-500 bg-red-500/10' : 'border-white/10'
+                }`}
               >
                 <motion.div
                   animate={{ y: [0, -10, 0] }}
@@ -557,14 +567,14 @@ export default function NewInspectionPage() {
                 </motion.div>
                 <div className="text-center px-4">
                   <p className="text-sm md:text-xl font-black uppercase tracking-tight text-white">Pläne hochladen</p>
-                  <p className="text-gray-500 text-[8px] md:text-[10px] font-black mt-2 uppercase tracking-[2px] md:tracking-[3px]">JPG, PNG (Mehrere)</p>
+                  <p className="text-gray-500 text-[8px] md:text-[10px] font-black mt-2 uppercase tracking-[2px] md:tracking-[3px]">JPG, PNG, PDF (Mehrere oder Drag & Drop)</p>
                 </div>
                 <input
                   type="file"
                   multiple
                   ref={fileInputRef}
                   className="hidden"
-                  accept="image/*"
+                  accept="image/*,application/pdf"
                   onChange={handleImagesChange}
                 />
               </div>
@@ -573,8 +583,15 @@ export default function NewInspectionPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {floorPlans.map((plan, index) => (
                     <div key={plan.id} className="glass-premium rounded-3xl border border-white/10 overflow-hidden flex flex-col">
-                      <div className="relative aspect-[16/9] bg-black">
-                        <img src={plan.preview!} alt={plan.name} className="w-full h-full object-contain" />
+                      <div className="relative aspect-[16/9] bg-black flex items-center justify-center">
+                        {plan.preview === 'pdf' ? (
+                          <div className="flex flex-col items-center gap-3 text-red-500">
+                            <FileText className="w-12 h-12 md:w-20 md:h-20" />
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">PDF Dokument</span>
+                          </div>
+                        ) : (
+                          <img src={plan.preview!} alt={plan.name} className="w-full h-full object-contain" />
+                        )}
                         <button
                           type="button"
                           onClick={() => removeFloorPlan(index)}

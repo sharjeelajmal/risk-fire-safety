@@ -16,14 +16,10 @@ export async function POST(
       return NextResponse.json({ error: 'Inspection not found' }, { status: 404 });
     }
 
-    // Auto-calculate issue number
-    const issueNumber = (inspection.issues?.length || 0) + 1;
-
     const newIssue = {
       ...body,
-      issueNumber,
       createdAt: new Date(),
-      status: 'Open'
+      status: 'Offen'
     };
 
     // Push the new issue to the issues array

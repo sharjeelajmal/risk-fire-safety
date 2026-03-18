@@ -46,7 +46,8 @@ export default function InteractiveMapPage() {
         if (res.ok) {
           const json = await res.json();
           setData(json);
-          if (json.floorPlans && json.floorPlans.length > 0) {
+          // Set active floor plan if none is selected
+          if (json.floorPlans && json.floorPlans.length > 0 && !activeFloorPlanId) {
             setActiveFloorPlanId(json.floorPlans[0].id);
           }
         }
@@ -95,7 +96,7 @@ export default function InteractiveMapPage() {
         <Navbar />
         
         <div className="relative z-[60]">
-          <MapHeader title={data.ort} />
+          <MapHeader title={data.auftraggeber} />
           
           {/* Floor Plan Selector */}
           {data.floorPlans.length > 1 && (

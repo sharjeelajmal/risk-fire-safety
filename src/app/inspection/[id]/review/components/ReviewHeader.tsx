@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 interface ReviewHeaderProps {
   inspection: {
-    ort: string;
     datum: string | Date;
     auftraggeber: string;
     teilnehmer: string;
@@ -41,10 +40,6 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4 pt-4">
-          <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Standort / Projekt</label>
-            <p className="text-sm font-bold text-zinc-900 break-words">{inspection.ort}</p>
-          </div>
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Datum</label>
             <p className="text-sm font-bold text-zinc-900">{formattedDate}</p>

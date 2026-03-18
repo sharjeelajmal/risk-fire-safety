@@ -7,6 +7,7 @@ import { Save, ChevronLeft, Trash2 } from 'lucide-react';
 import Navbar from '@/components/navigation/Navbar';
 import ImageUploader from '../../add-issue/components/ImageUploader';
 import CustomSelect from '../../add-issue/components/CustomSelect';
+import CreatableMultiSelect from '@/components/ui/CreatableMultiSelect';
 
 const CONTRACTOR_OPTIONS = [
   { label: 'Architekt', value: 'Architect' },
@@ -20,10 +21,17 @@ const CONTRACTOR_OPTIONS = [
 ];
 
 const STATUS_OPTIONS = [
-  { label: 'Open', value: 'Open' },
-  { label: 'Completed', value: 'Completed' },
-  { label: 'Documentation', value: 'Documentation' },
-  { label: 'n/a', value: 'n/a' },
+  { label: 'Offen', value: 'Offen' },
+  { label: 'in Arbeit', value: 'in Arbeit' },
+  { label: 'abgeschlossen', value: 'abgeschlossen' },
+  { label: 'N/A', value: 'N/A' },
+];
+
+const MEASURE_OPTIONS = [
+  'Brandschutzabschottung erstellen',
+  'Leitungen nachisolieren',
+  'Brandschutzklappe einbauen',
+  'Fugen abdichten'
 ];
 
 function EditIssueForm() {
@@ -39,12 +47,13 @@ function EditIssueForm() {
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
 
   const [formData, setFormData] = useState({
+    issueNumber: '',
     location: '',
-    responsibleContractor: '',
+    responsibleContractor: [] as string[],
     description: '',
-    measures: '',
+    measures: [] as string[],
     priority: '1',
-    status: 'Open',
+    status: 'Offen',
     floorPlanId: '',
   });
 
@@ -57,12 +66,13 @@ function EditIssueForm() {
           const issue = data.issues.find((i: any) => i._id === params.issueId);
           if (issue) {
             setFormData({
-              location: issue.location,
-              responsibleContractor: issue.responsibleContractor,
-              description: issue.description,
-              measures: issue.measures,
-              priority: issue.priority,
-              status: issue.status || 'Open',
+              issueNumber: issue.issueNumber || '',
+              location: issue.location || '',
+              responsibleContractor: issue.responsibleContractor ? issue.responsibleContractor.split(', ').filter(Boolean) : [],
+              description: issue.description || '',
+              measures: issue.measures ? issue.measures.split(', ').filter(Boolean) : [],
+              priority: issue.priority || '1',
+              status: issue.status || 'Offen',
               floorPlanId: issue.floorPlanId || '',
             });
             setExistingImages(issue.images || []);
@@ -119,7 +129,12 @@ function EditIssueForm() {
 
       const result = await fetch(`/api/inspections/${params.id}/issues/${params.issueId}`, {
         method: 'PATCH',
-        body: JSON.stringify({ ...formData, images: uploadedUrls }),
+        body: JSON.stringify({ 
+          ...formData, 
+          responsibleContractor: formData.responsibleContractor.join(', '),
+          measures: formData.measures.join(', '),
+          images: uploadedUrls 
+        }),
       });
 
       if (result.ok) {
@@ -146,7 +161,7 @@ function EditIssueForm() {
       <main className="flex-1 max-w-2xl mx-auto w-full px-3 md:px-6">
         <div className="mb-8 md:mb-12">
           <button 
-            onClick={() => router.back()}
+            onClick={() => router.push(`/inspection/${params.id}/review`)}
             className="flex items-center gap-1.5 md:gap-2 text-zinc-500 hover:text-white transition-colors mb-4 md:mb-6 group cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform" />
@@ -157,6 +172,10 @@ function EditIssueForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 md:space-y-8">
+          <div className="space-y-1.5 md:space-y-2">
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mangel-Nummer</label>
+            <input required type="text" value={formData.issueNumber} onChange={(e) => setFormData({...formData, issueNumber: e.target.value})} placeholder="z.B. 1, 2024-01A" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" />
+          </div>
           {/* Image Section */}
           <div className="space-y-3 md:space-y-4">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Bilder</label>
@@ -199,12 +218,12 @@ function EditIssueForm() {
                 className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" 
               />
             </div>
-            <CustomSelect 
-              label="Unternehmer" 
-              options={CONTRACTOR_OPTIONS} 
-              value={formData.responsibleContractor} 
-              onChange={(val) => setFormData({...formData, responsibleContractor: val})} 
-              required 
+            <CreatableMultiSelect
+                label="Unternehmer"
+                values={formData.responsibleContractor}
+                onChange={(vals) => setFormData({...formData, responsibleContractor: vals})}
+                options={CONTRACTOR_OPTIONS.map(o => o.label)}
+                placeholder="Unternehmer auswählen..."
             />
           </div>
 
@@ -222,13 +241,11 @@ function EditIssueForm() {
 
           <div className="space-y-1.5 md:space-y-2">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Massnahmen</label>
-            <textarea 
-              required 
-              rows={3} 
-              value={formData.measures} 
-              onChange={(e) => setFormData({...formData, measures: e.target.value})} 
-              placeholder="Was muss getan werden?" 
-              className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm resize-none shadow-xl" 
+            <CreatableMultiSelect
+                values={formData.measures}
+                onChange={(vals) => setFormData({...formData, measures: vals})}
+                options={MEASURE_OPTIONS}
+                placeholder="Massnahmen auswählen oder tippen..."
             />
           </div>
 

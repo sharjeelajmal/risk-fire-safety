@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IIssue {
   _id?: string;
-  issueNumber: number;
+  issueNumber: string;
   x: number;
   y: number;
   location: string;
@@ -11,13 +11,12 @@ export interface IIssue {
   measures: string;
   priority: '1' | '2' | '3' | 'n/a';
   images: string[];
-  status: 'Open' | 'Completed' | 'Documentation' | 'n/a';
+  status: 'Offen' | 'in Arbeit' | 'abgeschlossen' | 'N/A';
   floorPlanId: string;
   createdAt: Date;
 }
 
 export interface IInspection extends Document {
-  ort: string;
   datum: Date;
   auftraggeber: string;
   teilnehmer: string;
@@ -43,7 +42,6 @@ const FloorPlanSchema = new Schema({
 }, { _id: false });
 
 const InspectionSchema: Schema = new Schema({
-  ort: { type: String, required: true },
   datum: { type: Date, default: Date.now },
   auftraggeber: { type: String, required: true },
   teilnehmer: { type: String, required: true },
@@ -53,7 +51,7 @@ const InspectionSchema: Schema = new Schema({
   floorPlans: [FloorPlanSchema],
   issues: [
     {
-      issueNumber: { type: Number, required: true },
+      issueNumber: { type: String, required: true },
       x: { type: Number, required: true },
       y: { type: Number, required: true },
       location: { type: String, required: true },
@@ -62,7 +60,7 @@ const InspectionSchema: Schema = new Schema({
       measures: { type: String, required: true },
       priority: { type: String, enum: ['1', '2', '3', 'n/a'], default: '1' },
       images: [{ type: String }],
-      status: { type: String, enum: ['Open', 'Completed', 'Documentation', 'n/a'], default: 'Open' },
+      status: { type: String, enum: ['Offen', 'in Arbeit', 'abgeschlossen', 'N/A'], default: 'Offen' },
       floorPlanId: { type: String },
       createdAt: { type: Date, default: Date.now }
     }

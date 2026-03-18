@@ -4,28 +4,31 @@ import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/render
 const styles = StyleSheet.create({
   page: {
     padding: 40,
+    paddingTop: 60, // Space for fixed header
     fontSize: 10,
     fontFamily: 'Helvetica',
-    color: '#333333',
+    color: '#000000', // Pure black for printing
     backgroundColor: '#FFFFFF',
   },
-  header: {
+  headerContainer: {
     position: 'absolute',
     top: 20,
-    left: 40,
-    right: 40,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-    paddingBottom: 5,
+    left: 0,
+    right: 0,
+    textAlign: 'center',
+    paddingHorizontal: 40,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#111111',
+    paddingBottom: 5,
   },
   headerTitle: {
-    fontSize: 8,
+    fontSize: 9,
     fontWeight: 'bold',
-    color: '#999999',
-    letterSpacing: 1,
+    color: '#000000',
+    letterSpacing: 0.5,
   },
   logo: {
     width: 150,
@@ -42,15 +45,21 @@ const styles = StyleSheet.create({
     left: 40,
     right: 40,
     borderTopWidth: 1,
-    borderTopColor: '#EEEEEE',
+    borderTopColor: '#111111',
     paddingTop: 5,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   footerText: {
-    fontSize: 8,
-    color: '#999999',
+    fontSize: 7,
+    color: '#111111',
+  },
+  footerAddress: {
+    fontSize: 6,
+    color: '#444444',
+    textAlign: 'center',
+    flex: 1,
   },
   
   // Cover Page
@@ -66,9 +75,9 @@ const styles = StyleSheet.create({
   },
   companySub: {
     fontSize: 10,
-    color: '#999999',
+    color: '#111111',
     marginBottom: 40,
-    letterSpacing: 2,
+    letterSpacing: 1,
   },
   projectGrid: {
     flexDirection: 'row',
@@ -81,10 +90,10 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 8,
-    color: '#999999',
+    color: '#000000',
     textTransform: 'uppercase',
     marginBottom: 2,
-    fontWeight: 'bold',
+    fontWeight: 'heavy',
   },
   value: {
     fontSize: 11,
@@ -113,9 +122,9 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 10,
     fontWeight: 'bold',
-    color: '#999999',
+    color: '#000000',
     textTransform: 'uppercase',
-    letterSpacing: 2,
+    letterSpacing: 1,
     marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
@@ -225,9 +234,10 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: 'bold',
   },
-  p3: { backgroundColor: '#FEE2E2', color: '#DC2626' },
-  p2: { backgroundColor: '#FFEDD5', color: '#EA580C' },
-  p1: { backgroundColor: '#DCFCE7', color: '#16A34A' },
+  p1: { backgroundColor: '#DC2626', color: '#FFFFFF' },
+  p2: { backgroundColor: '#EA580C', color: '#FFFFFF' },
+  p3: { backgroundColor: '#2563EB', color: '#FFFFFF' },
+  pna: { backgroundColor: '#4B5563', color: '#FFFFFF' },
   
   issueContentGrid: {
     flexDirection: 'row',
@@ -283,8 +293,6 @@ interface InspectionPDFProps {
   data: {
     _id?: string;
     id?: string;
-    ort: string;
-    datum: string | Date;
     auftraggeber: string;
     participantsList: { name: string; role: string }[];
     documentType: string;
@@ -295,6 +303,15 @@ interface InspectionPDFProps {
 }
 
 export const InspectionPDF = ({ data }: InspectionPDFProps) => {
+  // Helper for Cloudinary URLs
+  const getFullUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.startsWith('//')) return `https:${url}`;
+    return url;
+  };
+
+  const fileName = `Inspektionsbericht_${(data.auftraggeber || 'Bericht').replace(/\s+/g, '_')}.pdf`;
+
   const dateObj = new Date(data.datum);
   const formattedDate = dateObj.toLocaleDateString('de-DE', {
     day: '2-digit',
@@ -307,24 +324,30 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
   const idSuffix = (data._id || data.id || 'NEW').slice(-6).toUpperCase();
   const reportNumber = `${year}-${idSuffix}`;
 
+  // Force Hide Empty Floor Plans
+  const activeFloorPlans = data.floorPlans?.filter(plan => 
+    data.issues?.some(issue => issue.floorPlanId === plan.id)
+  ) || [];
+
   return (
     <Document>
       {/* PAGE 1: COVER PAGE */}
       <Page size="A4" style={styles.page}>
-        <View style={styles.header} fixed>
+        <View style={styles.headerContainer} fixed>
+          <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
           <Image src="public/logo.png" style={styles.logo} />
         </View>
 
         <View style={styles.coverContainer}>
           <Text style={styles.documentType}>
-            {data.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS Protokoll'}
+            {data.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS-Protokoll'}
           </Text>
           <Image src="public/logo.png" style={styles.logo} />
 
           <View style={styles.projectGrid}>
             <View style={styles.gridItem}>
-              <Text style={styles.label}>Standort / Projekt</Text>
-              <Text style={styles.value}>{data.ort}</Text>
+              <Text style={styles.label}>Auftraggeber</Text>
+              <Text style={styles.value}>{data.auftraggeber}</Text>
             </View>
             <View style={styles.gridItem}>
               <Text style={styles.label}>Datum</Text>
@@ -387,33 +410,37 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           <View style={styles.legendGrid}>
             <View style={styles.legendCard}>
               <Text style={[styles.levelLabel, { color: '#DC2626' }]}>Stufe 1</Text>
-              <Text style={styles.levelText}>Sofortmassnahmen</Text>
+              <Text style={styles.levelText}>Prio 1 (so rasch als möglich umzusetzen)</Text>
             </View>
             <View style={styles.legendCard}>
               <Text style={[styles.levelLabel, { color: '#EA580C' }]}>Stufe 2</Text>
               <Text style={styles.levelText}>Kurzfristig (3 – 6 Monate)</Text>
             </View>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#16A34A' }]}>Stufe 3</Text>
+              <Text style={[styles.levelLabel, { color: '#2563EB' }]}>Stufe 3</Text>
               <Text style={styles.levelText}>Mittelfristig (12 – 24 Monate)</Text>
             </View>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#999999' }]}>Stufe 4</Text>
-              <Text style={styles.levelText}>Langfristig (2 – 5 Jahre)</Text>
+              <Text style={[styles.levelLabel, { color: '#4B5563' }]}>N/A</Text>
+              <Text style={styles.levelText}>N/A - Nicht anwendbar / Keine Massnahme erforderlich</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>RFS | Brandschutz & Sicherheit</Text>
+          <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
+          <View style={styles.footerAddress}>
+            <Text>Blegistrasse 13, 6340 Baar | info@riskfiresafety.ch</Text>
+          </View>
           <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>
       </Page>
 
       {/* PAGES: FLOOR PLANS */}
-      {data.floorPlans && data.floorPlans.map((fp, idx) => (
+      {activeFloorPlans.map((fp) => (
         <Page key={fp.id} size="A4" style={styles.page}>
-          <View style={styles.header} fixed>
+          <View style={styles.headerContainer} fixed>
+            <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
             <Image src="public/logo.png" style={styles.logo} />
           </View>
 
@@ -423,7 +450,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           </View>
 
           <View style={styles.mapContainer}>
-            <Image src={fp.url} style={styles.mapImage} />
+            <Image src={fp.url.replace(/\.pdf$/i, '.jpg')} style={styles.mapImage} />
             
             {/* Map Pins overlay filtering by floorPlanId */}
             {data.issues?.filter(i => i.floorPlanId === fp.id && i.x !== undefined && i.y !== undefined).map((issue, index) => (
@@ -445,7 +472,10 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           </View>
 
           <View style={styles.footer} fixed>
-            <Text style={styles.footerText}>RFS | Brandschutz & Sicherheit</Text>
+            <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
+            <View style={styles.footerAddress}>
+              <Text>Blegistrasse 13, 6340 Baar | info@riskfiresafety.ch</Text>
+            </View>
             <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
           </View>
         </Page>
@@ -453,9 +483,9 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
 
       {/* PAGE 3+: ISSUES LIST */}
       <Page size="A4" style={styles.page}>
-        <View style={styles.header} fixed>
-          <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GMBH</Text>
-          <Text style={styles.logoPlaceholder}>RISK FIRE SAFETY</Text>
+        <View style={styles.headerContainer} fixed>
+          <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
+          <Image src="public/logo.png" style={styles.logo} />
         </View>
 
         <View style={styles.sectionTitle}>
@@ -471,11 +501,17 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                 <Text style={styles.issueLocation}>{issue.location}</Text>
               </View>
               <View style={{ flexDirection: 'row', gap: 5 }}>
-                <View style={[styles.priorityBadge, issue.priority === '3' ? styles.p3 : issue.priority === '2' ? styles.p2 : styles.p1]}>
-                  <Text>Priorität {issue.priority}</Text>
+                <View style={[
+                  styles.priorityBadge, 
+                  issue.priority === '1' ? styles.p1 : 
+                  issue.priority === '2' ? styles.p2 : 
+                  issue.priority === '3' ? styles.p3 : 
+                  styles.pna
+                ]}>
+                  <Text>{issue.priority === '1' ? 'Prio 1 (so rasch als möglich umzusetzen)' : `Priorität ${issue.priority}`}</Text>
                 </View>
                 <View style={[styles.priorityBadge, { backgroundColor: '#000000', color: '#FFFFFF' }]}>
-                  <Text>{issue.status || 'Open'}</Text>
+                  <Text>{issue.status === 'Open' ? 'Offen' : issue.status || 'Offen'}</Text>
                 </View>
               </View>
             </View>
@@ -486,19 +522,19 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                   <Text style={styles.label}>Problembeschreibung</Text>
                   <Text>{issue.description}</Text>
                 </View>
-                <View style={styles.infoGroup}>
+                <View style={styles.infoGroup} wrap={true}>
                   <Text style={styles.label}>Massnahmen</Text>
                   <Text style={{ fontStyle: 'italic' }}>{issue.measures}</Text>
                 </View>
                 <View style={styles.infoGroup}>
-                  <Text style={styles.label}>Verantwortlicher Unternehmer</Text>
+                  <Text style={styles.label}>Unternehmer</Text>
                   <Text style={{ fontWeight: 'bold' }}>{issue.responsibleContractor}</Text>
                 </View>
               </View>
 
               <View style={styles.imageColumn}>
                 {issue.images?.map((url, i) => (
-                  <Image key={i} src={url} style={styles.issueImage} />
+                  <Image key={i} src={getFullUrl(url)} style={styles.issueImage} />
                 ))}
               </View>
             </View>
@@ -507,7 +543,10 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         ))}
 
         <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>RFS | Brandschutz & Sicherheit</Text>
+          <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
+          <View style={styles.footerAddress}>
+            <Text>Blegistrasse 13, 6340 Baar | info@riskfiresafety.ch</Text>
+          </View>
           <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>
       </Page>

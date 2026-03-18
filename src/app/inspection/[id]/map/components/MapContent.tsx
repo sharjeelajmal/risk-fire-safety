@@ -7,6 +7,7 @@ interface Issue {
   _id: string;
   x: number;
   y: number;
+  issueNumber: string;
   floorPlanId: string;
 }
 
@@ -36,7 +37,7 @@ export default function MapContent({
   };
 
   return (
-    <main className="lg:pl-24 flex-1 w-full min-h-0 relative z-10 bg-[#050505] touch-none flex flex-col overflow-hidden">
+    <main className="lg:pl-24 flex-1 w-full min-h-[60vh] relative z-10 bg-[#050505] touch-none flex flex-col overflow-hidden">
       <TransformComponent
         wrapperClass="!w-full !h-full !flex-1"
         contentClass="min-h-full min-w-full flex items-center justify-center"
@@ -52,7 +53,7 @@ export default function MapContent({
             </div>
           ) : (
             <img 
-              src={floorPlanUrl} 
+              src={floorPlanUrl.replace(/\.pdf$/i, '.jpg')} 
               alt="Floor Plan" 
               draggable={false}
               className="block w-auto h-auto max-w-[95vw] max-h-[70vh] md:max-h-[80vh] object-contain select-none pointer-events-none transition-shadow"
@@ -79,7 +80,7 @@ export default function MapContent({
                   <MapPin size={24} className="md:w-8 md:h-8" fill="currentColor" />
                 </motion.div>
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 mt-0.5 text-[8px] md:text-[10px] font-black text-white">
-                  {index + 1}
+                  {issue.issueNumber}
                 </div>
               </div>
             </motion.div>
