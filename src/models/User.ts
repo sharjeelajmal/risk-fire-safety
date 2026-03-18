@@ -24,6 +24,12 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  customLists: {
+    auftraggeber: { type: [String], default: [] },
+    participants: { type: [String], default: [] },
+    functions: { type: [String], default: [] },
+    notes: { type: [String], default: [] }
+  }
 });
 
 export default mongoose.models.User || mongoose.model('User', UserSchema);

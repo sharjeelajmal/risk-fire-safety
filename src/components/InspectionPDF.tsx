@@ -300,6 +300,7 @@ interface InspectionPDFProps {
     generalNotes?: string[];
     floorPlans: FloorPlan[];
     issues: Issue[];
+    teilnehmer?: string;
   };
 }
 
@@ -374,7 +375,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
             </View>
             <View style={styles.gridItem}>
               <Text style={styles.label}>Erstellt von</Text>
-              <Text style={styles.value}>Robin Furrer</Text>
+              <Text style={styles.value}>{data.teilnehmer || 'Robin Furrer'}</Text>
             </View>
           </View>
 

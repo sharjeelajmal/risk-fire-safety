@@ -52,6 +52,7 @@ function AddIssueForm() {
     status: 'Offen',
     floorPlanId: searchParams.get('floorPlanId') || '',
   });
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchInspection = async () => {
@@ -84,6 +85,20 @@ function AddIssueForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation
+    const newErrors: Record<string, boolean> = {};
+    if (!formData.issueNumber.trim()) newErrors.issueNumber = true;
+    if (!formData.location.trim()) newErrors.location = true;
+    if (formData.responsibleContractor.length === 0) newErrors.responsibleContractor = true;
+    if (!formData.description.trim()) newErrors.description = true;
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
     try {
       const uploadedUrls: string[] = [];
@@ -116,22 +131,51 @@ function AddIssueForm() {
         <FormHeader x={searchParams.get('x')} y={searchParams.get('y')} />
         <form onSubmit={handleSubmit} className="space-y-5 md:space-y-8">
           <div className="space-y-1.5 md:space-y-2">
-            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mangel-Nummer</label>
-            <input required type="text" value={formData.issueNumber} onChange={(e) => setFormData({...formData, issueNumber: e.target.value})} placeholder="z.B. 1, 2024-01A" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" />
+            <label className={`block text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${errors.issueNumber ? 'text-red-500' : 'text-zinc-400'}`}>Mangel-Nummer</label>
+            <input 
+              type="text" 
+              value={formData.issueNumber} 
+              onChange={(e) => {
+                setFormData({...formData, issueNumber: e.target.value});
+                if (errors.issueNumber) setErrors(prev => ({ ...prev, issueNumber: false }));
+              }} 
+              placeholder="z.B. 1, 2024-01A" 
+              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl ${
+                errors.issueNumber ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10 focus:border-red-500/50'
+              }`} 
+            />
+            {errors.issueNumber && <p className="text-red-500 text-[10px] font-bold mt-1">Dieses Feld wird benötigt</p>}
           </div>
           <ImageUploader previews={previews} onAddImages={handleImageChange} onRemoveImage={removeImage} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-1.5 md:space-y-2">
-              <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Standortbereich</label>
-              <input required type="text" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} placeholder="z.B. Flur 1. OG" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" />
+              <label className={`block text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${errors.location ? 'text-red-500' : 'text-zinc-400'}`}>Standortbereich</label>
+              <input 
+                type="text" 
+                value={formData.location} 
+                onChange={(e) => {
+                  setFormData({...formData, location: e.target.value});
+                  if (errors.location) setErrors(prev => ({ ...prev, location: false }));
+                }} 
+                placeholder="z.B. Flur 1. OG" 
+                className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl ${
+                  errors.location ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10 focus:border-red-500/50'
+                }`} 
+              />
+              {errors.location && <p className="text-red-500 text-[10px] font-bold mt-1">Dieses Feld wird benötigt</p>}
             </div>
             <CreatableMultiSelect
                 label="Unternehmer"
                 values={formData.responsibleContractor}
-                onChange={(vals) => setFormData({...formData, responsibleContractor: vals})}
+                onChange={(vals) => {
+                  setFormData({...formData, responsibleContractor: vals});
+                  if (errors.responsibleContractor) setErrors(prev => ({ ...prev, responsibleContractor: false }));
+                }}
                 options={CONTRACTOR_OPTIONS.map(o => o.label)}
                 placeholder="Unternehmer auswählen..."
+                listType="participants"
+                error={errors.responsibleContractor}
             />
           </div>
 
@@ -150,8 +194,20 @@ function AddIssueForm() {
           </div>
 
           <div className="space-y-1.5 md:space-y-2">
-            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Problembeschreibung</label>
-            <textarea required rows={4} value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} placeholder="Was ist der Mangel?" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm resize-none shadow-xl" />
+            <label className={`block text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${errors.description ? 'text-red-500' : 'text-zinc-400'}`}>Problembeschreibung</label>
+            <textarea 
+              rows={4} 
+              value={formData.description} 
+              onChange={(e) => {
+                setFormData({...formData, description: e.target.value});
+                if (errors.description) setErrors(prev => ({ ...prev, description: false }));
+              }} 
+              placeholder="Was ist der Mangel?" 
+              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm resize-none shadow-xl ${
+                errors.description ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10 focus:border-red-500/50'
+              }`} 
+            />
+            {errors.description && <p className="text-red-500 text-[10px] font-bold mt-1">Dieses Feld wird benötigt</p>}
           </div>
           <div className="space-y-1.5 md:space-y-2">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Massnahmen</label>
@@ -160,6 +216,7 @@ function AddIssueForm() {
                 onChange={(vals) => setFormData({...formData, measures: vals})}
                 options={MEASURE_OPTIONS}
                 placeholder="Massnahmen auswählen oder tippen..."
+                listType="notes"
             />
           </div>
 

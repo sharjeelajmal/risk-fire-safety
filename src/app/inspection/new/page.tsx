@@ -131,6 +131,7 @@ export default function NewInspectionPage() {
     participants: [{ name: '', role: '' }],
     generalNotes: [] as string[],
   });
+  const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [customNote, setCustomNote] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   
@@ -243,6 +244,21 @@ export default function NewInspectionPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validation
+    const newErrors: Record<string, boolean> = {};
+    if (!formData.auftraggeber.trim()) newErrors.auftraggeber = true;
+    if (!formData.datum) newErrors.datum = true;
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      // Scroll to first error
+      const firstError = Object.keys(newErrors)[0];
+      const element = document.getElementsByName(firstError)[0] || document.querySelector(`[label="${firstError}"]`);
+      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    setErrors({});
     setLoading(true);
     try {
       const data = new FormData();
@@ -374,21 +390,32 @@ export default function NewInspectionPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 !overflow-visible">
 
               <div className="space-y-2 md:space-y-3 relative !overflow-visible z-50">
-                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Datum</label>
-                <CustomCalendar
-                  selectedDate={formData.datum}
-                  onChange={(date) => setFormData({ ...formData, datum: date })}
-                />
+                <label className={`text-[9px] md:text-[10px] uppercase font-black tracking-[2px] ml-2 transition-colors ${errors.datum ? 'text-red-500' : 'text-gray-500'}`}>Datum</label>
+                <div className={errors.datum ? 'ring-2 ring-red-500 rounded-2xl' : ''}>
+                  <CustomCalendar
+                    selectedDate={formData.datum}
+                    onChange={(date) => {
+                      setFormData({ ...formData, datum: date });
+                      if (errors.datum) setErrors(prev => ({ ...prev, datum: false }));
+                    }}
+                  />
+                </div>
+                {errors.datum && <p className="text-red-500 text-[10px] md:text-xs font-bold ml-2 animate-pulse">Dieses Feld wird benötigt</p>}
               </div>
 
               <div className="space-y-2 md:space-y-3">
                 <CreatableSingleSelect
-                  label="Opdrachtgeber"
+                  label="Auftraggeber"
                   icon={<User className="w-4 h-4 md:w-5 md:h-5" />}
                   value={formData.auftraggeber}
-                  onChange={(val) => setFormData({ ...formData, auftraggeber: val })}
+                  onChange={(val) => {
+                    setFormData({ ...formData, auftraggeber: val });
+                    if (errors.auftraggeber) setErrors(prev => ({ ...prev, auftraggeber: false }));
+                  }}
                   options={clientOptions}
                   placeholder="Auftraggeber auswählen oder tippen..."
+                  listType="auftraggeber"
+                  error={errors.auftraggeber}
                 />
               </div>
 
@@ -406,31 +433,28 @@ export default function NewInspectionPage() {
                 <div className="space-y-3 md:space-y-4">
                   {formData.participants.map((p, index) => (
                     <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 items-start bg-white/[0.02] p-3 md:p-4 rounded-xl md:rounded-2xl border border-white/5">
-                      <div className="relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
-                          <User className="w-4 h-4 md:w-4.5 md:h-4.5" />
-                        </div>
-                        <input
-                          type="text"
+                      <div className="flex-1">
+                        <CreatableSingleSelect
+                          label=""
+                          icon={<User className="w-4 h-4 md:w-4.5 md:h-4.5" />}
                           placeholder="Name"
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 md:py-4 pl-10 md:pl-12 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-xs md:text-sm"
                           value={p.name}
-                          onChange={(e) => updateParticipant(index, 'name', e.target.value)}
+                          onChange={(val) => updateParticipant(index, 'name', val)}
+                          options={[]}
+                          listType="participants"
                         />
                       </div>
-                      <div className="relative group flex gap-2 md:gap-3">
-                        <div className="relative flex-1">
-                          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors z-10">
-                            <Building className="w-4 h-4 md:w-4.5 md:h-4.5" />
-                          </div>
-                          <input
-                            type="text"
-                            placeholder="Funktion"
-                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 md:py-4 pl-10 md:pl-12 pr-4 focus:border-red-500/50 focus:bg-white/[0.08] outline-none transition-all font-bold text-xs md:text-sm"
-                            value={p.role}
-                            onChange={(e) => updateParticipant(index, 'role', e.target.value)}
-                          />
-                        </div>
+                      <div className="flex-1">
+                        <CreatableSingleSelect
+                          label=""
+                          icon={<Building className="w-4 h-4 md:w-4.5 md:h-4.5" />}
+                          placeholder="Funktion"
+                          value={p.role}
+                          onChange={(val) => updateParticipant(index, 'role', val)}
+                          options={['Architekt', 'Bauleiter', 'Eigentümer', 'Fachplaner', 'Installateur']}
+                          listType="functions"
+                        />
+                      </div>
                         {formData.participants.length > 1 && (
                           <button
                             type="button"
@@ -440,26 +464,21 @@ export default function NewInspectionPage() {
                             <X className="w-4 h-4 md:w-4.5 md:h-4.5" />
                           </button>
                         )}
-                      </div>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-2 md:space-y-3">
-                <label className="text-[9px] md:text-[10px] uppercase font-black tracking-[2px] text-gray-500 ml-2">Erstellt von</label>
-                <div className="relative group grayscale opacity-50">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 z-10">
-                    <User className="w-[18px] h-[18px] md:w-5 md:h-5" />
-                  </div>
-                  <input
-                    required
-                    type="text"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-4 outline-none font-bold text-xs md:text-lg cursor-not-allowed"
-                    value={formData.teilnehmer}
-                    disabled
-                  />
-                </div>
+                <CreatableSingleSelect
+                  label="Erstellt von"
+                  icon={<User className="w-[18px] h-[18px] md:w-5 md:h-5" />}
+                  placeholder="Name des Erstellers"
+                  value={formData.teilnehmer}
+                  onChange={(val) => setFormData({ ...formData, teilnehmer: val })}
+                  options={[]}
+                  listType="participants"
+                />
               </div>
             </div>
           </div>
@@ -503,6 +522,7 @@ export default function NewInspectionPage() {
                   value={customNote}
                   onChange={(val) => setCustomNote(val)}
                   options={noteOptions}
+                  listType="notes"
                 />
                 <button
                   type="button"
