@@ -14,6 +14,7 @@ interface Issue {
   _id: string;
   x: number;
   y: number;
+  issueNumber: string;
   floorPlanId: string;
 }
 
@@ -26,6 +27,7 @@ interface FloorPlan {
 interface InspectionData {
   _id: string;
   ort: string;
+  auftraggeber: string;
   floorPlans: FloorPlan[];
   issues: Issue[];
 }

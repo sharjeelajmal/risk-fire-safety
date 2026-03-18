@@ -246,7 +246,6 @@ export default function NewInspectionPage() {
     setLoading(true);
     try {
       const data = new FormData();
-      data.append('ort', formData.ort);
       data.append('datum', formData.datum);
       data.append('auftraggeber', formData.auftraggeber);
       data.append('teilnehmer', formData.teilnehmer);

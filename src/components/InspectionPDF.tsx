@@ -294,6 +294,7 @@ interface InspectionPDFProps {
     _id?: string;
     id?: string;
     auftraggeber: string;
+    datum: string | Date;
     participantsList: { name: string; role: string }[];
     documentType: string;
     generalNotes?: string[];
