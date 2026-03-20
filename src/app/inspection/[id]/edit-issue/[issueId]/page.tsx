@@ -45,6 +45,7 @@ function EditIssueForm() {
   // New images selected from local file system
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newPreviews, setNewPreviews] = useState<string[]>([]);
+  const [pdfFlags, setPdfFlags] = useState<boolean[]>([]);
 
   const [formData, setFormData] = useState({
     issueNumber: '',
@@ -87,12 +88,10 @@ function EditIssueForm() {
     fetchData();
   }, [params.id, params.issueId]);
 
-  const handleNewImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      setNewImages(prev => [...prev, ...selectedFiles]);
-      setNewPreviews(prev => [...prev, ...selectedFiles.map(file => URL.createObjectURL(file))]);
-    }
+  const handleNewImageChange = (files: File[]) => {
+    setNewImages(prev => [...prev, ...files]);
+    setNewPreviews(prev => [...prev, ...files.map(file => URL.createObjectURL(file))]);
+    setPdfFlags(prev => [...prev, ...files.map(file => file.type === 'application/pdf')]);
   };
 
   const removeExistingImage = (url: string) => {
@@ -102,6 +101,7 @@ function EditIssueForm() {
   const removeNewImage = (i: number) => {
     setNewImages(prev => prev.filter((_, idx) => idx !== i));
     setNewPreviews(prev => prev.filter((_, idx) => idx !== i));
+    setPdfFlags(prev => prev.filter((_, idx) => idx !== i));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,6 +203,7 @@ function EditIssueForm() {
               previews={newPreviews} 
               onAddImages={handleNewImageChange} 
               onRemoveImage={removeNewImage} 
+              isPdf={(i: number) => pdfFlags[i] ?? false}
             />
           </div>
 

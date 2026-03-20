@@ -1,16 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  User, 
-  Settings, 
-  Mail, 
-  Lock, 
-  Bell, 
-  FileText, 
-  Save, 
-  ChevronRight,
+import {
+  User,
+  Settings,
+  Mail,
+  Lock,
+  Bell,
+  FileText,
+  Save,
   Shield,
   Eye,
   EyeOff,
@@ -18,11 +17,308 @@ import {
   AlertCircle,
   Loader2,
   Plus,
-  X
+  X,
+  Search,
+  Pencil,
+  Check,
+  Trash2,
+  List,
 } from 'lucide-react';
 import Navbar from '@/components/navigation/Navbar';
 import Header from '@/components/dashboard/Header';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Stammdaten Modal Component
+// ─────────────────────────────────────────────────────────────────────────────
+interface StammdatenModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  customLists: Record<string, string[]>;
+  onListsChange: (lists: Record<string, string[]>) => void;
+}
+
+const LIST_TABS = [
+  { key: 'auftraggeber', label: 'Auftraggeber', icon: <User size={16} /> },
+  { key: 'participants', label: 'Teilnehmer', icon: <User size={16} /> },
+  { key: 'functions', label: 'Funktionen', icon: <Shield size={16} /> },
+  { key: 'notes', label: 'Hinweise', icon: <FileText size={16} /> },
+];
+
+function StammdatenModal({ isOpen, onClose, customLists, onListsChange }: StammdatenModalProps) {
+  const [activeTab, setActiveTab] = useState('auftraggeber');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editingItem, setEditingItem] = useState<{ key: string; idx: number; val: string } | null>(null);
+  const [addingValue, setAddingValue] = useState('');
+  const [saving, setSaving] = useState(false);
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingItem) editInputRef.current?.focus();
+  }, [editingItem]);
+
+  // Reset on tab change
+  useEffect(() => {
+    setSearchQuery('');
+    setAddingValue('');
+    setEditingItem(null);
+  }, [activeTab]);
+
+  const currentList: string[] = customLists[activeTab] || [];
+  const filteredList = currentList.filter(item =>
+    item.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleAdd = async () => {
+    const trimmed = addingValue.trim();
+    if (!trimmed) return;
+    setSaving(true);
+    try {
+      const res = await fetch('/api/users/me/lists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: activeTab, item: trimmed }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onListsChange(data);
+        setAddingValue('');
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (item: string) => {
+    setSaving(true);
+    try {
+      const res = await fetch('/api/users/me/lists', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: activeTab, item }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onListsChange(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditSave = async () => {
+    if (!editingItem) return;
+    const newVal = editingItem.val.trim();
+    const oldVal = currentList[editingItem.idx];
+    if (!newVal || newVal === oldVal) { setEditingItem(null); return; }
+    setSaving(true);
+    try {
+      const res = await fetch('/api/users/me/lists', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: activeTab, oldItem: oldVal, newItem: newVal }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        onListsChange(data);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSaving(false);
+      setEditingItem(null);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm"
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 60 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+          className="w-full sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] flex flex-col glass-premium rounded-t-[28px] sm:rounded-[32px] border border-white/10 shadow-2xl !overflow-visible"
+        >
+          {/* Modal Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-red-600/10 border border-red-600/20 flex items-center justify-center text-red-500">
+                <List size={18} />
+              </div>
+              <div>
+                <h2 className="text-base font-black text-white uppercase tracking-tight">Listen verwalten</h2>
+                <p className="text-[9px] text-zinc-500 uppercase font-black tracking-widest">Stammdaten bearbeiten</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl bg-white/5 hover:bg-red-600/10 text-zinc-400 hover:text-red-400 transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-1 px-3 pt-4 shrink-0">
+            {LIST_TABS.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 py-2 px-1 rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1 min-w-0 ${
+                  activeTab === tab.key
+                    ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                    : 'bg-white/5 text-zinc-500 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <span className="shrink-0">{tab.icon}</span>
+                <span className="truncate">{tab.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div className="px-4 pt-3 shrink-0">
+            <div className="relative">
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Suche..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none focus:border-red-600/50 transition-all font-medium"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white">
+                  <X size={12} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* List */}
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1.5 scrollbar-premium">
+            {filteredList.length === 0 && (
+              <div className="py-12 text-center text-zinc-600 text-xs font-bold uppercase tracking-widest">
+                {searchQuery ? 'Keine Treffer gefunden' : 'Noch keine Einträge'}
+              </div>
+            )}
+
+            <AnimatePresence mode="popLayout">
+              {filteredList.map((item, idx) => {
+                const originalIdx = currentList.indexOf(item);
+                const isEditing = editingItem?.key === activeTab && editingItem?.idx === originalIdx;
+
+                return (
+                  <motion.div
+                    key={item}
+                    layout
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5 group hover:border-white/10 transition-all"
+                  >
+                    {/* Number badge */}
+                    <span className="w-6 h-6 shrink-0 rounded-lg bg-white/5 flex items-center justify-center text-[9px] font-black text-zinc-600">
+                      {idx + 1}
+                    </span>
+
+                    {/* Item content / edit input */}
+                    {isEditing ? (
+                      <input
+                        ref={editInputRef}
+                        value={editingItem!.val}
+                        onChange={(e) => setEditingItem({ ...editingItem!, val: e.target.value })}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleEditSave(); if (e.key === 'Escape') setEditingItem(null); }}
+                        className="flex-1 bg-white/5 border border-red-500/50 rounded-lg px-3 py-1.5 text-xs text-white outline-none font-medium"
+                      />
+                    ) : (
+                      <span className="flex-1 text-xs text-zinc-300 font-medium leading-relaxed">{item}</span>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {isEditing ? (
+                        <>
+                          <button
+                            onClick={handleEditSave}
+                            disabled={saving}
+                            className="p-1.5 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
+                          >
+                            <Check size={13} />
+                          </button>
+                          <button
+                            onClick={() => setEditingItem(null)}
+                            className="p-1.5 rounded-lg bg-white/5 text-zinc-500 hover:bg-white/10 transition-colors"
+                          >
+                            <X size={13} />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => setEditingItem({ key: activeTab, idx: originalIdx, val: item })}
+                            className="p-1.5 rounded-lg sm:opacity-0 sm:group-hover:opacity-100 bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-all"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item)}
+                            disabled={saving}
+                            className="p-1.5 rounded-lg sm:opacity-0 sm:group-hover:opacity-100 bg-red-600/10 text-red-400 hover:bg-red-600/20 transition-all"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+
+          {/* Add new item */}
+          <div className="px-3 pb-5 pt-3 border-t border-white/5 shrink-0">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={addingValue}
+                onChange={(e) => setAddingValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleAdd(); }}
+                placeholder="Neuen Eintrag hinzufügen..."
+                className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-xs text-white outline-none focus:border-red-600/50 transition-all font-medium"
+              />
+              <button
+                onClick={handleAdd}
+                disabled={saving || !addingValue.trim()}
+                className="shrink-0 px-3 sm:px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[10px] transition-all flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-red-600/20"
+              >
+                {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                <span className="hidden sm:inline">Hinzufügen</span>
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Settings Page
+// ─────────────────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [profile, setProfile] = useState({
@@ -41,7 +337,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isMaster, setIsMaster] = useState(false);
-  const [message, setMessage] = useState({ text: '', type: '' }); // type: 'success' | 'error'
+  const [message, setMessage] = useState({ text: '', type: '' });
 
   const [customLists, setCustomLists] = useState<Record<string, string[]>>({
     auftraggeber: [],
@@ -50,16 +346,18 @@ export default function SettingsPage() {
     notes: []
   });
 
+  const [isStammdatenModalOpen, setIsStammdatenModalOpen] = useState(false);
+
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await fetch('/api/users/me');
         if (res.ok) {
           const data = await res.json();
-          setProfile(prev => ({ 
-            ...prev, 
-            name: data.name, 
-            email: data.email 
+          setProfile(prev => ({
+            ...prev,
+            name: data.name,
+            email: data.email
           }));
           setIsMaster(!!data.isMaster);
         }
@@ -87,7 +385,7 @@ export default function SettingsPage() {
   const handleSave = async () => {
     setSaving(true);
     setMessage({ text: '', type: '' });
-    
+
     try {
       const res = await fetch('/api/users/me', {
         method: 'PUT',
@@ -103,7 +401,6 @@ export default function SettingsPage() {
 
       if (res.ok) {
         setMessage({ text: 'Profil erfolgreich aktualisiert', type: 'success' });
-        // Clear password fields
         setProfile(prev => ({ ...prev, currentPassword: '', newPassword: '' }));
       } else {
         setMessage({ text: data.error || 'Update fehlgeschlagen', type: 'error' });
@@ -112,57 +409,18 @@ export default function SettingsPage() {
       setMessage({ text: 'Ein unerwarteter Fehler ist aufgetreten', type: 'error' });
     } finally {
       setSaving(false);
-      // Clear message after 3 seconds
       setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     }
   };
 
-  const handleAddListItem = async (type: string, item: string) => {
-    if (!item.trim()) return;
-    try {
-      const res = await fetch('/api/users/me/lists', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, item: item.trim() })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setCustomLists(data);
-      } else {
-        const errorData = await res.json();
-        alert(`Fehler beim Speichern: ${errorData.error || 'Serverfehler'}`);
-      }
-    } catch (err) {
-      console.error('Error adding item:', err);
-      alert('Ein technischer Fehler ist aufgetreten. Bitte prüfen Sie die Verbindung.');
-    }
-  };
-
-  const handleDeleteListItem = async (type: string, item: string) => {
-    try {
-      const res = await fetch('/api/users/me/lists', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, item })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setCustomLists(data);
-      } else {
-        const errorData = await res.json();
-        alert(`Fehler beim Löschen: ${errorData.error || 'Serverfehler'}`);
-      }
-    } catch (err) {
-      console.error('Error deleting item:', err);
-      alert('Ein technischer Fehler ist aufgetreten.');
-    }
-  };
+  // Total count across all lists for the badge
+  const totalListItems = Object.values(customLists).reduce((sum, arr) => sum + arr.length, 0);
 
   return (
     <div className="relative min-h-screen bg-[#050505] overflow-x-hidden pb-24 lg:pb-0 font-sans">
       <div className="noise-overlay text-white"></div>
       <div className="bg-mesh-premium"></div>
-      
+
       <Navbar />
       <Header />
 
@@ -187,8 +445,8 @@ export default function SettingsPage() {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   className={`flex items-center gap-3 px-6 py-3 rounded-2xl border ${
-                    message.type === 'success' 
-                      ? 'bg-green-500/10 border-green-500/20 text-green-500' 
+                    message.type === 'success'
+                      ? 'bg-green-500/10 border-green-500/20 text-green-500'
                       : 'bg-red-500/10 border-red-500/20 text-red-500'
                   }`}
                 >
@@ -267,7 +525,7 @@ export default function SettingsPage() {
                       <label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-3 md:ml-4">Neues Passwort</label>
                       <div className="relative">
                         <input
-                          type={showPassword ? "text" : "password"}
+                          type={showPassword ? 'text' : 'password'}
                           disabled={isMaster}
                           placeholder="Neues Passwort (optional)"
                           value={profile.newPassword}
@@ -322,7 +580,7 @@ export default function SettingsPage() {
                         <p className="text-[8px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-0.5">Logo einblenden</p>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => setAppSettings({ ...appSettings, showPdfLogo: !appSettings.showPdfLogo })}
                       className={`w-10 h-5 md:w-12 md:h-6 rounded-full transition-all relative ${appSettings.showPdfLogo ? 'bg-red-600' : 'bg-zinc-800'} cursor-pointer`}
                     >
@@ -341,7 +599,7 @@ export default function SettingsPage() {
                         <p className="text-[8px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest mt-0.5">Systemupdates</p>
                       </div>
                     </div>
-                    <button 
+                    <button
                       onClick={() => setAppSettings({ ...appSettings, notifications: !appSettings.notifications })}
                       className={`w-10 h-5 md:w-12 md:h-6 rounded-full transition-all relative ${appSettings.notifications ? 'bg-red-600' : 'bg-zinc-800'} cursor-pointer`}
                     >
@@ -357,80 +615,48 @@ export default function SettingsPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="glass-premium rounded-[32px] md:rounded-[40px] p-5 md:p-10 border border-white/5 relative overflow-hidden"
+              className="glass-premium rounded-[32px] md:rounded-[40px] p-5 md:p-10 border border-white/5 relative !overflow-visible z-[60]"
             >
               <div className="card-shine opacity-10"></div>
               <div className="relative z-10 space-y-6 md:space-y-8">
-                <div className="flex items-center gap-3 md:gap-4">
-                  <div className="p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
-                    <FileText className="w-4 h-4 md:w-5 md:h-5" />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className="p-2.5 md:p-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-zinc-400">
+                      <FileText className="w-4 h-4 md:w-5 md:h-5" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">Stammdaten</h2>
+                      <p className="text-[8px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest">Dropdown-Listen anpassen</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-lg md:text-xl font-black text-white uppercase tracking-tight">Stammdaten</h2>
-                    <p className="text-[8px] md:text-[10px] text-zinc-500 uppercase font-black tracking-widest">Dropdown-Listen anpassen</p>
-                  </div>
+
+                  <button
+                    onClick={() => setIsStammdatenModalOpen(true)}
+                    className="flex items-center gap-2.5 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black uppercase tracking-widest text-[10px] transition-all shadow-lg shadow-red-600/20 active:scale-[0.98]"
+                  >
+                    <List size={15} />
+                    Listen verwalten
+                    {totalListItems > 0 && (
+                      <span className="bg-white/20 px-2 py-0.5 rounded-full text-[9px]">{totalListItems}</span>
+                    )}
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { key: 'auftraggeber', label: 'Auftraggeber', icon: <User size={16} /> },
-                    { key: 'participants', label: 'Teilnehmer', icon: <User size={16} /> },
-                    { key: 'functions', label: 'Funktionen', icon: <Shield size={16} /> },
-                    { key: 'notes', label: 'Hinweise', icon: <FileText size={16} /> }
-                  ].map((list) => (
-                    <div key={list.key} className="space-y-4 p-5 md:p-6 rounded-[24px] bg-white/5 border border-white/5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-zinc-300">
-                          {list.icon}
-                          <span className="text-[10px] md:text-xs font-black uppercase tracking-widest">{list.label}</span>
-                        </div>
-                        <span className="text-[8px] font-black text-zinc-500 bg-white/5 px-2 py-1 rounded-full uppercase tracking-tighter">
-                          {customLists[list.key]?.length || 0} Einträge
-                        </span>
+                {/* Summary chips */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {LIST_TABS.map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => { setIsStammdatenModalOpen(true); }}
+                      className="flex flex-col items-start p-4 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-red-600/20 hover:bg-white/5 transition-all text-left group"
+                    >
+                      <div className="flex items-center gap-2 text-zinc-500 group-hover:text-red-400 transition-colors mb-1">
+                        {tab.icon}
+                        <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
                       </div>
-
-                      <div className="space-y-2 max-h-[200px] overflow-y-auto pr-2 scrollbar-premium">
-                        {customLists[list.key]?.map((item: string) => (
-                          <div key={item} className="flex items-center justify-between py-2 px-3 bg-white/[0.02] border border-white/5 rounded-xl group hover:border-red-600/30 transition-all">
-                            <span className="text-xs text-zinc-400 font-medium">{item}</span>
-                            <button 
-                              onClick={() => handleDeleteListItem(list.key as any, item)}
-                              className="p-1.5 text-zinc-600 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="relative pt-2 flex gap-2">
-                        <input
-                          type="text"
-                          id={`input-${list.key}`}
-                          placeholder="Neu hinzufügen..."
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              const input = e.target as HTMLInputElement;
-                              handleAddListItem(list.key as any, input.value);
-                              input.value = '';
-                            }
-                          }}
-                          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-white text-[11px] outline-none focus:border-red-600/50 transition-all"
-                        />
-                        <button 
-                          onClick={() => {
-                            const input = document.getElementById(`input-${list.key}`) as HTMLInputElement;
-                            if (input) {
-                              handleAddListItem(list.key as any, input.value);
-                              input.value = '';
-                            }
-                          }}
-                          className="p-2.5 rounded-xl bg-red-600/10 text-red-500 hover:bg-red-600/20 transition-colors"
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                    </div>
+                      <span className="text-xl font-black text-white">{customLists[tab.key]?.length || 0}</span>
+                      <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Einträge</span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -468,6 +694,14 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+
+      {/* Stammdaten Modal */}
+      <StammdatenModal
+        isOpen={isStammdatenModalOpen}
+        onClose={() => setIsStammdatenModalOpen(false)}
+        customLists={customLists}
+        onListsChange={setCustomLists}
+      />
     </div>
   );
 }

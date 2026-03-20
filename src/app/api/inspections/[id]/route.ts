@@ -22,6 +22,38 @@ export async function GET(
   }
 }
 
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await connectToDatabase();
+    const { id } = await params;
+    const body = await request.json();
+
+    const { datum, auftraggeber, teilnehmer, documentType, participants, generalNotes } = body;
+
+    const updateData: Record<string, any> = {};
+    if (datum !== undefined) updateData.datum = datum;
+    if (auftraggeber !== undefined) updateData.auftraggeber = auftraggeber;
+    if (teilnehmer !== undefined) updateData.teilnehmer = teilnehmer;
+    if (documentType !== undefined) updateData.documentType = documentType;
+    if (participants !== undefined) updateData.participantsList = participants;
+    if (generalNotes !== undefined) updateData.generalNotes = generalNotes;
+
+    const updated = await Inspection.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+
+    if (!updated) {
+      return NextResponse.json({ error: 'Inspektion nicht gefunden' }, { status: 404 });
+    }
+
+    return NextResponse.json(updated.toObject());
+  } catch (error: any) {
+    console.error('API PUT Error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -42,3 +74,4 @@ export async function DELETE(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+

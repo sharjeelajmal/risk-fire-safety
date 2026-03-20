@@ -42,6 +42,7 @@ function AddIssueForm() {
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [pdfFlags, setPdfFlags] = useState<boolean[]>([]);
   const [formData, setFormData] = useState({
     issueNumber: '',
     location: '',
@@ -70,17 +71,19 @@ function AddIssueForm() {
     fetchInspection();
   }, [params.id]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      setImages(prev => [...prev, ...selectedFiles]);
-      setPreviews(prev => [...prev, ...selectedFiles.map(file => URL.createObjectURL(file))]);
-    }
+  const handleImageChange = (files: File[]) => {
+    setImages(prev => [...prev, ...files]);
+    setPreviews(prev => [
+      ...prev,
+      ...files.map(file => file.type === 'application/pdf' ? 'pdf' : URL.createObjectURL(file))
+    ]);
+    setPdfFlags(prev => [...prev, ...files.map(f => f.type === 'application/pdf')]);
   };
 
   const removeImage = (i: number) => {
     setImages(prev => prev.filter((_, idx) => idx !== i));
     setPreviews(prev => prev.filter((_, idx) => idx !== i));
+    setPdfFlags(prev => prev.filter((_, idx) => idx !== i));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,7 +149,7 @@ function AddIssueForm() {
             />
             {errors.issueNumber && <p className="text-red-500 text-[10px] font-bold mt-1">Dieses Feld wird benötigt</p>}
           </div>
-          <ImageUploader previews={previews} onAddImages={handleImageChange} onRemoveImage={removeImage} />
+          <ImageUploader previews={previews} onAddImages={handleImageChange} onRemoveImage={removeImage} isPdf={(i) => pdfFlags[i] ?? false} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-1.5 md:space-y-2">

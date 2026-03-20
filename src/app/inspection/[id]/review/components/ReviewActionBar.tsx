@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, FileDown } from 'lucide-react';
+import { ChevronLeft, FileDown, Pencil } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InspectionPDF } from '@/components/InspectionPDF';
@@ -28,7 +28,15 @@ export default function ReviewActionBar({ inspection }: ReviewActionBarProps) {
         </button>
 
         <div className="flex items-center gap-2 md:gap-4">
-          <button 
+          <button
+            onClick={() => router.push(`/inspection/${inspection._id}/edit-details`)}
+            className="flex items-center gap-1.5 md:gap-2 text-zinc-300 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all px-3 md:px-4 py-2 rounded-xl md:rounded-2xl group cursor-pointer"
+          >
+            <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4 text-red-400 group-hover:text-red-300 transition-colors" />
+            <span className="text-[10px] md:text-xs font-black uppercase tracking-widest hidden sm:inline">Details bearbeiten</span>
+          </button>
+
+          <button
             onClick={() => router.push(`/inspection/${inspection._id}/map`)}
             className="flex items-center gap-1.5 md:gap-2 text-zinc-400 hover:text-white transition-colors px-3 md:px-4 py-2 border border-white/5 hover:border-white/20 rounded-xl md:rounded-2xl group cursor-pointer"
           >

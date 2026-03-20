@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Search, X, Plus } from 'lucide-react';
+import { ChevronDown, X, Plus } from 'lucide-react';
 
 interface CreatableMultiSelectProps {
   values: string[];
@@ -40,9 +40,7 @@ export default function CreatableMultiSelect({
           const res = await fetch('/api/users/me/lists');
           if (res.ok) {
             const data = await res.json();
-            if (data[listType]) {
-              setDbOptions(data[listType]);
-            }
+            if (data[listType]) setDbOptions(data[listType]);
           }
         } catch (e) {
           console.error('Error loading DB options', e);
@@ -56,6 +54,7 @@ export default function CreatableMultiSelect({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setSearch('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -63,16 +62,14 @@ export default function CreatableMultiSelect({
   }, []);
 
   const allOptions = Array.from(new Set([...defaultOptions, ...dbOptions]));
-
-  const filteredOptions = allOptions.filter(opt => 
+  const filteredOptions = allOptions.filter(opt =>
     opt.toLowerCase().includes(search.toLowerCase()) && !values.includes(opt)
   );
 
   const handleSelect = async (val: string) => {
     if (!values.includes(val)) {
       onChange([...values, val]);
-      
-      // Save to DB if it's a new option
+
       if (listType && !defaultOptions.includes(val) && !dbOptions.includes(val)) {
         try {
           const res = await fetch('/api/users/me/lists', {
@@ -110,19 +107,19 @@ export default function CreatableMultiSelect({
           {label}
         </label>
       )}
-      
+
       <div className="space-y-3">
         {/* Selected Pills */}
         {values.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <AnimatePresence>
-              {values.map((val, i) => (
+              {values.map((val) => (
                 <motion.div
                   key={val}
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  className="bg-red-600/10 border border-red-500/30 rounded-full px-3 py-1.5 flex items-center gap-2 group"
+                  className="bg-red-600/10 border border-red-500/30 rounded-full px-3 py-1.5 flex items-center gap-2"
                 >
                   <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-red-500">{val}</span>
                   <button
@@ -155,8 +152,8 @@ export default function CreatableMultiSelect({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             className={`w-full bg-white/5 border rounded-xl md:rounded-2xl py-3.5 md:py-5 ${icon ? 'pl-12 md:pl-14' : 'px-5 md:px-6'} pr-12 outline-none transition-all font-bold text-sm md:text-lg ${
-              error 
-                ? 'border-red-500 ring-2 ring-red-500/20 bg-red-500/5' 
+              error
+                ? 'border-red-500 ring-2 ring-red-500/20 bg-red-500/5'
                 : 'border-white/10 focus:border-red-500/50 focus:bg-white/[0.08]'
             }`}
           />
@@ -170,44 +167,43 @@ export default function CreatableMultiSelect({
 
           <AnimatePresence>
             {isOpen && (
-              <motion.div
+              <motion.ul
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 right-0 mt-2 glass-premium rounded-2xl border border-white/10 shadow-2xl z-[100] max-h-60 overflow-y-auto overflow-x-hidden custom-scrollbar"
+                className="absolute left-0 right-0 top-[calc(100%+8px)] z-[999999] max-h-[240px] overflow-y-auto bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl custom-scrollbar py-2 pb-4 pointer-events-auto flex flex-col"
               >
                 {filteredOptions.length > 0 && filteredOptions.map((opt, i) => (
-                  <button
+                  <motion.li
                     key={i}
-                    type="button"
-                    onClick={() => handleSelect(opt)}
-                    className="w-full text-left px-5 py-3.5 hover:bg-white/10 transition-colors font-bold text-sm md:text-base border-b border-white/5 last:border-0 flex items-center justify-between group"
+                    onMouseDown={(e) => { e.preventDefault(); handleSelect(opt); }}
+                    className="w-full text-left px-5 py-3.5 hover:bg-white/10 transition-colors font-bold text-sm border-b border-white/5 last:border-0 flex items-center justify-between group cursor-pointer shrink-0 text-white"
                   >
                     {opt}
                     <Plus size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500" />
-                  </button>
+                  </motion.li>
                 ))}
-                
+
                 {search && !allOptions.find(o => o.toLowerCase() === search.toLowerCase()) && (
-                  <button
-                    type="button"
-                    onClick={() => handleSelect(search.trim())}
-                    className="w-full text-left px-5 py-3.5 hover:bg-white/10 transition-colors font-bold text-sm md:text-base text-red-500 italic border-t border-white/5"
+                  <motion.li
+                    onMouseDown={(e) => { e.preventDefault(); handleSelect(search.trim()); }}
+                    className="w-full text-left px-5 py-3.5 hover:bg-white/10 transition-colors font-bold text-sm text-red-500 italic border-t border-white/5 cursor-pointer shrink-0"
                   >
-                    "{search}" neu hinzufügen...
-                  </button>
+                    &ldquo;{search}&rdquo; neu hinzufügen...
+                  </motion.li>
                 )}
 
                 {filteredOptions.length === 0 && !search && (
-                  <div className="px-5 py-3.5 text-gray-500 text-sm font-bold italic">
+                  <li className="px-5 py-3.5 text-gray-500 text-sm font-bold italic shrink-0">
                     Keine weiteren Optionen
-                  </div>
+                  </li>
                 )}
-              </motion.div>
+              </motion.ul>
             )}
           </AnimatePresence>
         </div>
       </div>
+
       {error && (
         <p className="text-red-500 text-[10px] md:text-xs font-bold ml-2 animate-pulse">
           {errorText}

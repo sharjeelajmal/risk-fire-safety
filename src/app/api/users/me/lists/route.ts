@@ -168,3 +168,44 @@ export async function DELETE(request: Request) {
         return NextResponse.json({ error: 'Serverfehler' }, { status: 500 });
     }
 }
+
+export async function PUT(request: Request) {
+    try {
+        const userId = await getUserIdFromCookie();
+        if (!userId) return NextResponse.json({ error: 'Nicht authentifiziert' }, { status: 401 });
+
+        const { type, oldItem, newItem } = await request.json();
+        console.log(`PUT: Request to rename "${oldItem}" → "${newItem}" in "${type}" for user ${userId}`);
+        if (!type || !oldItem || !newItem) return NextResponse.json({ error: 'Typ, altes und neues Element erforderlich' }, { status: 400 });
+
+        await connectToDatabase();
+        
+        let user;
+        if (userId === 'admin') {
+            const adminEmail = process.env.AUTH_EMAIL || 'admin@admin.com';
+            user = await User.findOne({ email: adminEmail });
+        } else {
+            try {
+                user = await User.findById(userId);
+            } catch (e) {
+                return NextResponse.json({ error: 'Ungültiger Benutzer-ID-Format' }, { status: 400 });
+            }
+        }
+
+        if (!user) return NextResponse.json({ error: 'Benutzer nicht gefunden' }, { status: 404 });
+
+        const updatePath = `customLists.${type}`;
+        // Remove old item, then add new item
+        await User.updateOne({ _id: user._id }, { $pull: { [updatePath]: oldItem } });
+        await User.updateOne({ _id: user._id }, { $addToSet: { [updatePath]: newItem } });
+
+        const updatedUser = await User.findById(user._id);
+        console.log('PUT: Rename completed and fresh data fetched.');
+        return NextResponse.json(updatedUser?.customLists || {});
+        
+    } catch (error) {
+        console.error('API PUT Error:', error);
+        return NextResponse.json({ error: 'Serverfehler' }, { status: 500 });
+    }
+}
+

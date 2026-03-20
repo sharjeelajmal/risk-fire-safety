@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
-  Upload,
   Map,
   Calendar as CalendarIcon,
   User,
@@ -13,59 +12,64 @@ import {
   Loader2,
   X,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  Pencil,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/navigation/Navbar';
 import CreatableSingleSelect from '@/components/ui/CreatableSingleSelect';
-import { FileText } from 'lucide-react';
 
-// Custom Modern Animated Calendar Component
-const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onChange: (date: string) => void }) => {
+// Reuse the same calendar component pattern from new/page.tsx
+const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string; onChange: (date: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const d = selectedDate ? new Date(selectedDate + 'T00:00:00') : new Date();
+    return d;
+  });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
-  const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) setIsOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
+  const daysInMonth = (y: number, m: number) => new Date(y, m + 1, 0).getDate();
+  const firstDayOfMonth = (y: number, m: number) => new Date(y, m, 1).getDay();
   const handlePrevMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1));
   const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
 
   const selectDate = (day: number) => {
-    // Correctly create a local date string to avoid UTC shift
     const year = currentMonth.getFullYear();
     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
-    const dateStr = `${year}-${month}-${d}`;
-
-    onChange(dateStr);
+    onChange(`${year}-${month}-${d}`);
     setIsOpen(false);
   };
 
-  const days = [];
+  const days: (number | null)[] = [];
   const totalDays = daysInMonth(currentMonth.getFullYear(), currentMonth.getMonth());
   const startOffset = firstDayOfMonth(currentMonth.getFullYear(), currentMonth.getMonth());
-
   for (let i = 0; i < startOffset; i++) days.push(null);
   for (let d = 1; d <= totalDays; d++) days.push(d);
 
-  const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
+  const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
   return (
     <div className="relative" ref={containerRef}>
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-10 md:pl-14 pr-4 focus-within:border-red-500/50 focus-within:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg cursor-pointer flex items-center justify-between group"
+        className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-10 md:pl-14 pr-4 focus-within:border-red-500/50 outline-none transition-all font-bold text-sm md:text-lg cursor-pointer flex items-center justify-between group"
       >
         <div className="flex items-center gap-3 md:gap-4">
           <CalendarIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-hover:text-red-500 transition-colors w-4 h-4 md:w-5 md:h-5" />
-          <span>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+          <span>{selectedDate ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Datum wählen'}</span>
         </div>
         <ChevronRight className={`text-gray-600 transition-transform w-4 h-4 md:w-[18px] md:h-[18px] ${isOpen ? 'rotate-90' : ''}`} />
       </div>
-
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -76,18 +80,14 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
           >
             <div className="flex items-center justify-between mb-6">
               <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"><ChevronLeft size={20} /></button>
-              <h4 className="font-black uppercase tracking-widest text-sm text-white">
-                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-              </h4>
+              <h4 className="font-black uppercase tracking-widest text-sm text-white">{monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}</h4>
               <button type="button" onClick={handleNextMonth} className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"><ChevronRight size={20} /></button>
             </div>
-
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => (
                 <div key={d} className="text-center text-[10px] font-black text-gray-600 uppercase py-2">{d}</div>
               ))}
             </div>
-
             <div className="grid grid-cols-7 gap-1">
               {days.map((day, i) => (
                 <div key={i} className="aspect-square flex items-center justify-center">
@@ -97,13 +97,12 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       onClick={() => selectDate(day)}
-                      className={`w-full h-full rounded-xl text-xs font-bold transition-all ${selectedDate === `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-                        ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
-                        : 'text-gray-400 hover:bg-white/10 hover:text-white'
-                        }`}
-                    >
-                      {day}
-                    </motion.button>
+                      className={`w-full h-full rounded-xl text-xs font-bold transition-all ${
+                        selectedDate === `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                          ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
+                          : 'text-gray-400 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >{day}</motion.button>
                   )}
                 </div>
               ))}
@@ -115,26 +114,15 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
   );
 };
 
-export default function NewInspectionPage() {
+function EditDetailsContent() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const getLocalDate = () => {
-    const now = new Date();
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-  };
+  const params = useParams();
+  const id = params.id as string;
 
-  const [formData, setFormData] = useState({
-    datum: getLocalDate(),
-    auftraggeber: '',
-    teilnehmer: 'Robin Furrer',
-    documentType: 'Catalog of measures' as 'Catalog of measures' | 'QS protocol',
-    participants: [{ name: '', role: '' }],
-    generalNotes: [] as string[],
-  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, boolean>>({});
-  const [customNote, setCustomNote] = useState('');
-  const [isDragging, setIsDragging] = useState(false);
-  
+
   const clientOptions = ['Musterfirma AG', 'Immobilien Verwaltung GmbH', 'Swiss Property Management', 'City Real Estate'];
   const noteOptions = [
     'Sämtliche im Protokoll festgehaltenen Sachverhalte sind auf vergleichbare Fälle zu übertragen.',
@@ -142,14 +130,54 @@ export default function NewInspectionPage() {
     'Die brandschutztechnische Abnahme erfolgt nach Behebung der Mängel.',
     'Der Brandschutzplan ist entsprechend zu aktualisieren.'
   ];
-  const [floorPlans, setFloorPlans] = useState<{ id: string, name: string, file: File | null, preview: string | null }[]>([]);
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const defaultNotes = [
     'Sämtliche im Protokoll festgehaltenen Sachverhalte sind auf vergleichbare Fälle zu übertragen.',
     'Die im Protokoll aufgeführten Mängel werden durch uns lediglich dokumentiert. Die Behebung sowie die Abmeldung der erledigten Mängel liegen bei den Verantwortlichen.'
   ];
+
+  const [formData, setFormData] = useState({
+    datum: '',
+    auftraggeber: '',
+    teilnehmer: '',
+    documentType: 'Catalog of measures' as 'Catalog of measures' | 'QS protocol',
+    participants: [{ name: '', role: '' }],
+    generalNotes: [] as string[],
+  });
+  const [customNote, setCustomNote] = useState('');
+
+  // Load existing inspection data
+  useEffect(() => {
+    const fetchInspection = async () => {
+      try {
+        const res = await fetch(`/api/inspections/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          // Format date to YYYY-MM-DD
+          let datum = '';
+          if (data.datum) {
+            const d = new Date(data.datum);
+            datum = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          }
+          setFormData({
+            datum,
+            auftraggeber: data.auftraggeber || '',
+            teilnehmer: data.teilnehmer || '',
+            documentType: data.documentType || 'Catalog of measures',
+            participants: data.participantsList?.length > 0
+              ? data.participantsList
+              : [{ name: '', role: '' }],
+            generalNotes: data.generalNotes || [],
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching inspection:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInspection();
+  }, [id]);
 
   const handleNoteToggle = (note: string) => {
     setFormData(prev => ({
@@ -162,20 +190,13 @@ export default function NewInspectionPage() {
 
   const addCustomNote = () => {
     if (customNote.trim()) {
-      setFormData(prev => ({
-        ...prev,
-        generalNotes: [...prev.generalNotes, customNote.trim()]
-      }));
+      setFormData(prev => ({ ...prev, generalNotes: [...prev.generalNotes, customNote.trim()] }));
       setCustomNote('');
     }
   };
 
-  // Participant Handlers
   const addParticipant = () => {
-    setFormData(prev => ({
-      ...prev,
-      participants: [...prev.participants, { name: '', role: '' }]
-    }));
+    setFormData(prev => ({ ...prev, participants: [...prev.participants, { name: '', role: '' }] }));
   };
 
   const updateParticipant = (index: number, field: 'name' | 'role', value: string) => {
@@ -186,127 +207,61 @@ export default function NewInspectionPage() {
 
   const removeParticipant = (index: number) => {
     if (formData.participants.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        participants: prev.participants.filter((_, i) => i !== index)
-      }));
+      setFormData(prev => ({ ...prev, participants: prev.participants.filter((_, i) => i !== index) }));
     }
-  };
-
-  // Floor Plan Handlers
-  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
-    let files: FileList | null = null;
-    
-    if ('target' in e && (e.target as HTMLInputElement).files) {
-      files = (e.target as HTMLInputElement).files;
-    } else if ('dataTransfer' in e) {
-      files = (e as React.DragEvent).dataTransfer.files;
-    }
-
-    if (files) {
-      const newPlans = Array.from(files).map(file => ({
-        id: crypto.randomUUID(),
-        name: file.name.split('.')[0], // Default name from filename
-        file: file,
-        preview: file.type.includes('pdf') ? 'pdf' : URL.createObjectURL(file)
-      }));
-      setFloorPlans(prev => [...prev, ...newPlans]);
-    }
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const onDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleImagesChange(e);
-  };
-
-  const updateFloorPlanName = (index: number, name: string) => {
-    const newPlans = [...floorPlans];
-    newPlans[index].name = name;
-    setFloorPlans(newPlans);
-  };
-
-  const removeFloorPlan = (index: number) => {
-    setFloorPlans(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation
     const newErrors: Record<string, boolean> = {};
     if (!formData.auftraggeber.trim()) newErrors.auftraggeber = true;
     if (!formData.datum) newErrors.datum = true;
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      // Scroll to first error
-      const firstError = Object.keys(newErrors)[0];
-      const element = document.getElementsByName(firstError)[0] || document.querySelector(`[label="${firstError}"]`);
-      element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
     setErrors({});
-    setLoading(true);
+    setSaving(true);
     try {
-      const data = new FormData();
-      data.append('datum', formData.datum);
-      data.append('auftraggeber', formData.auftraggeber);
-      data.append('teilnehmer', formData.teilnehmer);
-      data.append('documentType', formData.documentType);
-      
-      // Filter out empty participants
       const validParticipants = formData.participants.filter(p => p.name.trim());
-      data.append('participants', JSON.stringify(validParticipants));
-      
-      data.append('generalNotes', JSON.stringify(formData.generalNotes));
-      
-      // Floor Plans Data (IDs and Names)
-      const floorPlansMeta = floorPlans.map(fp => ({ id: fp.id, name: fp.name }));
-      data.append('floorPlansData', JSON.stringify(floorPlansMeta));
-
-      // Append Files
-      floorPlans.forEach((fp, index) => {
-        if (fp.file) {
-          data.append(`file_${index}`, fp.file);
-        }
-      });
-
-      const res = await fetch('/api/inspections', {
-        method: 'POST',
-        body: data,
+      const res = await fetch(`/api/inspections/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          datum: formData.datum,
+          auftraggeber: formData.auftraggeber,
+          teilnehmer: formData.teilnehmer,
+          documentType: formData.documentType,
+          participants: validParticipants,
+          generalNotes: formData.generalNotes,
+        }),
       });
 
       if (res.ok) {
-        const result = await res.json();
-        if (floorPlans.length > 0) {
-          router.push(`/inspection/${result.id}/map`);
-        } else {
-          router.push(`/inspection/${result.id}/review`);
-        }
+        router.push(`/inspection/${id}/review`);
       } else {
-        const errData = await res.json();
-        alert(`Fehler: ${errData.error || 'Unbekannter Fehler'}`);
+        const err = await res.json();
+        alert(`Fehler: ${err.error || 'Unbekannter Fehler'}`);
       }
     } catch (error) {
       console.error(error);
-      alert('Erstellen der Inspektion fehlgeschlagen. Überprüfen Sie Ihre Verbindung.');
+      alert('Speichern fehlgeschlagen. Überprüfen Sie Ihre Verbindung.');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-t-2 border-red-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden relative">
@@ -318,7 +273,7 @@ export default function NewInspectionPage() {
       {/* Header */}
       <header className="fixed top-0 left-0 lg:left-24 right-0 h-16 md:h-24 glass-premium border-b border-white/5 z-50 px-4 md:px-12 flex items-center">
         <div className="flex-1 flex items-center justify-start">
-          <Link href="/dashboard">
+          <Link href={`/inspection/${id}/review`}>
             <motion.div
               whileHover={{ x: -4 }}
               className="flex items-center gap-2 text-gray-500 hover:text-white transition-colors cursor-pointer group"
@@ -328,13 +283,16 @@ export default function NewInspectionPage() {
             </motion.div>
           </Link>
         </div>
-        
-        <h1 className="text-sm md:text-xl font-black uppercase tracking-[2px] md:tracking-[4px] text-white truncate max-w-[180px] md:max-w-none text-center">
-          Neue Inspektion
-        </h1>
-        
+
+        <div className="flex items-center gap-2">
+          <Pencil className="w-4 h-4 text-red-500" />
+          <h1 className="text-sm md:text-xl font-black uppercase tracking-[2px] md:tracking-[4px] text-white truncate max-w-[180px] md:max-w-none text-center">
+            Details bearbeiten
+          </h1>
+        </div>
+
         <div className="flex-1 flex justify-end">
-          <div className="w-8 h-8 lg:hidden"></div> {/* Mobile Spacer */}
+          <div className="w-8 h-8 lg:hidden"></div>
         </div>
       </header>
 
@@ -356,7 +314,6 @@ export default function NewInspectionPage() {
                 <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Bericht auswählen</p>
               </div>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               {['Catalog of measures', 'QS protocol'].map((type) => (
                 <button
@@ -364,8 +321,8 @@ export default function NewInspectionPage() {
                   type="button"
                   onClick={() => setFormData({ ...formData, documentType: type as any })}
                   className={`py-4 md:py-6 px-6 md:px-8 rounded-xl md:rounded-2xl border-2 transition-all font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-between ${
-                    formData.documentType === type 
-                      ? 'bg-red-600/10 border-red-500 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]' 
+                    formData.documentType === type
+                      ? 'bg-red-600/10 border-red-500 text-red-500 shadow-[0_0_30px_rgba(239,68,68,0.2)]'
                       : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20'
                   }`}
                 >
@@ -375,7 +332,8 @@ export default function NewInspectionPage() {
               ))}
             </div>
           </div>
-          {/* Stap 1: Basic Details */}
+
+          {/* Basic Details */}
           <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10 overflow-visible! relative z-60">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
@@ -388,7 +346,6 @@ export default function NewInspectionPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-10 !overflow-visible">
-
               <div className="space-y-2 md:space-y-3 relative !overflow-visible z-50">
                 <label className={`text-[9px] md:text-[10px] uppercase font-black tracking-[2px] ml-2 transition-colors ${errors.datum ? 'text-red-500' : 'text-gray-500'}`}>Datum</label>
                 <div className={errors.datum ? 'ring-2 ring-red-500 rounded-2xl' : ''}>
@@ -436,7 +393,7 @@ export default function NewInspectionPage() {
                       <div className="flex-1">
                         <CreatableSingleSelect
                           label=""
-                          icon={<User className="w-4 h-4 md:w-4.5 md:h-4.5" />}
+                          icon={<User className="w-4 h-4" />}
                           placeholder="Name"
                           value={p.name}
                           onChange={(val) => updateParticipant(index, 'name', val)}
@@ -447,7 +404,7 @@ export default function NewInspectionPage() {
                       <div className="flex-1">
                         <CreatableSingleSelect
                           label=""
-                          icon={<Building className="w-4 h-4 md:w-4.5 md:h-4.5" />}
+                          icon={<Building className="w-4 h-4" />}
                           placeholder="Funktion"
                           value={p.role}
                           onChange={(val) => updateParticipant(index, 'role', val)}
@@ -455,15 +412,15 @@ export default function NewInspectionPage() {
                           listType="functions"
                         />
                       </div>
-                        {formData.participants.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeParticipant(index)}
-                            className="p-3 md:p-4 rounded-xl bg-red-600/10 text-red-500 hover:bg-red-600/20 transition-colors"
-                          >
-                            <X className="w-4 h-4 md:w-4.5 md:h-4.5" />
-                          </button>
-                        )}
+                      {formData.participants.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removeParticipant(index)}
+                          className="p-3 md:p-4 rounded-xl bg-red-600/10 text-red-500 hover:bg-red-600/20 transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -483,7 +440,7 @@ export default function NewInspectionPage() {
             </div>
           </div>
 
-          {/* New Section: General Notes */}
+          {/* General Notes */}
           <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10 overflow-visible! relative z-60 pb-20 md:pb-32">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
@@ -497,8 +454,8 @@ export default function NewInspectionPage() {
 
             <div className="space-y-3 md:space-y-4">
               {defaultNotes.map((note, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   onClick={() => handleNoteToggle(note)}
                   className={`p-4 md:p-6 rounded-xl md:rounded-2xl border transition-all cursor-pointer flex items-center gap-3 md:gap-4 ${
                     formData.generalNotes.includes(note)
@@ -532,127 +489,45 @@ export default function NewInspectionPage() {
                   Hinweis zur Liste hinzufügen
                 </button>
               </div>
-                
-                {formData.generalNotes.filter(n => !defaultNotes.includes(n)).length > 0 && (
-                  <div className="pt-4 space-y-3">
-                    <p className="text-[10px] uppercase font-black tracking-[2px] text-red-500 ml-2">Benutzerdefinierte Notizen:</p>
-                    {formData.generalNotes
-                      .filter(note => !defaultNotes.includes(note))
-                      .map((note, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
-                          <p className="text-sm font-bold text-white pr-4">{note}</p>
-                          <button 
-                            type="button"
-                            onClick={() => handleNoteToggle(note)}
-                            className="text-gray-500 hover:text-red-500 transition-colors"
-                          >
-                            <X size={18} />
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                )}
-              </div>
-            </div>
 
-          {/* Stap 2: Map Upload */}
-          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10">
-            <div className="flex items-center gap-3 md:gap-4">
-              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
-                <Map className="w-5 h-5 md:w-6 md:h-6" />
-              </div>
-              <div>
-                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Grundriss</h2>
-                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Plan hochladen</p>
-              </div>
-            </div>
-
-            <div className="space-y-8">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={onDragOver}
-                onDragLeave={onDragLeave}
-                onDrop={onDrop}
-                className={`w-full py-8 md:py-12 bg-white/[0.02] rounded-2xl md:rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 md:gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer ${
-                  isDragging ? 'border-red-500 bg-red-500/10' : 'border-white/10'
-                }`}
-              >
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-red-600/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform"
-                >
-                  <Upload className="w-6 h-6 md:w-8 md:h-8" />
-                </motion.div>
-                <div className="text-center px-4">
-                  <p className="text-sm md:text-xl font-black uppercase tracking-tight text-white">Pläne hochladen</p>
-                  <p className="text-gray-500 text-[8px] md:text-[10px] font-black mt-2 uppercase tracking-[2px] md:tracking-[3px]">JPG, PNG, PDF (Mehrere oder Drag & Drop)</p>
-                </div>
-                <input
-                  type="file"
-                  multiple
-                  ref={fileInputRef}
-                  className="hidden"
-                  accept="image/*,application/pdf"
-                  onChange={handleImagesChange}
-                />
-              </div>
-
-              {floorPlans.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {floorPlans.map((plan, index) => (
-                    <div key={plan.id} className="glass-premium rounded-3xl border border-white/10 overflow-hidden flex flex-col">
-                      <div className="relative aspect-[16/9] bg-black flex items-center justify-center">
-                        {plan.preview === 'pdf' ? (
-                          <div className="flex flex-col items-center gap-3 text-red-500">
-                            <FileText className="w-12 h-12 md:w-20 md:h-20" />
-                            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">PDF Dokument</span>
-                          </div>
-                        ) : (
-                          <img src={plan.preview!} alt={plan.name} className="w-full h-full object-contain" />
-                        )}
+              {formData.generalNotes.filter(n => !defaultNotes.includes(n)).length > 0 && (
+                <div className="pt-4 space-y-3">
+                  <p className="text-[10px] uppercase font-black tracking-[2px] text-red-500 ml-2">Benutzerdefinierte Notizen:</p>
+                  {formData.generalNotes
+                    .filter(note => !defaultNotes.includes(note))
+                    .map((note, index) => (
+                      <div key={index} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                        <p className="text-sm font-bold text-white pr-4">{note}</p>
                         <button
                           type="button"
-                          onClick={() => removeFloorPlan(index)}
-                          className="absolute top-2 md:top-4 right-2 md:right-4 p-1.5 md:p-2 rounded-lg md:rounded-xl bg-black/60 backdrop-blur-md text-white hover:text-red-500 transition-colors"
+                          onClick={() => handleNoteToggle(note)}
+                          className="text-gray-500 hover:text-red-500 transition-colors"
                         >
-                          <X className="w-4 h-4 md:w-4.5 md:h-4.5" />
+                          <X size={18} />
                         </button>
                       </div>
-                      <div className="p-3 md:p-6 space-y-2 md:space-y-3">
-                        <label className="text-[9px] md:text-[10px] uppercase font-black tracking-widest text-gray-500 ml-1">Plan Bezeichnung</label>
-                        <input
-                          required
-                          type="text"
-                          placeholder="z.B. Erdgeschoss"
-                          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 md:py-4 px-4 md:px-5 focus:border-red-500/50 outline-none transition-all font-bold text-xs md:text-sm"
-                          value={plan.name}
-                          onChange={(e) => updateFloorPlanName(index, e.target.value)}
-                        />
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               )}
             </div>
           </div>
 
-          {/* Fixed Footer Action */}
+          {/* Fixed Footer */}
           <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-24 md:h-32 glass-premium border-t border-white/5 z-50 flex items-center justify-center px-4 md:px-8">
             <motion.button
-              whileHover={!loading ? { scale: 1.02 } : {}}
-              whileTap={!loading ? { scale: 0.98 } : {}}
-              disabled={loading}
+              whileHover={!saving ? { scale: 1.02 } : {}}
+              whileTap={!saving ? { scale: 0.98 } : {}}
+              disabled={saving}
               className="w-full max-w-2xl bg-gradient-to-r from-red-600 to-red-900 py-4 md:py-6 rounded-xl md:rounded-[2rem] flex items-center justify-center gap-3 md:gap-4 text-white font-black uppercase tracking-[2px] md:tracking-[3px] text-xs md:text-base shadow-[0_20px_50px_rgba(239,68,68,0.3)] hover:shadow-[0_30px_70px_rgba(239,68,68,0.5)] transition-all cursor-pointer disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
             >
-              {loading ? (
+              {saving ? (
                 <>
                   <Loader2 className="animate-spin w-5 h-5 md:w-6 md:h-6" />
-                  <span>Wird erstellt...</span>
+                  <span>Wird gespeichert...</span>
                 </>
               ) : (
                 <>
-                  <span>Inspektion starten</span>
+                  <span>Änderungen speichern</span>
                   <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
                 </>
               )}
@@ -661,5 +536,17 @@ export default function NewInspectionPage() {
         </motion.form>
       </main>
     </div>
+  );
+}
+
+export default function EditDetailsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-12 h-12 rounded-full border-t-2 border-red-600 animate-spin" />
+      </div>
+    }>
+      <EditDetailsContent />
+    </Suspense>
   );
 }

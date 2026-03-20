@@ -172,15 +172,26 @@ export default function DraftsSection({ searchQuery }: DraftsSectionProps) {
           </button>
           
           <div className="flex gap-2">
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`w-12 h-12 rounded-2xl font-black transition-all cursor-pointer ${currentPage === i + 1 ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20' : 'bg-white/5 border border-white/10 text-zinc-500 hover:bg-white/10'}`}
-              >
-                {i + 1}
-              </button>
-            ))}
+            {(() => {
+              // Sliding window: show max 3 page buttons which shift forward/backward
+              const windowSize = 3;
+              let start = Math.max(1, Math.min(currentPage, totalPages - windowSize + 1));
+              let end = Math.min(totalPages, start + windowSize - 1);
+              
+              return Array.from({ length: end - start + 1 }, (_, i) => start + i).map(page => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-12 h-12 rounded-2xl font-black transition-all cursor-pointer ${
+                    currentPage === page
+                      ? 'bg-amber-500 text-black shadow-lg shadow-amber-500/20'
+                      : 'bg-white/5 border border-white/10 text-zinc-500 hover:bg-white/10'
+                  }`}
+                >
+                  {page}
+                </button>
+              ));
+            })()}
           </div>
 
           <button 
