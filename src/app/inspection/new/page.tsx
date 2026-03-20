@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft,
@@ -25,7 +26,54 @@ import { FileText } from 'lucide-react';
 const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onChange: (date: string) => void }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+  const [mounted, setMounted] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
+
+  const updateCoords = () => {
+    if (triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + 16,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (isOpen) {
+      updateCoords();
+      window.addEventListener('scroll', updateCoords, true);
+      window.addEventListener('resize', updateCoords);
+    }
+    return () => {
+      window.removeEventListener('scroll', updateCoords, true);
+      window.removeEventListener('resize', updateCoords);
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        containerRef.current && !containerRef.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
   const firstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
@@ -34,7 +82,6 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
   const handleNextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1));
 
   const selectDate = (day: number) => {
-    // Correctly create a local date string to avoid UTC shift
     const year = currentMonth.getFullYear();
     const month = String(currentMonth.getMonth() + 1).padStart(2, '0');
     const d = String(day).padStart(2, '0');
@@ -53,10 +100,69 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
 
   const monthNames = ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"];
 
+  const calendarDropdown = (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={dropdownRef}
+          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+          style={{
+            position: 'fixed',
+            top: coords.top,
+            left: coords.left,
+            width: coords.width,
+          }}
+          className="z-[1000000] glass-premium rounded-[2rem] p-6 border border-white/10 shadow-2xl overflow-visible"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"><ChevronLeft size={20} /></button>
+            <h4 className="font-black uppercase tracking-widest text-sm text-white">
+              {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
+            </h4>
+            <button type="button" onClick={handleNextMonth} className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"><ChevronRight size={20} /></button>
+          </div>
+
+          <div className="grid grid-cols-7 gap-1 mb-2">
+            {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => (
+              <div key={d} className="text-center text-[10px] font-black text-gray-600 uppercase py-2">{d}</div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-1">
+            {days.map((day, i) => (
+              <div key={i} className="aspect-square flex items-center justify-center">
+                {day && (
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => selectDate(day)}
+                    className={`w-full h-full rounded-xl text-xs font-bold transition-all ${selectedDate === `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+                      ? 'bg-red-600 text-white shadow-lg shadow-red-600/20'
+                      : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {day}
+                  </motion.button>
+                )}
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <div className="relative" ref={containerRef}>
       <div
-        onClick={() => setIsOpen(!isOpen)}
+        ref={triggerRef}
+        onClick={() => {
+          if (!isOpen) updateCoords();
+          setIsOpen(!isOpen);
+        }}
         className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-10 md:pl-14 pr-4 focus-within:border-red-500/50 focus-within:bg-white/[0.08] outline-none transition-all font-bold text-sm md:text-lg cursor-pointer flex items-center justify-between group"
       >
         <div className="flex items-center gap-3 md:gap-4">
@@ -66,54 +172,11 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
         <ChevronRight className={`text-gray-600 transition-transform w-4 h-4 md:w-[18px] md:h-[18px] ${isOpen ? 'rotate-90' : ''}`} />
       </div>
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute top-full left-0 right-0 mt-4 glass-premium rounded-[2rem] p-6 z-[999999] border border-white/10 shadow-2xl overflow-visible"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"><ChevronLeft size={20} /></button>
-              <h4 className="font-black uppercase tracking-widest text-sm text-white">
-                {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
-              </h4>
-              <button type="button" onClick={handleNextMonth} className="p-2 hover:bg-white/5 rounded-xl text-gray-400 hover:text-white transition-colors"><ChevronRight size={20} /></button>
-            </div>
-
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => (
-                <div key={d} className="text-center text-[10px] font-black text-gray-600 uppercase py-2">{d}</div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-7 gap-1">
-              {days.map((day, i) => (
-                <div key={i} className="aspect-square flex items-center justify-center">
-                  {day && (
-                    <motion.button
-                      type="button"
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => selectDate(day)}
-                      className={`w-full h-full rounded-xl text-xs font-bold transition-all ${selectedDate === `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-                        ? 'bg-red-600 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]'
-                        : 'text-gray-400 hover:bg-white/10 hover:text-white'
-                        }`}
-                    >
-                      {day}
-                    </motion.button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {mounted && createPortal(calendarDropdown, document.body)}
     </div>
   );
 };
+
 
 export default function NewInspectionPage() {
   const router = useRouter();
