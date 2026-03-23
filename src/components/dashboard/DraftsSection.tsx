@@ -113,31 +113,33 @@ export default function DraftsSection({ searchQuery }: DraftsSectionProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: idx * 0.05 }}
-              className="glass-premium p-4 md:p-6 rounded-2xl md:rounded-[32px] hover:border-amber-500/30 transition-all group relative overflow-hidden"
+              className="glass-premium p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl md:rounded-[32px] hover:border-amber-500/30 transition-all group relative overflow-hidden"
             >
               <div className="card-shine opacity-30"></div>
               <div className="relative z-10 flex flex-col h-full justify-between gap-4 md:gap-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2 md:space-y-3">
-                    <div className="flex items-center gap-2 text-zinc-100">
-                      <MapPin size={14} className="text-amber-500 w-3.5 h-3.5" />
-                      <span className="text-xs md:text-sm font-black uppercase tracking-tight">{draft.ort}</span>
+                <div className="flex flex-col gap-3">
+                  {/* Top Row: Location + Date */}
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                    <div className="flex items-center gap-2 text-zinc-100 min-w-0">
+                      <MapPin size={14} className="text-amber-500 w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="text-xs sm:text-sm font-black uppercase tracking-tight truncate">{draft.ort}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-zinc-500">
-                      <Calendar size={12} className="w-3 h-3 md:w-3.5 md:h-3.5" />
-                      <span className="text-[10px] md:text-xs font-bold tracking-widest uppercase">{new Date(draft.datum).toLocaleDateString('de-DE')}</span>
+                    <div className="flex items-center gap-2 text-zinc-500 flex-shrink-0">
+                      <Calendar size={12} className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                      <span className="text-[10px] sm:text-xs font-bold tracking-widest uppercase">{new Date(draft.datum).toLocaleDateString('de-DE')}</span>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 md:px-3 py-1 rounded-lg md:xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest">
-                      {draft.status}
+                  {/* Bottom Row: Client Badge + Delete Button */}
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="px-2 sm:px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] sm:text-[11px] font-black uppercase tracking-wider truncate max-w-[160px] sm:max-w-[200px] md:max-w-[280px] lg:max-w-[320px]">
+                      {draft.auftraggeber || 'Unbenanntes Projekt'}
                     </span>
                     <button 
                       onClick={(e) => handleDeleteTrigger(draft._id, e)}
-                      className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all cursor-pointer shadow-lg shadow-red-500/5 transition-colors"
+                      className="p-2 rounded-lg bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white transition-all cursor-pointer shadow-lg shadow-red-500/5 flex-shrink-0"
                     >
-                      <Trash2 className="w-3 h-3 md:w-3.5 md:h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>

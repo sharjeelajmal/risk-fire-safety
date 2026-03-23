@@ -72,9 +72,9 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
       </div>
 
       <div className="w-full md:w-auto flex md:block justify-start">
-        <div className="bg-black text-white px-6 py-4 rounded-xl inline-block min-w-[140px] shadow-lg">
-          <span className="block text-[10px] font-black tracking-widest uppercase opacity-50">Bericht Nr.</span>
-          <span className="text-xl md:text-2xl font-black">#{reportNumber}</span>
+        <div className="bg-black text-white px-4 py-3 rounded-xl inline-block min-w-[120px] shadow-lg">
+          <span className="block text-[9px] font-black tracking-widest uppercase opacity-50">Bericht Nr.</span>
+          <span className="text-sm md:text-base font-black">#{reportNumber}</span>
         </div>
       </div>
     </div>

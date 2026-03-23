@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   badgeValue: {
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: 'bold',
   },
 

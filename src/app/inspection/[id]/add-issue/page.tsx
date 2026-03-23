@@ -91,12 +91,10 @@ function AddIssueForm() {
     
     // Relaxed Validation
     const hasImage = images.length > 0;
-    const hasDescription = formData.description.trim().length > 0;
-    const hasMeasures = formData.measures.length > 0;
 
-    // Only error if everything is empty
-    if (!hasImage && !hasDescription && !hasMeasures) {
-      setErrors({ general: true });
+    // Only error if no image AND no description
+    if (!hasImage && !formData.description.trim()) {
+      alert('Bitte fügen Sie ein Foto oder eine Beschreibung hinzu.');
       return;
     }
 
@@ -133,7 +131,7 @@ function AddIssueForm() {
         <FormHeader x={searchParams.get('x')} y={searchParams.get('y')} />
         <form onSubmit={handleSubmit} className="space-y-5 md:space-y-8">
           <div className="space-y-1.5 md:space-y-2">
-            <label className={`block text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${errors.issueNumber ? 'text-red-500' : 'text-zinc-400'}`}>Mangel-Nummer</label>
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mangel-Nummer</label>
             <input 
               type="text" 
               value={formData.issueNumber} 
@@ -141,14 +139,14 @@ function AddIssueForm() {
                 setFormData({...formData, issueNumber: e.target.value});
               }} 
               placeholder="z.B. 1, 2024-01A" 
-              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl border-white/10 focus:border-red-500/50`} 
+              className="w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl border-white/10 focus:border-red-500/50"
             />
           </div>
           <ImageUploader previews={previews} onAddImages={handleImageChange} onRemoveImage={removeImage} isPdf={(i) => pdfFlags[i] ?? false} />
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div className="space-y-1.5 md:space-y-2">
-              <label className={`block text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${errors.location ? 'text-red-500' : 'text-zinc-400'}`}>Standortbereich</label>
+              <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Standortbereich</label>
               <input 
                 type="text" 
                 value={formData.location} 
@@ -156,7 +154,7 @@ function AddIssueForm() {
                   setFormData({...formData, location: e.target.value});
                 }} 
                 placeholder="z.B. Flur 1. OG" 
-                className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl border-white/10 focus:border-red-500/50`} 
+                className="w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl border-white/10 focus:border-red-500/50"
               />
             </div>
             <CreatableMultiSelect
@@ -172,7 +170,7 @@ function AddIssueForm() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <CustomSelect label="Status" options={STATUS_OPTIONS} value={formData.status} onChange={(val) => setFormData({...formData, status: val})} required />
+            <CustomSelect label="Status" options={STATUS_OPTIONS} value={formData.status} onChange={(val) => setFormData({...formData, status: val})} />
              <div className="space-y-1.5 md:space-y-2">
               <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Priorität</label>
               <div className="flex gap-1.5 md:gap-2">
@@ -186,7 +184,7 @@ function AddIssueForm() {
           </div>
 
           <div className="space-y-1.5 md:space-y-2">
-            <label className={`block text-[10px] md:text-xs font-black uppercase tracking-widest transition-colors ${errors.description ? 'text-red-500' : 'text-zinc-400'}`}>Problembeschreibung</label>
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Problembeschreibung</label>
             <textarea 
               rows={4} 
               value={formData.description} 
@@ -194,7 +192,7 @@ function AddIssueForm() {
                 setFormData({...formData, description: e.target.value});
               }} 
               placeholder="Was ist der Mangel?" 
-              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm resize-none shadow-xl border-white/10 focus:border-red-500/50`} 
+              className="w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm resize-none shadow-xl border-white/10 focus:border-red-500/50"
             />
           </div>
           <div className="space-y-1.5 md:space-y-2">
@@ -208,11 +206,6 @@ function AddIssueForm() {
             />
           </div>
 
-          {errors.general && (
-            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">
-              Bitte geben Sie mindestens ein Bild, eine Beschreibung oder eine Massnahme an.
-            </div>
-          )}
 
           <div className="flex flex-col-reverse sm:flex-row gap-3 md:gap-4 w-full">
             <button
