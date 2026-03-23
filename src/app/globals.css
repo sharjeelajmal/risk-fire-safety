@@ -135,13 +135,20 @@
 
 /* Glassmorphism 2.0 */
 .glass-premium {
-  background: var(--glass-bg);
-  backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid var(--glass-border);
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.9),
-    inset 0 1px 1px rgba(255, 255, 255, 0.05);
-  overflow: hidden;
+  @apply bg-[#0a0a0a] border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)];
+}
+.glass-panel {
+  @apply bg-[#111] border-white/5;
+}
+
+/* Only apply expensive GPU blur effects on larger desktop screens */
+@media (min-width: 768px) {
+  .glass-premium {
+    @apply bg-[#0a0a0a]/80 backdrop-blur-2xl;
+  }
+  .glass-panel {
+    @apply bg-[#111]/80 backdrop-blur-xl;
+  }
 }
 
 /* Card Decorative Element */

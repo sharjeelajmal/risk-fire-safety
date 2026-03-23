@@ -11,7 +11,7 @@ interface MapHeaderProps {
 
 export default function MapHeader({ title }: MapHeaderProps) {
   return (
-    <header className="fixed top-0 left-0 md:left-24 right-0 h-16 md:h-24 glass-premium border-b border-white/5 z-50 px-4 md:px-12 flex items-center">
+    <header className="fixed top-0 left-0 md:left-24 right-0 h-16 md:h-24 bg-[#050505] border-b border-white/10 shadow-lg z-50 px-4 md:px-12 flex items-center">
       <div className="flex-1 flex items-center justify-start">
         <Link href="/dashboard">
           <motion.div 

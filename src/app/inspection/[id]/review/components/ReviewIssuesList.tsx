@@ -110,19 +110,19 @@ export default function ReviewIssuesList({ issues }: { issues: Issue[] }) {
               <div className="space-y-4 md:space-y-6">
                 <div>
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Problembeschreibung</label>
-                  <div className="h-auto whitespace-pre-wrap break-words">
+                  <div className="h-auto whitespace-pre-wrap wrap-break-word break-all overflow-hidden max-w-full">
                     <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-medium">{issue.description}</p>
                   </div>
                 </div>
                 <div>
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Massnahmen</label>
-                  <div className="h-auto">
+                  <div className="h-auto whitespace-pre-wrap wrap-break-word break-all overflow-hidden max-w-full">
                     <p className="text-xs md:text-sm text-zinc-600 leading-relaxed font-medium italic">{issue.measures}</p>
                   </div>
                 </div>
                 <div>
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Verantwortlichkeit</label>
-                  <p className="text-[10px] md:text-sm font-black text-zinc-900 uppercase tracking-wide">{issue.responsibleContractor}</p>
+                  <p className="text-[10px] md:text-sm font-black text-zinc-900 uppercase tracking-wide wrap-break-word break-all overflow-hidden max-w-full">{issue.responsibleContractor}</p>
                 </div>
               </div>
 

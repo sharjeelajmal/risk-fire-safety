@@ -117,7 +117,7 @@ export default function ImageUploader({
                   <button
                     type="button"
                     onClick={() => onRemoveImage(i)}
-                    className="absolute top-1.5 md:top-2 right-1.5 md:right-2 bg-black/60 backdrop-blur-md p-1 md:p-1.5 rounded-lg md:rounded-full text-white hover:bg-red-600 transition-colors pointer-events-auto"
+                    className="absolute top-1.5 md:top-2 right-1.5 md:right-2 bg-black/80 sm:bg-black/60 sm:backdrop-blur-md p-1 md:p-1.5 rounded-lg md:rounded-full text-white hover:bg-red-600 transition-colors pointer-events-auto"
                   >
                     <X className="w-3 h-3 md:w-3.5 md:h-3.5" />
                   </button>

@@ -52,11 +52,11 @@ const CustomCalendar = ({ selectedDate, onChange }: { selectedDate: string, onCh
   useLayoutEffect(() => {
     if (isOpen) {
       updateCoords();
-      window.addEventListener('scroll', updateCoords, true);
+      // window.addEventListener('scroll', updateCoords, true); // Removed redundant scroll listener
       window.addEventListener('resize', updateCoords);
     }
     return () => {
-      window.removeEventListener('scroll', updateCoords, true);
+      // window.removeEventListener('scroll', updateCoords, true);
       window.removeEventListener('resize', updateCoords);
     };
   }, [isOpen]);
@@ -268,7 +268,7 @@ export default function NewInspectionPage() {
 
     if (files) {
       const newPlans = Array.from(files).map(file => ({
-        id: crypto.randomUUID(),
+        id: (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2)),
         name: file.name.split('.')[0], // Default name from filename
         file: file,
         preview: file.type.includes('pdf') ? 'pdf' : URL.createObjectURL(file)
@@ -373,13 +373,13 @@ export default function NewInspectionPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white overflow-x-hidden relative">
-      <div className="noise-overlay"></div>
-      <div className="bg-mesh-premium opacity-50"></div>
+      <div className="noise-overlay hidden md:block"></div>
+      <div className="bg-mesh-premium opacity-50 hidden md:block"></div>
 
       <Navbar />
 
       {/* Header */}
-      <header className="fixed top-0 left-0 lg:left-24 right-0 h-16 md:h-24 glass-premium border-b border-white/5 z-50 px-4 md:px-12 flex items-center">
+      <header className="fixed top-0 left-0 lg:left-24 right-0 h-16 md:h-24 bg-[#050505] border-b border-white/10 shadow-lg z-50 px-4 md:px-12 flex items-center">
         <div className="flex-1 flex items-center justify-start">
           <Link href="/dashboard">
             <motion.div
@@ -409,7 +409,7 @@ export default function NewInspectionPage() {
           className="space-y-6 md:space-y-12 w-full max-w-5xl"
         >
           {/* Document Type Selection */}
-          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-6 md:space-y-8">
+          <div className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-6 md:space-y-8">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
                 <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6" />
@@ -439,7 +439,7 @@ export default function NewInspectionPage() {
             </div>
           </div>
           {/* Stap 1: Basic Details */}
-          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10 overflow-visible! relative z-60">
+          <div className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-8 md:space-y-10 overflow-visible! relative z-60">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
                 <Building className="w-5 h-5 md:w-6 md:h-6" />
@@ -547,7 +547,7 @@ export default function NewInspectionPage() {
           </div>
 
           {/* New Section: General Notes */}
-          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10 overflow-visible! relative z-60 pb-20 md:pb-32">
+          <div className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-8 md:space-y-10 overflow-visible! relative z-60 pb-20 md:pb-32">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
                 <Building className="w-5 h-5 md:w-6 md:h-6" />
@@ -619,7 +619,7 @@ export default function NewInspectionPage() {
             </div>
 
           {/* Stap 2: Map Upload */}
-          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10">
+          <div className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-8 md:space-y-10">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
                 <Map className="w-5 h-5 md:w-6 md:h-6" />
@@ -636,7 +636,7 @@ export default function NewInspectionPage() {
                 onDragOver={onDragOver}
                 onDragLeave={onDragLeave}
                 onDrop={onDrop}
-                className={`w-full py-8 md:py-12 bg-white/[0.02] rounded-2xl md:rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 md:gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer ${
+                className={`w-full py-8 md:py-12 bg-white/[0.02] rounded-2xl md:rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 md:gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer relative ${
                   isDragging ? 'border-red-500 bg-red-500/10' : 'border-white/10'
                 }`}
               >
@@ -664,7 +664,7 @@ export default function NewInspectionPage() {
               {floorPlans.length > 0 && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {floorPlans.map((plan, index) => (
-                    <div key={plan.id} className="glass-premium rounded-3xl border border-white/10 overflow-hidden flex flex-col">
+                    <div key={plan.id} className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-3xl overflow-hidden flex flex-col">
                       <div className="relative aspect-[16/9] bg-black flex items-center justify-center">
                         {plan.preview === 'pdf' ? (
                           <div className="flex flex-col items-center gap-3 text-red-500">
@@ -672,7 +672,7 @@ export default function NewInspectionPage() {
                             <span className="text-[10px] font-black uppercase tracking-widest opacity-60">PDF Dokument</span>
                           </div>
                         ) : (
-                          <img src={plan.preview!} alt={plan.name} className="w-full h-full object-contain" />
+                          <img src={plan.preview!} alt={plan.name} className="w-full h-full object-contain min-h-[150px] md:min-h-[200px]" />
                         )}
                         <button
                           type="button"
@@ -701,7 +701,7 @@ export default function NewInspectionPage() {
           </div>
 
           {/* Fixed Footer Action */}
-          <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-24 md:h-32 glass-premium border-t border-white/5 z-50 flex items-center justify-center px-4 md:px-8">
+          <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-24 md:h-32 bg-[#050505] border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] z-50 flex items-center justify-center px-4 md:px-8">
             <motion.button
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}

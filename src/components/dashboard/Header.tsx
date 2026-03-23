@@ -19,7 +19,7 @@ export default function Header() {
   };
 
   return (
-    <header className="h-16 md:h-24 glass-premium border-b border-white/5 fixed top-0 right-0 left-0 lg:left-24 z-40 px-4 md:px-8 flex items-center justify-between">
+    <header className="h-16 md:h-24 bg-[#050505] border-b border-white/10 shadow-lg fixed top-0 right-0 left-0 lg:left-24 z-40 px-4 md:px-8 flex items-center justify-between">
       {/* Left Side: Logo and Text */}
       <div className="flex items-center gap-3 md:gap-4">
         <div className="flex items-center group cursor-pointer">

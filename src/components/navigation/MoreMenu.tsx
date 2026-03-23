@@ -49,7 +49,7 @@ export default function MoreMenu({ isOpen, onClose }: MoreMenuProps) {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 lg:left-24 lg:right-auto lg:top-1/2 lg:-translate-y-1/2 lg:bottom-auto lg:w-96 glass-premium rounded-t-[2rem] md:rounded-t-[3rem] lg:rounded-[3rem] p-6 lg:p-8 pb-10 lg:pb-8 z-[70] border-t lg:border border-white/10"
+            className="fixed bottom-0 left-0 right-0 lg:left-24 lg:right-auto lg:top-1/2 lg:-translate-y-1/2 lg:bottom-auto lg:w-96 bg-[#0a0a0a] rounded-t-[2rem] md:rounded-t-[3rem] lg:rounded-[3rem] p-6 lg:p-8 pb-10 lg:pb-8 z-[70] border-t lg:border border-white/10"
           >
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter">Mehr Optionen</h3>

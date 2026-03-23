@@ -13,7 +13,7 @@ export default function MapFooter({ inspectionId }: MapFooterProps) {
       <motion.div 
         initial={{ y: 50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="w-full max-w-md h-12 md:h-16 glass-premium rounded-full border border-white/10 p-1 md:p-2 flex items-center justify-between shadow-[0_20px_60px_rgba(0,0,0,0.6)] pointer-events-auto bg-black/60 backdrop-blur-[40px] gap-1 md:gap-2"
+        className="w-full max-w-md h-12 md:h-16 bg-[#0a0a0a] rounded-full border border-white/10 p-1 md:p-2 flex items-center justify-between shadow-[0_20px_60px_rgba(0,0,0,0.8)] pointer-events-auto gap-1 md:gap-2"
       >
         <Link href="/dashboard" className="flex-1 h-full">
           <motion.button 
@@ -33,7 +33,7 @@ export default function MapFooter({ inspectionId }: MapFooterProps) {
           <motion.button 
             whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(239, 68, 68, 0.5)' }}
             whileTap={{ scale: 0.95 }}
-            className="w-full h-full flex items-center justify-center gap-1.5 md:gap-2 bg-gradient-to-r from-red-600 to-red-800 text-white rounded-full font-black uppercase tracking-widest text-[8px] md:text-xs transition-all cursor-pointer shadow-lg border border-red-500/30"
+            className="w-full h-full flex items-center justify-center gap-1.5 md:gap-2 bg-linear-to-r from-red-600 to-red-800 text-white rounded-full font-black uppercase tracking-widest text-[8px] md:text-xs transition-all cursor-pointer shadow-lg border border-red-500/30"
           >
             <span>Überprüfen</span>
             <FileCheck className="w-3.5 h-3.5 md:w-4 md:h-4" />

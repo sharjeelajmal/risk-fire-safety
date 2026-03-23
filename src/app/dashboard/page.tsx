@@ -35,7 +35,7 @@ export default function DashboardPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Suchen nach Standort..."
-              className="w-full bg-white/5 border border-white/10 rounded-2xl md:rounded-[2rem] pl-12 md:pl-16 pr-6 md:pr-8 py-4 md:py-6 text-white text-xs md:text-sm outline-none focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-zinc-600 shadow-2xl backdrop-blur-xl"
+              className="w-full bg-white/5 border border-white/10 rounded-2xl md:rounded-[2rem] pl-12 md:pl-16 pr-6 md:pr-8 py-4 md:py-6 text-white text-xs md:text-sm outline-none focus:border-red-500/50 focus:bg-white/10 transition-all placeholder:text-zinc-600 shadow-2xl md:backdrop-blur-xl"
             />
           </div>
 
@@ -47,8 +47,8 @@ export default function DashboardPage() {
       </main>
 
       {/* Decorative Blur Blobs */}
-      <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-red-900/5 blur-[120px] rounded-full z-0 pointer-events-none" />
-      <div className="absolute bottom-[10%] left-[-10%] w-[500px] h-[500px] bg-red-600/5 blur-[100px] rounded-full z-0 pointer-events-none" />
+      <div className="hidden md:block absolute top-[20%] right-[-10%] w-[600px] h-[600px] bg-red-900/5 blur-[120px] rounded-full z-0 pointer-events-none" />
+      <div className="hidden md:block absolute bottom-[10%] left-[-10%] w-[500px] h-[500px] bg-red-600/5 blur-[100px] rounded-full z-0 pointer-events-none" />
     </div>
   );
 }

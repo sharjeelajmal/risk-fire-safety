@@ -89,15 +89,14 @@ function AddIssueForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
-    const newErrors: Record<string, boolean> = {};
-    if (!formData.issueNumber.trim()) newErrors.issueNumber = true;
-    if (!formData.location.trim()) newErrors.location = true;
-    if (formData.responsibleContractor.length === 0) newErrors.responsibleContractor = true;
-    if (!formData.description.trim()) newErrors.description = true;
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    // Relaxed Validation
+    const hasImage = images.length > 0;
+    const hasDescription = formData.description.trim().length > 0;
+    const hasMeasures = formData.measures.length > 0;
+
+    // Only error if everything is empty
+    if (!hasImage && !hasDescription && !hasMeasures) {
+      setErrors({ general: true });
       return;
     }
 
@@ -140,14 +139,10 @@ function AddIssueForm() {
               value={formData.issueNumber} 
               onChange={(e) => {
                 setFormData({...formData, issueNumber: e.target.value});
-                if (errors.issueNumber) setErrors(prev => ({ ...prev, issueNumber: false }));
               }} 
               placeholder="z.B. 1, 2024-01A" 
-              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl ${
-                errors.issueNumber ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10 focus:border-red-500/50'
-              }`} 
+              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl border-white/10 focus:border-red-500/50`} 
             />
-            {errors.issueNumber && <p className="text-red-500 text-[10px] font-bold mt-1">Dieses Feld wird benötigt</p>}
           </div>
           <ImageUploader previews={previews} onAddImages={handleImageChange} onRemoveImage={removeImage} isPdf={(i) => pdfFlags[i] ?? false} />
           
@@ -159,26 +154,20 @@ function AddIssueForm() {
                 value={formData.location} 
                 onChange={(e) => {
                   setFormData({...formData, location: e.target.value});
-                  if (errors.location) setErrors(prev => ({ ...prev, location: false }));
                 }} 
                 placeholder="z.B. Flur 1. OG" 
-                className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl ${
-                  errors.location ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10 focus:border-red-500/50'
-                }`} 
+                className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm shadow-xl border-white/10 focus:border-red-500/50`} 
               />
-              {errors.location && <p className="text-red-500 text-[10px] font-bold mt-1">Dieses Feld wird benötigt</p>}
             </div>
             <CreatableMultiSelect
                 label="Unternehmer"
                 values={formData.responsibleContractor}
                 onChange={(vals) => {
                   setFormData({...formData, responsibleContractor: vals});
-                  if (errors.responsibleContractor) setErrors(prev => ({ ...prev, responsibleContractor: false }));
                 }}
                 options={CONTRACTOR_OPTIONS.map(o => o.label)}
                 placeholder="Unternehmer auswählen..."
                 listType="participants"
-                error={errors.responsibleContractor}
             />
           </div>
 
@@ -203,14 +192,10 @@ function AddIssueForm() {
               value={formData.description} 
               onChange={(e) => {
                 setFormData({...formData, description: e.target.value});
-                if (errors.description) setErrors(prev => ({ ...prev, description: false }));
               }} 
               placeholder="Was ist der Mangel?" 
-              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm resize-none shadow-xl ${
-                errors.description ? 'border-red-500 ring-1 ring-red-500/20' : 'border-white/10 focus:border-red-500/50'
-              }`} 
+              className={`w-full bg-[#0a0a0a] border rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none transition-all text-[13px] md:text-sm resize-none shadow-xl border-white/10 focus:border-red-500/50`} 
             />
-            {errors.description && <p className="text-red-500 text-[10px] font-bold mt-1">Dieses Feld wird benötigt</p>}
           </div>
           <div className="space-y-1.5 md:space-y-2">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Massnahmen</label>
@@ -223,9 +208,29 @@ function AddIssueForm() {
             />
           </div>
 
-          <motion.button disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className={`w-full py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest md:tracking-[3px] flex items-center justify-center gap-2 md:gap-3 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}>
-            {loading ? <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><span className="text-[10px] md:text-xs">Speichern</span><Save className="w-4 h-4 md:w-4.5 md:h-4.5" /></>}
-          </motion.button>
+          {errors.general && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-500 text-xs font-bold text-center">
+              Bitte geben Sie mindestens ein Bild, eine Beschreibung oder eine Massnahme an.
+            </div>
+          )}
+
+          <div className="flex flex-col-reverse sm:flex-row gap-3 md:gap-4 w-full">
+            <button
+              type="button"
+              onClick={() => router.push(`/inspection/${params.id}/map`)}
+              className="flex-1 py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest text-zinc-500 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-xs md:text-sm cursor-pointer"
+            >
+              Abbrechen
+            </button>
+            <motion.button 
+              disabled={loading} 
+              whileHover={{ scale: 1.02 }} 
+              whileTap={{ scale: 0.98 }} 
+              className={`flex-2 py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest md:tracking-[3px] flex items-center justify-center gap-2 md:gap-3 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}
+            >
+              {loading ? <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><span className="text-[10px] md:text-xs">Speichern</span><Save className="w-4 h-4 md:w-4.5 md:h-4.5" /></>}
+            </motion.button>
+          </div>
         </form>
       </main>
       <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[150px] pointer-events-none -z-10"></div>

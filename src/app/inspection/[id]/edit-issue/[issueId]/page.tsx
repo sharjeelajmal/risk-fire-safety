@@ -106,6 +106,20 @@ function EditIssueForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Relaxed Validation
+    const hasExistingImages = existingImages.length > 0;
+    const hasNewImages = newImages.length > 0;
+    const hasDescription = formData.description.trim().length > 0;
+    const hasMeasures = formData.measures.length > 0;
+
+    // Only error if everything is empty
+    if (!hasExistingImages && !hasNewImages && !hasDescription && !hasMeasures) {
+      alert('Bitte geben Sie mindestens ein Bild, eine Beschreibung oder eine Massnahme an.');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const uploadedUrls: string[] = [...existingImages];
@@ -174,7 +188,7 @@ function EditIssueForm() {
         <form onSubmit={handleSubmit} className="space-y-5 md:space-y-8">
           <div className="space-y-1.5 md:space-y-2">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mangel-Nummer</label>
-            <input required type="text" value={formData.issueNumber} onChange={(e) => setFormData({...formData, issueNumber: e.target.value})} placeholder="z.B. 1, 2024-01A" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" />
+            <input type="text" value={formData.issueNumber} onChange={(e) => setFormData({...formData, issueNumber: e.target.value})} placeholder="z.B. 1, 2024-01A" className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl px-4 md:px-5 py-3 md:py-4 focus:outline-none focus:border-red-500/50 transition-all text-[13px] md:text-sm shadow-xl" />
           </div>
           {/* Image Section */}
           <div className="space-y-3 md:space-y-4">
@@ -211,7 +225,6 @@ function EditIssueForm() {
             <div className="space-y-1.5 md:space-y-2">
               <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Standortbereich</label>
               <input 
-                required 
                 type="text" 
                 value={formData.location} 
                 onChange={(e) => setFormData({...formData, location: e.target.value})} 
@@ -231,7 +244,6 @@ function EditIssueForm() {
           <div className="space-y-1.5 md:space-y-2">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mängel / Beschreibung</label>
             <textarea 
-              required 
               rows={4} 
               value={formData.description} 
               onChange={(e) => setFormData({...formData, description: e.target.value})} 
@@ -256,7 +268,6 @@ function EditIssueForm() {
               options={STATUS_OPTIONS} 
               value={formData.status} 
               onChange={(val) => setFormData({...formData, status: val})} 
-              required 
             />
             <div className="space-y-1.5 md:space-y-2">
               <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Priorität</label>

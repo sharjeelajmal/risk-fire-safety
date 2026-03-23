@@ -327,7 +327,7 @@ function EditDetailsContent() {
       <Navbar />
 
       {/* Header */}
-      <header className="fixed top-0 left-0 lg:left-24 right-0 h-16 md:h-24 glass-premium border-b border-white/5 z-50 px-4 md:px-12 flex items-center">
+      <header className="fixed top-0 left-0 lg:left-24 right-0 h-16 md:h-24 bg-[#050505] border-b border-white/10 shadow-lg z-50 px-4 md:px-12 flex items-center">
         <div className="flex-1 flex items-center justify-start">
           <Link href={`/inspection/${id}/review`}>
             <motion.div
@@ -569,7 +569,7 @@ function EditDetailsContent() {
           </div>
 
           {/* Fixed Footer */}
-          <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-24 md:h-32 glass-premium border-t border-white/5 z-50 flex items-center justify-center px-4 md:px-8">
+          <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-24 md:h-32 bg-[#050505] border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] z-50 flex items-center justify-center px-4 md:px-8">
             <motion.button
               whileHover={!saving ? { scale: 1.02 } : {}}
               whileTap={!saving ? { scale: 0.98 } : {}}

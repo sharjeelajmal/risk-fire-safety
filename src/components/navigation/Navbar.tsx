@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Home, Plus, Users, Settings as Gear } from 'lucide-react';
 import Link from 'next/link';
@@ -17,11 +17,23 @@ const navItems = [
 export default function Navbar() {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 20;
+      if (scrolled !== isScrolled) {
+        setIsScrolled(scrolled);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isScrolled]);
 
   return (
     <>
       {/* Mobile: Bottom Navigation Bar */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 glass-premium border-t border-white/5 z-50 px-6 flex items-center justify-between pb-safe">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 border-t border-white/10 z-[99999] px-6 flex items-center justify-between pb-safe bg-[#050505] shadow-[0_-10px_30px_rgba(0,0,0,0.8)]">
         {navItems.map((item) => {
           const isActive = pathname === item.path;
           const isButton = item.path === 'menu';
@@ -64,7 +76,7 @@ export default function Navbar() {
       </nav>
 
       {/* Desktop: Mini Sidebar Navigation */}
-      <aside className="hidden lg:flex fixed left-0 top-0 bottom-0 w-24 flex-col items-center py-8 glass-premium border-r border-white/5 z-50">
+      <aside className={`hidden lg:flex fixed left-0 top-0 bottom-0 w-24 flex-col items-center py-8 border-r border-white/10 z-50 transition-all duration-300 ${isScrolled ? 'bg-[#050505] shadow-2xl' : 'bg-transparent'}`}>
         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-red-900 flex items-center justify-center mb-16 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
             <span className="text-white font-black text-xl">R</span>
         </div>

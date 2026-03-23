@@ -93,7 +93,7 @@ export default function CustomSelect({
             left: coords.left,
             width: coords.width,
           }}
-          className="z-[1000000] bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden max-h-60 overflow-y-auto backdrop-blur-3xl"
+          className="z-[1000000] bg-[#0a0a0a] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden max-h-60 overflow-y-auto md:backdrop-blur-3xl"
         >
           <div className="p-1.5 md:p-2 space-y-1">
             {options.map((option) => {

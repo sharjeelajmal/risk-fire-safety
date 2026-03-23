@@ -245,6 +245,7 @@ const styles = StyleSheet.create({
   },
   infoColumn: {
     flex: 1,
+    width: '100%',
   },
   imageColumn: {
     width: 200,
