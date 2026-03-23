@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
     paddingTop: 60, // Space for fixed header
     fontSize: 10,
     fontFamily: 'Helvetica',
-    color: '#000000', // Pure black for printing
+    color: '#27272a', // Softer dark slate
     backgroundColor: '#FFFFFF',
   },
   headerContainer: {
@@ -20,14 +20,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#111111',
-    paddingBottom: 5,
+    borderBottomWidth: 2,
+    borderBottomColor: '#f4f4f5',
+    paddingBottom: 10,
   },
   headerTitle: {
     fontSize: 9,
     fontWeight: 'bold',
-    color: '#000000',
+    color: '#18181b',
     letterSpacing: 0.5,
   },
   logo: {
@@ -64,14 +64,16 @@ const styles = StyleSheet.create({
   
   // Cover Page
   coverContainer: {
-    marginTop: 40,
-    marginBottom: 40,
+    marginTop: 30,
+    marginBottom: 30,
+    padding: 0,
   },
   documentType: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 5,
-    color: '#000000',
+    color: '#18181b',
+    letterSpacing: -0.5,
   },
   companySub: {
     fontSize: 10,
@@ -90,31 +92,35 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 8,
-    color: '#000000',
+    color: '#71717a',
     textTransform: 'uppercase',
-    marginBottom: 2,
+    letterSpacing: 1.5,
+    marginBottom: 4,
     fontWeight: 'heavy',
   },
   value: {
     fontSize: 11,
+    color: '#27272a',
     fontWeight: 'bold',
-    color: '#000000',
   },
   reportBadge: {
-    backgroundColor: '#000000',
+    backgroundColor: '#f4f4f5',
     padding: 10,
-    borderRadius: 4,
+    borderRadius: 6,
     alignSelf: 'flex-start',
     marginTop: 20,
+    borderWidth: 1,
+    borderColor: '#e4e4e7',
   },
   badgeLabel: {
-    color: '#FFFFFF',
-    fontSize: 8,
-    opacity: 0.6,
+    color: '#71717a',
+    fontSize: 7,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   badgeValue: {
-    color: '#FFFFFF',
-    fontSize: 11,
+    color: '#18181b',
+    fontSize: 10,
     fontWeight: 'bold',
   },
 
@@ -208,9 +214,11 @@ const styles = StyleSheet.create({
   // Issues
   issueCard: {
     marginBottom: 20,
-    paddingLeft: 15,
-    borderLeftWidth: 4,
-    borderLeftColor: '#DC2626',
+    padding: 20,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e4e4e7',
   },
   issueHeader: {
     flexDirection: 'row',
@@ -218,9 +226,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   issueNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#EEEEEE',
+    fontSize: 16,
+    fontWeight: 'heavy',
+    color: '#DC2626',
   },
   issueLocation: {
     fontSize: 14,
@@ -262,6 +270,11 @@ const styles = StyleSheet.create({
   },
   infoGroup: {
     marginBottom: 10,
+  },
+  descriptionText: {
+    flex: 1,
+    fontSize: 10,
+    color: '#3f3f46',
   },
   divider: {
     height: 1,
@@ -338,14 +351,13 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
       <Page size="A4" style={styles.page}>
         <View style={styles.headerContainer} fixed>
           <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
-          <Image src="public/logo.png" style={styles.logo} />
+          <Image src="/blacklogo.png" style={styles.logo} />
         </View>
 
         <View style={styles.coverContainer}>
           <Text style={styles.documentType}>
             {data.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS-Protokoll'}
           </Text>
-          <Image src="public/logo.png" style={styles.logo} />
 
           <View style={styles.projectGrid}>
             <View style={styles.gridItem}>
@@ -444,7 +456,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         <Page key={fp.id} size="A4" style={styles.page}>
           <View style={styles.headerContainer} fixed>
             <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
-            <Image src="public/logo.png" style={styles.logo} />
+            <Image src="/blacklogo.png" style={styles.logo} />
           </View>
 
           <View style={styles.sectionTitle}>
@@ -488,7 +500,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
       <Page size="A4" style={styles.page}>
         <View style={styles.headerContainer} fixed>
           <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
-          <Image src="public/logo.png" style={styles.logo} />
+          <Image src="/blacklogo.png" style={styles.logo} />
         </View>
 
         <View style={styles.sectionTitle}>
@@ -523,11 +535,11 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
               <View style={styles.infoColumn}>
                 <View style={styles.infoGroup}>
                   <Text style={styles.label}>Problembeschreibung</Text>
-                  <Text>{issue.description}</Text>
+                  <Text style={styles.descriptionText}>{issue.description}</Text>
                 </View>
                 <View style={styles.infoGroup} wrap={true}>
                   <Text style={styles.label}>Massnahmen</Text>
-                  <Text style={{ fontStyle: 'italic' }}>{issue.measures}</Text>
+                  <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>{issue.measures}</Text>
                 </View>
                 <View style={styles.infoGroup}>
                   <Text style={styles.label}>Unternehmer</Text>

@@ -33,9 +33,9 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
             {inspection.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS Protokoll'}
           </h1>
           <img 
-            src="/logo.png" 
+            src="/blacklogo.png" 
             alt="Logo" 
-            className="w-[150px] h-[54px] object-contain invert hue-rotate-180"
+            className="w-[150px] h-[54px] object-contain"
           />
         </div>
         
