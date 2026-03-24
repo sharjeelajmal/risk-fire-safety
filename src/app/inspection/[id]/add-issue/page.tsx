@@ -14,7 +14,7 @@ const CONTRACTOR_OPTIONS = [
   { label: 'Architekt', value: 'Architect' },
   { label: 'Fachplaner', value: 'specialist planner' },
   { label: 'Installateur', value: 'installer' },
-  { label: 'Eigentümer-Nutzergruppe', value: 'owner-user group' },
+  { label: 'Eigentümer / Nutzer', value: 'owner-user group' },
   { label: 'Bauleiter', value: 'site manager' },
   { label: 'Elektriker', value: 'electrician' },
   { label: 'QS Brandschutz', value: 'QS fire protection' },

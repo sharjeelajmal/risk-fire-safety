@@ -514,7 +514,7 @@ export default function NewInspectionPage() {
                           placeholder="Funktion"
                           value={p.role}
                           onChange={(val) => updateParticipant(index, 'role', val)}
-                          options={['Architekt', 'Bauleiter', 'Eigentümer', 'Fachplaner', 'Installateur']}
+                          options={['Architekt', 'Bauleiter', 'Eigentümer / Nutzer', 'Fachplaner', 'Installateur']}
                           listType="functions"
                         />
                       </div>
