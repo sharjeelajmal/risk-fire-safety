@@ -5,6 +5,7 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     paddingTop: 60, // Space for fixed header
+    paddingBottom: 80, // Space for footer
     fontSize: 10,
     fontFamily: 'Helvetica',
     color: '#27272a', // Softer dark slate
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
   },
   footer: {
     position: 'absolute',
-    bottom: 20,
+    bottom: 30,
     left: 40,
     right: 40,
     borderTopWidth: 1,
@@ -351,7 +352,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
       <Page size="A4" style={styles.page}>
         <View style={styles.headerContainer} fixed>
           <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
-          <Image src="/blacklogo.png" style={styles.logo} />
+          <Image src="/blacklogo.jpeg" style={styles.logo} />
         </View>
 
         <View style={styles.coverContainer}>
@@ -367,10 +368,6 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
             <View style={styles.gridItem}>
               <Text style={styles.label}>Datum</Text>
               <Text style={styles.value}>{formattedDate}</Text>
-            </View>
-            <View style={styles.gridItem}>
-              <Text style={styles.label}>Auftraggeber</Text>
-              <Text style={styles.value}>{data.auftraggeber}</Text>
             </View>
             <View style={styles.gridItem}>
               <Text style={styles.label}>Teilnehmer</Text>
@@ -445,7 +442,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
           <View style={styles.footerAddress}>
-            <Text>Blegistrasse 13, 6340 Baar | info@riskfiresafety.ch</Text>
+            <Text>info@rfs-sicherheit.ch</Text>
           </View>
           <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>
@@ -456,7 +453,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         <Page key={fp.id} size="A4" style={styles.page}>
           <View style={styles.headerContainer} fixed>
             <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
-            <Image src="/blacklogo.png" style={styles.logo} />
+            <Image src="/blacklogo.jpeg" style={styles.logo} />
           </View>
 
           <View style={styles.sectionTitle}>
@@ -489,7 +486,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           <View style={styles.footer} fixed>
             <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
             <View style={styles.footerAddress}>
-              <Text>Blegistrasse 13, 6340 Baar | info@riskfiresafety.ch</Text>
+              <Text>info@rfs-sicherheit.ch</Text>
             </View>
             <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
           </View>
@@ -500,7 +497,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
       <Page size="A4" style={styles.page}>
         <View style={styles.headerContainer} fixed>
           <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
-          <Image src="/blacklogo.png" style={styles.logo} />
+          <Image src="/blacklogo.jpeg" style={styles.logo} />
         </View>
 
         <View style={styles.sectionTitle}>
@@ -508,8 +505,8 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           <Text>Detaillierte Mängelliste</Text>
         </View>
 
-        {data.issues.map((issue) => (
-          <View key={issue.issueNumber} style={styles.issueCard} wrap={false}>
+        {data.issues.map((issue, index) => (
+          <View key={issue.issueNumber} style={[styles.issueCard, { marginTop: index === 0 ? 20 : 0 }]} wrap={false}>
             <View style={styles.issueHeader}>
               <View>
                 <Text style={styles.issueNumber}>#{issue.issueNumber}</Text>
@@ -560,7 +557,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         <View style={styles.footer} fixed>
           <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
           <View style={styles.footerAddress}>
-            <Text>Blegistrasse 13, 6340 Baar | info@riskfiresafety.ch</Text>
+            <Text>info@rfs-sicherheit.ch</Text>
           </View>
           <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
         </View>
