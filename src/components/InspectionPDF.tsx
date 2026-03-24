@@ -374,7 +374,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
               {Array.isArray(data.participantsList) && data.participantsList.length > 0 ? (
                 data.participantsList.map((p, i) => (
                   <Text key={i} style={styles.value}>
-                    {p.name} <Text style={{ fontSize: 8, color: '#999999', fontWeight: 'normal' }}>— {p.role}</Text>
+                    {p.name} {p.role && p.role.trim() !== '' ? <Text style={{ fontSize: 8, color: '#999999', fontWeight: 'normal' }}>— {p.role.trim()}</Text> : null}
                   </Text>
                 ))
               ) : typeof (data as any).participants === 'string' && (data as any).participants ? (

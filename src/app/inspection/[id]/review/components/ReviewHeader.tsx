@@ -54,7 +54,7 @@ export default function ReviewHeader({ inspection }: ReviewHeaderProps) {
               {Array.isArray(inspection.participantsList) && inspection.participantsList.length > 0 ? (
                 inspection.participantsList.map((p, i) => (
                   <p key={i} className="text-sm font-bold text-zinc-900 break-words">
-                    {p.name} <span className="text-zinc-400 font-medium text-xs ml-1">— {p.role}</span>
+                    {p.name} {p.role && p.role.trim() !== '' ? <span className="text-zinc-400 font-medium text-xs ml-1">— {p.role.trim()}</span> : null}
                   </p>
                 ))
               ) : typeof (inspection as any).participants === 'string' && (inspection as any).participants ? (
