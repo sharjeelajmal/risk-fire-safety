@@ -309,7 +309,7 @@ export default function NewInspectionPage() {
     
     // Validation
     const newErrors: Record<string, boolean> = {};
-    if (!formData.auftraggeber.trim()) newErrors.auftraggeber = true;
+
     if (!formData.datum) newErrors.datum = true;
     
     if (Object.keys(newErrors).length > 0) {

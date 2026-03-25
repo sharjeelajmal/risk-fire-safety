@@ -39,9 +39,6 @@ export async function POST(request: Request) {
     const floorPlansDataRaw = formData.get('floorPlansData') as string;
     const generalNotesRaw = formData.get('generalNotes') as string;
 
-    if (!auftraggeber) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-    }
 
     let participants = [];
     try {

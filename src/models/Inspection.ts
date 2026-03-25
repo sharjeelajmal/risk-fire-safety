@@ -43,7 +43,7 @@ const FloorPlanSchema = new Schema({
 
 const InspectionSchema: Schema = new Schema({
   datum: { type: Date, default: Date.now },
-  auftraggeber: { type: String, required: true },
+  auftraggeber: { type: String, required: false },
   teilnehmer: { type: String, required: true },
   documentType: { type: String, enum: ['Catalog of measures', 'QS protocol'], default: 'Catalog of measures' },
   participantsList: [ParticipantSchema],
