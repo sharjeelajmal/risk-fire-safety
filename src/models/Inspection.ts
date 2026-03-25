@@ -9,7 +9,8 @@ export interface IIssue {
   responsibleContractor: string;
   description: string;
   measures: string;
-  priority: '1' | '2' | '3' | 'n/a';
+  category: string;
+  priority: '1' | '2' | '3' | '4' | 'n/a';
   images: string[];
   status: 'Offen' | 'in Arbeit' | 'abgeschlossen' | 'N/A';
   floorPlanId: string;
@@ -20,6 +21,7 @@ export interface IInspection extends Document {
   datum: Date;
   auftraggeber: string;
   teilnehmer: string;
+  parentTitle?: string;
   documentType: 'Catalog of measures' | 'QS protocol';
   participantsList: { name: string; role: string }[];
   generalNotes: string[];
@@ -45,6 +47,7 @@ const InspectionSchema: Schema = new Schema({
   datum: { type: Date, default: Date.now },
   auftraggeber: { type: String, required: false },
   teilnehmer: { type: String, required: true },
+  parentTitle: { type: String, default: "" },
   documentType: { type: String, enum: ['Catalog of measures', 'QS protocol'], default: 'Catalog of measures' },
   participantsList: [ParticipantSchema],
   generalNotes: [{ type: String }],
@@ -58,7 +61,8 @@ const InspectionSchema: Schema = new Schema({
       responsibleContractor: { type: String, default: "" },
       description: { type: String, default: "" },
       measures: { type: String, default: "" },
-      priority: { type: String, enum: ['1', '2', '3', 'n/a'], default: '1' },
+      category: { type: String, default: "" },
+      priority: { type: String, enum: ['1', '2', '3', '4', 'n/a'], default: '1' },
       images: [{ type: String }],
       status: { type: String, enum: ['Offen', 'in Arbeit', 'abgeschlossen', 'N/A'], default: 'Offen' },
       floorPlanId: { type: String },

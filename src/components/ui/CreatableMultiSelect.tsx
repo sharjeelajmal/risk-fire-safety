@@ -15,6 +15,7 @@ interface CreatableMultiSelectProps {
   listType?: 'auftraggeber' | 'participants' | 'functions' | 'notes';
   error?: boolean;
   errorText?: string;
+  dropdownDirection?: 'up' | 'down';
 }
 
 export default function CreatableMultiSelect({
@@ -26,12 +27,13 @@ export default function CreatableMultiSelect({
   icon,
   listType,
   error,
-  errorText = 'Dieses Feld wird benötigt'
+  errorText = 'Dieses Feld wird benötigt',
+  dropdownDirection = 'down'
 }: CreatableMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [dbOptions, setDbOptions] = useState<string[]>([]);
-  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0, bottom: 0 });
   const [mounted, setMounted] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -66,6 +68,7 @@ export default function CreatableMultiSelect({
       const rect = inputWrapperRef.current.getBoundingClientRect();
       setCoords({
         top: rect.bottom + 8,
+        bottom: window.innerHeight - rect.top + 8,
         left: rect.left,
         width: rect.width
       });
@@ -143,12 +146,13 @@ export default function CreatableMultiSelect({
       {isOpen && (
         <motion.ul
           ref={dropdownRef}
-          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+          initial={{ opacity: 0, y: dropdownDirection === 'up' ? -10 : 10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+          exit={{ opacity: 0, y: dropdownDirection === 'up' ? -10 : 10, scale: 0.95 }}
           style={{
             position: 'fixed',
-            top: coords.top,
+            top: dropdownDirection === 'up' ? 'auto' : coords.top,
+            bottom: dropdownDirection === 'up' ? coords.bottom : 'auto',
             left: coords.left,
             width: coords.width,
           }}

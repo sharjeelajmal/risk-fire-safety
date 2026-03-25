@@ -243,39 +243,47 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: 'bold',
   },
-  p1: { backgroundColor: '#DC2626', color: '#FFFFFF' },
-  p2: { backgroundColor: '#EA580C', color: '#FFFFFF' },
-  p3: { backgroundColor: '#2563EB', color: '#FFFFFF' },
-  pna: { backgroundColor: '#4B5563', color: '#FFFFFF' },
+  p1: { backgroundColor: '#FFEEF2', color: '#DC2626' },
+  p2: { backgroundColor: '#FFF7ED', color: '#EA580C' },
+  p3: { backgroundColor: '#F0FDF4', color: '#16A34A' },
+  p4: { backgroundColor: '#F4F4F5', color: '#71717A' },
+  pna: { backgroundColor: '#F4F4F5', color: '#71717A' },
+  
+  statusOpen: { backgroundColor: '#DC2626', color: '#FFFFFF' },
+  statusProgress: { backgroundColor: '#F97316', color: '#FFFFFF' },
+  statusCompleted: { backgroundColor: '#16A34A', color: '#FFFFFF' },
+  statusGeneric: { backgroundColor: '#71717A', color: '#FFFFFF' },
   
   issueContentGrid: {
     flexDirection: 'row',
     gap: 20,
   },
   infoColumn: {
-    flex: 1,
-    width: '100%',
+    flexGrow: 1,
+    flexShrink: 1,
+    width: 'auto',
   },
   imageColumn: {
-    width: 200,
+    width: 180,
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 5,
+    justifyContent: 'flex-end',
   },
   issueImage: {
-    width: 90,
-    height: 90,
+    width: 85,
+    height: 85,
     borderRadius: 8,
     objectFit: 'cover',
     backgroundColor: '#F3F4F6',
   },
   infoGroup: {
-    marginBottom: 10,
+    marginBottom: 8,
   },
   descriptionText: {
-    flex: 1,
     fontSize: 10,
     color: '#3f3f46',
+    lineHeight: 1.4,
   },
   divider: {
     height: 1,
@@ -290,7 +298,8 @@ interface Issue {
   responsibleContractor: string;
   description: string;
   measures: string;
-  priority: '1' | '2' | '3' | 'n/a';
+  priority: '1' | '2' | '3' | '4' | 'n/a';
+  category?: string;
   images: string[];
   status?: string;
   floorPlanId?: string;
@@ -315,6 +324,7 @@ interface InspectionPDFProps {
     generalNotes?: string[];
     floorPlans: FloorPlan[];
     issues: Issue[];
+    parentTitle?: string;
     teilnehmer?: string;
   };
 }
@@ -359,6 +369,11 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           <Text style={styles.documentType}>
             {data.documentType === 'Catalog of measures' ? 'Massnahmenkatalog' : 'QS-Protokoll'}
           </Text>
+          {data.parentTitle && (
+            <Text style={{ fontSize: 14, fontWeight: 'bold', color: '#DC2626', marginBottom: 15, textTransform: 'uppercase' }}>
+              {data.parentTitle}
+            </Text>
+          )}
 
           <View style={styles.projectGrid}>
             <View style={styles.gridItem}>
@@ -422,19 +437,19 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           <View style={styles.legendGrid}>
             <View style={styles.legendCard}>
               <Text style={[styles.levelLabel, { color: '#DC2626' }]}>Stufe 1</Text>
-              <Text style={styles.levelText}>Prio 1 (so rasch als möglich umzusetzen)</Text>
+              <Text style={styles.levelText}>Sofortmassnahmen</Text>
             </View>
             <View style={styles.legendCard}>
               <Text style={[styles.levelLabel, { color: '#EA580C' }]}>Stufe 2</Text>
               <Text style={styles.levelText}>Kurzfristig (3 – 6 Monate)</Text>
             </View>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#2563EB' }]}>Stufe 3</Text>
+              <Text style={[styles.levelLabel, { color: '#16A34A' }]}>Stufe 3</Text>
               <Text style={styles.levelText}>Mittelfristig (12 – 24 Monate)</Text>
             </View>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#4B5563' }]}>N/A</Text>
-              <Text style={styles.levelText}>N/A - Nicht anwendbar / Keine Massnahme erforderlich</Text>
+              <Text style={[styles.levelLabel, { color: '#71717A' }]}>Stufe 4</Text>
+              <Text style={styles.levelText}>Langfristig (2 – 5 Jahre)</Text>
             </View>
           </View>
         </View>
@@ -448,41 +463,223 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
         </View>
       </Page>
 
-      {/* PAGES: FLOOR PLANS */}
-      {activeFloorPlans.map((fp) => (
-        <Page key={fp.id} size="A4" style={styles.page}>
+      {/* PAGES: FLOOR PLAN CONTENT GROUPED */}
+      {data.floorPlans?.map((fp) => {
+        const fpIssues = data.issues?.filter(i => i.floorPlanId === fp.id) || [];
+        if (fpIssues.length === 0) return null;
+
+        return (
+          <React.Fragment key={fp.id}>
+            {/* Floor Plan Image Page */}
+            <Page size="A4" style={styles.page}>
+              <View style={styles.headerContainer} fixed>
+                <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
+                <Image src="/blacklogo.jpeg" style={styles.logo} />
+              </View>
+
+              <View style={styles.sectionTitle}>
+                <View style={styles.sectionLine} />
+                <Text>Grundriss / Brandschutzplan: {fp.name}</Text>
+              </View>
+
+              <View style={styles.mapContainer}>
+                <Image src={fp.url.replace(/\.pdf$/i, '.jpg')} style={styles.mapImage} />
+                {fpIssues.filter(i => i.x !== undefined && i.y !== undefined).map((issue) => (
+                  <View 
+                    key={issue.issueNumber} 
+                    style={[
+                      styles.pin, 
+                      { 
+                        top: `${issue.y}%`, 
+                        left: `${issue.x}%`,
+                        marginTop: -7,
+                        marginLeft: -7
+                      }
+                    ]}
+                  >
+                    <Text style={styles.pinText}>{issue.issueNumber}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.footer} fixed>
+                <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
+                <View style={styles.footerAddress}>
+                  <Text>info@rfs-sicherheit.ch</Text>
+                </View>
+                <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
+              </View>
+            </Page>
+
+            {/* Associated Issues for this Floor Plan */}
+            <Page size="A4" style={styles.page}>
+              <View style={styles.headerContainer} fixed>
+                <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
+                <Image src="/blacklogo.jpeg" style={styles.logo} />
+              </View>
+
+              <View style={styles.sectionTitle}>
+                <View style={styles.sectionLine} />
+                <Text>Mängelliste - {fp.name}</Text>
+              </View>
+
+              {fpIssues.map((issue, index) => (
+                <View key={issue.issueNumber} style={[styles.issueCard]} wrap={false}>
+                  <View style={styles.issueHeader}>
+                    <View>
+                      <Text style={styles.issueNumber}>#{issue.issueNumber}</Text>
+                      <Text style={styles.issueLocation}>{issue.location}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', gap: 5 }}>
+                      <View style={[
+                        styles.priorityBadge, 
+                        issue.priority === '1' ? styles.p1 : 
+                        issue.priority === '2' ? styles.p2 : 
+                        issue.priority === '3' ? styles.p3 : 
+                        issue.priority === '4' ? styles.p4 :
+                        styles.pna
+                      ]}>
+                        <Text>{issue.priority === 'n/a' ? 'Priorität n/a' : `Priorität ${issue.priority}`}</Text>
+                      </View>
+                      <View style={[
+                        styles.priorityBadge, 
+                        (issue.status === 'Open' || issue.status === 'Offen') ? styles.statusOpen :
+                        (issue.status === 'In progress' || issue.status === 'In Bearbeitung') ? styles.statusProgress :
+                        (issue.status === 'Completed' || issue.status === 'Erledigt') ? styles.statusCompleted :
+                        styles.statusGeneric
+                      ]}>
+                        <Text>
+                          {issue.status === 'Open' ? 'Offen' : 
+                           issue.status === 'In progress' ? 'In Bearbeitung' :
+                           issue.status === 'Completed' ? 'Erledigt' :
+                           issue.status === 'Documentation' ? 'Dokumentation' :
+                           issue.status || 'Offen'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={styles.issueContentGrid}>
+                    <View style={styles.infoColumn}>
+                      {issue.category && (
+                        <View style={styles.infoGroup}>
+                          <Text style={styles.label}>Kategorie</Text>
+                          <Text style={{ fontSize: 9, fontWeight: 'black', textTransform: 'uppercase' }}>{issue.category}</Text>
+                        </View>
+                      )}
+                      <View style={styles.infoGroup}>
+                        <Text style={styles.label}>Problembeschreibung</Text>
+                        <Text style={styles.descriptionText}>{issue.description}</Text>
+                      </View>
+                      <View style={styles.infoGroup}>
+                        <Text style={styles.label}>Massnahmen</Text>
+                        <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>{issue.measures}</Text>
+                      </View>
+                      <View style={styles.infoGroup}>
+                        <Text style={styles.label}>Verantwortlichkeit</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{issue.responsibleContractor}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.imageColumn}>
+                      {issue.images?.map((url, i) => (
+                        <Image key={i} src={getFullUrl(url)} style={styles.issueImage} />
+                      ))}
+                    </View>
+                  </View>
+                  <View style={styles.divider} />
+                </View>
+              ))}
+
+              <View style={styles.footer} fixed>
+                <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
+                <View style={styles.footerAddress}>
+                  <Text>info@rfs-sicherheit.ch</Text>
+                </View>
+                <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
+              </View>
+            </Page>
+          </React.Fragment>
+        );
+      })}
+
+      {/* PAGE: GENERAL ISSUES (No Floor Plan) */}
+      {data.issues.filter(i => !i.floorPlanId).length > 0 && (
+        <Page size="A4" style={styles.page}>
+          {/* ... Header/Footer omitted for brevity but should be there ... I'll include them in the real replacement */}
           <View style={styles.headerContainer} fixed>
             <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
             <Image src="/blacklogo.jpeg" style={styles.logo} />
           </View>
-
           <View style={styles.sectionTitle}>
             <View style={styles.sectionLine} />
-            <Text>Grundriss / Brandschutzplan: {fp.name}</Text>
+            <Text>Allgemeine Mängelliste</Text>
           </View>
-
-          <View style={styles.mapContainer}>
-            <Image src={fp.url.replace(/\.pdf$/i, '.jpg')} style={styles.mapImage} />
-            
-            {/* Map Pins overlay filtering by floorPlanId */}
-            {data.issues?.filter(i => i.floorPlanId === fp.id && i.x !== undefined && i.y !== undefined).map((issue, index) => (
-              <View 
-                key={issue.issueNumber} 
-                style={[
-                  styles.pin, 
-                  { 
-                    top: `${issue.y}%`, 
-                    left: `${issue.x}%`,
-                    marginTop: -7,
-                    marginLeft: -7
-                  }
-                ]}
-              >
-                <Text style={styles.pinText}>{issue.issueNumber}</Text>
-              </View>
-            ))}
-          </View>
-
+          {data.issues.filter(i => !i.floorPlanId).map((issue) => (
+             <View key={issue.issueNumber} style={[styles.issueCard]} wrap={false}>
+               {/* Same issue card structure as above ... */}
+               <View style={styles.issueHeader}>
+                    <View>
+                      <Text style={styles.issueNumber}>#{issue.issueNumber}</Text>
+                      <Text style={styles.issueLocation}>{issue.location}</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', gap: 5 }}>
+                      <View style={[
+                        styles.priorityBadge, 
+                        issue.priority === '1' ? styles.p1 : 
+                        issue.priority === '2' ? styles.p2 : 
+                        issue.priority === '3' ? styles.p3 : 
+                        issue.priority === '4' ? styles.p4 :
+                        styles.pna
+                      ]}>
+                        <Text>{issue.priority === 'n/a' ? 'Priorität n/a' : `Priorität ${issue.priority}`}</Text>
+                      </View>
+                      <View style={[
+                        styles.priorityBadge, 
+                        (issue.status === 'Open' || issue.status === 'Offen') ? styles.statusOpen :
+                        (issue.status === 'In progress' || issue.status === 'In Bearbeitung') ? styles.statusProgress :
+                        (issue.status === 'Completed' || issue.status === 'Erledigt') ? styles.statusCompleted :
+                        styles.statusGeneric
+                      ]}>
+                        <Text>
+                          {issue.status === 'Open' ? 'Offen' : 
+                           issue.status === 'In progress' ? 'In Bearbeitung' :
+                           issue.status === 'Completed' ? 'Erledigt' :
+                           issue.status === 'Documentation' ? 'Dokumentation' :
+                           issue.status || 'Offen'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={styles.issueContentGrid}>
+                    <View style={styles.infoColumn}>
+                      {issue.category && (
+                        <View style={styles.infoGroup}>
+                          <Text style={styles.label}>Kategorie</Text>
+                          <Text style={{ fontSize: 9, fontWeight: 'black', textTransform: 'uppercase' }}>{issue.category}</Text>
+                        </View>
+                      )}
+                      <View style={styles.infoGroup}>
+                        <Text style={styles.label}>Problembeschreibung</Text>
+                        <Text style={styles.descriptionText}>{issue.description}</Text>
+                      </View>
+                      <View style={styles.infoGroup}>
+                        <Text style={styles.label}>Massnahmen</Text>
+                        <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>{issue.measures}</Text>
+                      </View>
+                      <View style={styles.infoGroup}>
+                        <Text style={styles.label}>Verantwortlichkeit</Text>
+                        <Text style={{ fontWeight: 'bold' }}>{issue.responsibleContractor}</Text>
+                      </View>
+                    </View>
+                    <View style={styles.imageColumn}>
+                      {issue.images?.map((url, i) => (
+                        <Image key={i} src={getFullUrl(url)} style={styles.issueImage} />
+                      ))}
+                    </View>
+                  </View>
+             </View>
+          ))}
           <View style={styles.footer} fixed>
             <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
             <View style={styles.footerAddress}>
@@ -491,77 +688,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
             <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
           </View>
         </Page>
-      ))}
-
-      {/* PAGE 3+: ISSUES LIST */}
-      <Page size="A4" style={styles.page}>
-        <View style={styles.headerContainer} fixed>
-          <Text style={styles.headerTitle}>RFS RISK FIRE SAFETY GmbH</Text>
-          <Image src="/blacklogo.jpeg" style={styles.logo} />
-        </View>
-
-        <View style={styles.sectionTitle}>
-          <View style={styles.sectionLine} />
-          <Text>Detaillierte Mängelliste</Text>
-        </View>
-
-        {data.issues.map((issue, index) => (
-          <View key={issue.issueNumber} style={[styles.issueCard, { marginTop: index === 0 ? 20 : 0 }]} wrap={false}>
-            <View style={styles.issueHeader}>
-              <View>
-                <Text style={styles.issueNumber}>#{issue.issueNumber}</Text>
-                <Text style={styles.issueLocation}>{issue.location}</Text>
-              </View>
-              <View style={{ flexDirection: 'row', gap: 5 }}>
-                <View style={[
-                  styles.priorityBadge, 
-                  issue.priority === '1' ? styles.p1 : 
-                  issue.priority === '2' ? styles.p2 : 
-                  issue.priority === '3' ? styles.p3 : 
-                  styles.pna
-                ]}>
-                  <Text>{issue.priority === '1' ? 'Prio 1 (so rasch als möglich umzusetzen)' : `Priorität ${issue.priority}`}</Text>
-                </View>
-                <View style={[styles.priorityBadge, { backgroundColor: '#000000', color: '#FFFFFF' }]}>
-                  <Text>{issue.status === 'Open' ? 'Offen' : issue.status || 'Offen'}</Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.issueContentGrid}>
-              <View style={styles.infoColumn}>
-                <View style={styles.infoGroup}>
-                  <Text style={styles.label}>Problembeschreibung</Text>
-                  <Text style={styles.descriptionText}>{issue.description}</Text>
-                </View>
-                <View style={styles.infoGroup} wrap={true}>
-                  <Text style={styles.label}>Massnahmen</Text>
-                  <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>{issue.measures}</Text>
-                </View>
-                <View style={styles.infoGroup}>
-                  <Text style={styles.label}>Unternehmer</Text>
-                  <Text style={{ fontWeight: 'bold' }}>{issue.responsibleContractor}</Text>
-                </View>
-              </View>
-
-              <View style={styles.imageColumn}>
-                {issue.images?.map((url, i) => (
-                  <Image key={i} src={getFullUrl(url)} style={styles.issueImage} />
-                ))}
-              </View>
-            </View>
-            <View style={styles.divider} />
-          </View>
-        ))}
-
-        <View style={styles.footer} fixed>
-          <Text style={styles.footerText}>RFS RISK FIRE SAFETY GmbH</Text>
-          <View style={styles.footerAddress}>
-            <Text>info@rfs-sicherheit.ch</Text>
-          </View>
-          <Text style={styles.footerText} render={({ pageNumber, totalPages }) => `Seite ${pageNumber} von ${totalPages}`} />
-        </View>
-      </Page>
+      )}
     </Document>
   );
 };

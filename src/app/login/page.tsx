@@ -40,7 +40,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#050505] overflow-hidden flex flex-col lg:flex-row font-['Outfit']">
+    <div className="relative min-h-screen w-full bg-[#050505] overflow-x-hidden flex flex-col lg:flex-row font-['Outfit']">
       <div className="noise-overlay"></div>
       <div className="bg-mesh-premium"></div>
 

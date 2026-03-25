@@ -34,21 +34,31 @@ function ReviewContent() {
           <ReviewHeader inspection={inspection} />
         </div>
 
-        {/* PAGE 2+: CONTENT */}
-        <div className="space-y-12">
+        {/* PAGE 2+: CONTENT BY FLOOR PLAN */}
+        <div className="space-y-16">
           {inspection.floorPlans && inspection.floorPlans.length > 0 ? (
             inspection.floorPlans.map((fp: any, idx: number) => {
-              const fpIssues = (inspection.issues || [])
-                .filter((issue: any) => issue.floorPlanId === fp.id)
-                .map((issue: any) => ({
-                  x: issue.x,
-                  y: issue.y,
-                  issueNumber: issue.issueNumber,
-                }));
+              const fpIssues = (inspection.issues || []).filter((issue: any) => issue.floorPlanId === fp.id);
+              const fpMarkers = fpIssues.map((issue: any) => ({
+                x: issue.x,
+                y: issue.y,
+                issueNumber: issue.issueNumber,
+              }));
+
               return (
-                <div key={fp.id} className={idx > 0 ? "pt-12 border-t border-zinc-100" : ""}>
-                  <h3 className="text-sm font-black uppercase tracking-widest text-zinc-900 mb-4">{fp.name}</h3>
-                  <ReviewFloorPlan floorPlanUrl={fp.url} issues={fpIssues} />
+                <div key={fp.id} className="space-y-8">
+                  <div className="border-b-2 border-zinc-100 pb-4">
+                    <h3 className="text-xl font-black uppercase tracking-widest text-zinc-900">{fp.name}</h3>
+                  </div>
+                  
+                  <ReviewFloorPlan floorPlanUrl={fp.url} issues={fpMarkers} />
+
+                  <div className="pt-4">
+                    <ReviewIssuesList 
+                      issues={fpIssues} 
+                      title={`Mängel - ${fp.name}`}
+                    />
+                  </div>
                 </div>
               );
             })
@@ -63,14 +73,24 @@ function ReviewContent() {
             </div>
           )}
 
+          {/* PAGE: GENERAL ISSUES (No Floor Plan) */}
+          {inspection.issues?.filter((i: any) => !i.floorPlanId).length > 0 && (
+            <div className="pt-12 border-t border-zinc-100">
+              <ReviewIssuesList 
+                issues={inspection.issues.filter((i: any) => !i.floorPlanId)} 
+                title="Allgemeine Mängel"
+              />
+            </div>
+          )}
+
           {/* Hinweis Section (General Notes) */}
           {inspection.generalNotes && inspection.generalNotes.length > 0 && (
-            <div className="mb-12">
+            <div className="mt-12 pt-12 border-t border-zinc-100">
               <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-4 flex items-center gap-3">
                 <span className="w-8 h-[2px] bg-red-600"></span>
                 Hinweis
               </h2>
-              <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100 space-y-3">
+              <div className="bg-zinc-50 p-6 rounded-2xl border border-zinc-100 space-y-3 font-sans">
                 {inspection.generalNotes.map((note: string, idx: number) => (
                   <div key={idx} className="flex gap-3">
                     <span className="text-red-600 font-black">•</span>
@@ -82,7 +102,7 @@ function ReviewContent() {
           )}
 
           {/* Priority Legend */}
-          <div className="mb-12">
+          <div className="mt-12 pt-12 border-t border-zinc-100">
             <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-4 flex items-center gap-3">
               <span className="w-8 h-[2px] bg-red-600"></span>
               Prioritätenlegende
@@ -106,10 +126,6 @@ function ReviewContent() {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-12 pt-12 border-t border-zinc-100">
-          <ReviewIssuesList issues={inspection.issues || []} />
         </div>
       </div>
 

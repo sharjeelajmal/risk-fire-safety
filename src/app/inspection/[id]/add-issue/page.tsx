@@ -50,6 +50,7 @@ function AddIssueForm() {
     description: '',
     measures: [] as string[],
     priority: '1',
+    category: '',
     status: 'Offen',
     floorPlanId: searchParams.get('floorPlanId') || '',
   });
@@ -91,6 +92,12 @@ function AddIssueForm() {
     
     // Relaxed Validation
     const hasImage = images.length > 0;
+
+    // Mandatory Category
+    if (!formData.category) {
+      alert('Bitte wählen Sie eine Kategorie aus.');
+      return;
+    }
 
     // Only error if no image AND no description
     if (!hasImage && !formData.description.trim()) {
@@ -169,14 +176,49 @@ function AddIssueForm() {
             />
           </div>
 
+          <div className="space-y-1.5 md:space-y-2">
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Kategorie (Zwingend)</label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Baulicher Brandschutz',
+                'Technischer Brandschutz',
+                'Organisatorischer Brandschutz',
+                'Abwehrender Brandschutz',
+                'Allgemeines'
+              ].map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setFormData({...formData, category: cat})}
+                  className={`px-4 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    formData.category === cat 
+                      ? 'bg-white text-black border-white' 
+                      : 'bg-[#0a0a0a] border-white/10 text-zinc-500 hover:border-white/20'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <CustomSelect label="Status" options={STATUS_OPTIONS} value={formData.status} onChange={(val) => setFormData({...formData, status: val})} />
              <div className="space-y-1.5 md:space-y-2">
               <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Priorität</label>
-              <div className="flex gap-1.5 md:gap-2">
-                {['1', '2', '3', 'n/a'].map(v => (
-                  <button key={v} type="button" onClick={() => setFormData({...formData, priority: v as any})} className={`flex-1 py-2.5 md:py-3 rounded-lg md:rounded-xl border transition-all font-black text-[9px] md:text-[10px] tracking-widest ${formData.priority === v ? 'bg-red-500/10 text-red-500 border-red-500/50' : 'bg-[#0a0a0a] border-white/5 text-zinc-600'}`}>
-                    {v === 'n/a' ? 'N/A' : v}
+              <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
+                {['1', '2', '3', '4', 'n/a'].map(v => (
+                  <button 
+                    key={v} 
+                    type="button" 
+                    onClick={() => setFormData({...formData, priority: v as any})} 
+                    className={`py-2 px-1 rounded-lg border transition-all font-black text-[9px] tracking-tight text-center flex items-center justify-center min-h-[40px] ${
+                      formData.priority === v 
+                        ? 'bg-red-500/10 text-red-500 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' 
+                        : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/20'
+                    }`}
+                  >
+                    {v === 'n/a' ? 'N/A' : `Priorität ${v}`}
                   </button>
                 ))}
               </div>
@@ -203,15 +245,16 @@ function AddIssueForm() {
                 options={MEASURE_OPTIONS}
                 placeholder="Massnahmen auswählen oder tippen..."
                 listType="notes"
+                dropdownDirection="up"
             />
           </div>
 
 
-          <div className="flex flex-col-reverse sm:flex-row gap-3 md:gap-4 w-full">
+          <div className="flex flex-col-reverse sm:flex-row gap-2 w-full mt-4">
             <button
               type="button"
               onClick={() => router.push(`/inspection/${params.id}/map`)}
-              className="flex-1 py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest text-zinc-500 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-xs md:text-sm cursor-pointer"
+              className="flex-1 h-10 rounded-full font-black uppercase tracking-widest text-zinc-500 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-[10px] cursor-pointer"
             >
               Abbrechen
             </button>
@@ -219,9 +262,13 @@ function AddIssueForm() {
               disabled={loading} 
               whileHover={{ scale: 1.02 }} 
               whileTap={{ scale: 0.98 }} 
-              className={`flex-2 py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest md:tracking-[3px] flex items-center justify-center gap-2 md:gap-3 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}
+              className={`flex-2 h-10 rounded-full font-black uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}
             >
-              {loading ? <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><span className="text-[10px] md:text-xs">Speichern</span><Save className="w-4 h-4 md:w-4.5 md:h-4.5" /></>}
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <><span className="text-[10px]">Speichern</span><Save className="w-3.5 h-3.5" /></>
+              )}
             </motion.button>
           </div>
         </form>

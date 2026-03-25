@@ -34,11 +34,11 @@ export async function POST(request: Request) {
     const datum = formData.get('datum') as string;
     const auftraggeber = formData.get('auftraggeber') as string;
     const teilnehmer = formData.get('teilnehmer') as string;
+    const parentTitle = formData.get('parentTitle') as string;
     const documentType = formData.get('documentType') as string;
     const participantsRaw = formData.get('participants') as string;
     const floorPlansDataRaw = formData.get('floorPlansData') as string;
     const generalNotesRaw = formData.get('generalNotes') as string;
-
 
     let participants = [];
     try {
@@ -102,12 +102,13 @@ export async function POST(request: Request) {
             }
         }
     }
-      
+
     // Save to MongoDB
     const newInspection = await Inspection.create({
       datum: new Date(datum),
       auftraggeber,
       teilnehmer,
+      parentTitle,
       documentType,
       participantsList: participants,
       generalNotes,

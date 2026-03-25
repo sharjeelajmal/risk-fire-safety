@@ -54,6 +54,7 @@ function EditIssueForm() {
     description: '',
     measures: [] as string[],
     priority: '1',
+    category: '',
     status: 'Offen',
     floorPlanId: '',
   });
@@ -72,9 +73,10 @@ function EditIssueForm() {
               responsibleContractor: issue.responsibleContractor ? issue.responsibleContractor.split(', ').filter(Boolean) : [],
               description: issue.description || '',
               measures: issue.measures ? issue.measures.split(', ').filter(Boolean) : [],
-              priority: issue.priority || '1',
-              status: issue.status || 'Offen',
-              floorPlanId: issue.floorPlanId || '',
+               priority: issue.priority || '1',
+               category: issue.category || '',
+               status: issue.status || 'Offen',
+               floorPlanId: issue.floorPlanId || '',
             });
             setExistingImages(issue.images || []);
           }
@@ -112,6 +114,13 @@ function EditIssueForm() {
     const hasNewImages = newImages.length > 0;
     const hasDescription = formData.description.trim().length > 0;
     const hasMeasures = formData.measures.length > 0;
+
+    // Mandatory Category
+    if (!formData.category) {
+      alert('Bitte wählen Sie eine Kategorie aus.');
+      setLoading(false);
+      return;
+    }
 
     // Only error if everything is empty
     if (!hasExistingImages && !hasNewImages && !hasDescription && !hasMeasures) {
@@ -242,6 +251,32 @@ function EditIssueForm() {
           </div>
 
           <div className="space-y-1.5 md:space-y-2">
+            <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Kategorie (Zwingend)</label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'Baulicher Brandschutz',
+                'Technischer Brandschutz',
+                'Organisatorischer Brandschutz',
+                'Abwehrender Brandschutz',
+                'Allgemeines'
+              ].map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => setFormData({...formData, category: cat})}
+                  className={`px-4 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-widest transition-all ${
+                    formData.category === cat 
+                      ? 'bg-white text-black border-white' 
+                      : 'bg-[#0a0a0a] border-white/10 text-zinc-500 hover:border-white/20'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5 md:space-y-2">
             <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Mängel / Beschreibung</label>
             <textarea 
               rows={4} 
@@ -259,6 +294,7 @@ function EditIssueForm() {
                 onChange={(vals) => setFormData({...formData, measures: vals})}
                 options={MEASURE_OPTIONS}
                 placeholder="Massnahmen auswählen oder tippen..."
+                dropdownDirection="up"
             />
           </div>
 
@@ -271,33 +307,46 @@ function EditIssueForm() {
             />
             <div className="space-y-1.5 md:space-y-2">
               <label className="block text-[10px] md:text-xs font-black uppercase tracking-widest text-zinc-400">Priorität</label>
-              <div className="flex gap-1.5 md:gap-2">
-                {['1', '2', '3', 'n/a'].map(v => (
+              <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-5 gap-2">
+                {['1', '2', '3', '4', 'n/a'].map(v => (
                   <button 
                     key={v} 
                     type="button" 
                     onClick={() => setFormData({...formData, priority: v as any})} 
-                    className={`flex-1 py-2.5 md:py-3 rounded-lg md:rounded-xl border transition-all font-black text-[9px] md:text-[10px] tracking-widest ${formData.priority === v ? 'bg-red-500/10 text-red-500 border-red-500/50' : 'bg-[#0a0a0a] border-white/5 text-zinc-600'}`}
+                    className={`py-2 px-1 rounded-lg border transition-all font-black text-[9px] tracking-tight text-center flex items-center justify-center min-h-[40px] ${
+                      formData.priority === v 
+                        ? 'bg-red-500/10 text-red-500 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.1)]' 
+                        : 'bg-[#0a0a0a] border-white/5 text-zinc-500 hover:border-white/20'
+                    }`}
                   >
-                    {v === 'n/a' ? 'N/A' : v}
+                    {v === 'n/a' ? 'N/A' : `Priorität ${v}`}
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          <motion.button 
-            disabled={loading} 
-            whileHover={{ scale: 1.02 }} 
-            whileTap={{ scale: 0.98 }} 
-            className={`w-full py-3.5 md:py-5 rounded-full font-black uppercase tracking-widest md:tracking-[3px] flex items-center justify-center gap-2 md:gap-3 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}
-          >
-            {loading ? (
-              <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-            ) : (
-              <><span className="text-[10px] md:text-xs">Aktualisieren</span><Save className="w-4 h-4 md:w-4.5 md:h-4.5" /></>
-            )}
-          </motion.button>
+          <div className="flex flex-col-reverse sm:flex-row gap-2 w-full mt-4">
+            <button
+              type="button"
+              onClick={() => router.push(`/inspection/${params.id}/map`)}
+              className="flex-1 h-10 rounded-full font-black uppercase tracking-widest text-zinc-500 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all text-[10px] cursor-pointer"
+            >
+              Abbrechen
+            </button>
+            <motion.button 
+              disabled={loading} 
+              whileHover={{ scale: 1.02 }} 
+              whileTap={{ scale: 0.98 }} 
+              className={`flex-2 h-10 rounded-full font-black uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer ${loading ? 'bg-zinc-800 text-zinc-500' : 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-xl'}`}
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              ) : (
+                <><span className="text-[10px]">Aktualisieren</span><Save className="w-3.5 h-3.5" /></>
+              )}
+            </motion.button>
+          </div>
         </form>
       </main>
       <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[150px] pointer-events-none -z-10"></div>

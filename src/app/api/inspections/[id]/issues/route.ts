@@ -9,16 +9,25 @@ export async function POST(
   try {
     await connectToDatabase();
     const { id } = await params;
-    const body = await request.json();
+    const { x, y, location, responsibleContractor, description, measures, category, priority, images, floorPlanId } = await request.json();
 
     const inspection = await Inspection.findById(id);
-    if (!inspection) {
-      return NextResponse.json({ error: 'Inspection not found' }, { status: 404 });
-    }
+    if (!inspection) return NextResponse.json({ error: 'Inspection not found' }, { status: 404 });
+
+    const nextIssueNumber = (inspection.issues.length + 1).toString();
 
     const newIssue = {
-      ...body,
-      createdAt: new Date(),
+      issueNumber: nextIssueNumber,
+      x,
+      y,
+      location,
+      responsibleContractor,
+      description,
+      measures,
+      category,
+      priority,
+      images,
+      floorPlanId,
       status: 'Offen'
     };
 

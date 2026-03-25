@@ -12,12 +12,13 @@ interface Issue {
   responsibleContractor: string;
   description: string;
   measures: string;
-  priority: '1' | '2' | '3' | 'n/a';
+  category?: string;
+  priority: '1' | '2' | '3' | '4' | 'n/a';
   images: string[];
-  status: 'Open' | 'Completed' | 'Documentation' | 'n/a';
+  status: 'Open' | 'Offen' | 'In progress' | 'In Bearbeitung' | 'Completed' | 'Erledigt' | 'Documentation' | 'Dokumentation' | 'n/a';
 }
 
-export default function ReviewIssuesList({ issues }: { issues: Issue[] }) {
+export default function ReviewIssuesList({ issues, title }: { issues: Issue[], title?: string }) {
   const router = useRouter();
   const params = useParams();
 
@@ -56,10 +57,12 @@ export default function ReviewIssuesList({ issues }: { issues: Issue[] }) {
 
   return (
     <div className="space-y-8 md:space-y-12">
-      <h2 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 md:mb-8 flex items-center gap-2 md:gap-3">
-        <span className="w-6 md:w-8 h-[2px] bg-red-600"></span>
-        Detaillierte Mängelliste
-      </h2>
+      {title && (
+        <h2 className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-zinc-400 mb-6 md:mb-8 flex items-center gap-2 md:gap-3">
+          <span className="w-6 md:w-8 h-[2px] bg-red-600"></span>
+          {title}
+        </h2>
+      )}
 
       {issues.length === 0 ? (
         <div className="p-8 md:p-12 border-2 border-dashed border-zinc-100 rounded-2xl md:rounded-3xl text-center">
@@ -77,7 +80,7 @@ export default function ReviewIssuesList({ issues }: { issues: Issue[] }) {
                 <div className="flex items-center gap-2 transition-all">
                   <button 
                     onClick={() => router.push(`/inspection/${params.id}/edit-issue/${issue._id}`)}
-                    className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-all border border-zinc-200 cursor-pointer flex items-center gap-2"
+                    className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-zinc-100 text-zinc-600 hover:bg-zinc-200 transition-all border border-zinc-200 cursor-pointer flex items-center gap-2 print:hidden"
                     title="Bearbeiten"
                   >
                     <Pencil className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -85,29 +88,45 @@ export default function ReviewIssuesList({ issues }: { issues: Issue[] }) {
                   </button>
                    <button 
                     onClick={() => issue._id && handleDeleteTrigger(issue._id)}
-                    className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all border border-red-100 cursor-pointer flex items-center gap-2"
+                    className="p-1.5 md:p-2 rounded-lg md:rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-all border border-red-100 cursor-pointer flex items-center gap-2 print:hidden"
                     title="Löschen"
                   >
                     <Trash2 className="w-3.5 h-3.5 md:w-4 md:h-4" />
                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest hidden sm:inline">Delete</span>
                   </button>
                 </div>
-                <div className={`px-2.5 md:px-4 py-1 md:py-2 rounded-full font-black text-[8px] md:text-[10px] uppercase tracking-widest ${
-                  issue.priority === '3' ? 'bg-red-100 text-red-600' : 
+                <div className={`px-2.5 md:px-4 py-1 md:py-1.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest ${
+                  issue.priority === '1' ? 'bg-red-100 text-red-600' : 
                   issue.priority === '2' ? 'bg-orange-100 text-orange-600' : 
-                  issue.priority === '1' ? 'bg-green-100 text-green-600' :
+                  issue.priority === '3' ? 'bg-green-100 text-green-600' :
+                  issue.priority === '4' ? 'bg-zinc-100 text-zinc-400' :
                   'bg-zinc-100 text-zinc-600'
                 }`}>
-                  P{issue.priority}
+                  {issue.priority === 'n/a' ? 'Priorität n/a' : `Priorität ${issue.priority}`}
                 </div>
-                <div className="px-2.5 md:px-4 py-1 md:py-2 rounded-full font-black text-[8px] md:text-[10px] uppercase tracking-widest bg-zinc-900 text-white shadow-lg">
-                  {issue.status || 'Open'}
+                <div className={`px-2.5 md:px-4 py-1 md:py-1.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest text-white shadow-lg ${
+                  issue.status === 'Open' || issue.status === 'Offen' ? 'bg-red-600' :
+                  issue.status === 'In progress' || issue.status === 'In Bearbeitung' ? 'bg-orange-500' :
+                  issue.status === 'Completed' || issue.status === 'Erledigt' ? 'bg-green-600' :
+                  'bg-zinc-500'
+                }`}>
+                  {issue.status === 'Open' ? 'Offen' : 
+                   issue.status === 'In progress' ? 'In Bearbeitung' :
+                   issue.status === 'Completed' ? 'Erledigt' :
+                   issue.status === 'Documentation' ? 'Dokumentation' :
+                   issue.status || 'Offen'}
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-12 mb-6 md:mb-8">
               <div className="space-y-4 md:space-y-6">
+                {issue.category && (
+                  <div>
+                    <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Kategorie</label>
+                    <p className="text-xs md:text-sm text-zinc-900 font-black uppercase tracking-tighter">{issue.category}</p>
+                  </div>
+                )}
                 <div>
                   <label className="block text-[9px] md:text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5 md:mb-1">Problembeschreibung</label>
                   <div className="h-auto whitespace-pre-wrap wrap-break-word break-all overflow-hidden max-w-full">

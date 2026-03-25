@@ -200,6 +200,7 @@ function EditDetailsContent() {
   const [formData, setFormData] = useState({
     datum: '',
     auftraggeber: '',
+    parentTitle: '',
     teilnehmer: '',
     documentType: 'Catalog of measures' as 'Catalog of measures' | 'QS protocol',
     participants: [{ name: '', role: '' }],
@@ -223,6 +224,7 @@ function EditDetailsContent() {
           setFormData({
             datum,
             auftraggeber: data.auftraggeber || '',
+            parentTitle: data.parentTitle || '',
             teilnehmer: data.teilnehmer || '',
             documentType: data.documentType || 'Catalog of measures',
             participants: data.participantsList?.length > 0
@@ -349,6 +351,7 @@ function EditDetailsContent() {
       const data = new FormData();
       data.append('datum', formData.datum);
       data.append('auftraggeber', formData.auftraggeber);
+      data.append('parentTitle', formData.parentTitle);
       data.append('teilnehmer', formData.teilnehmer);
       data.append('documentType', formData.documentType);
       
@@ -468,7 +471,31 @@ function EditDetailsContent() {
             </div>
           </div>
 
-          {/* Basic Details */}
+          {/* Overarching Title Input */}
+          <div className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-6 md:space-y-8">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <FileText className="w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Objektbezeichung</h2>
+                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Übergeordneter Titel</p>
+              </div>
+            </div>
+
+            <div className="relative group">
+              <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors w-5 h-5 md:w-6 md:h-6" />
+              <input
+                type="text"
+                value={formData.parentTitle}
+                onChange={(e) => setFormData({ ...formData, parentTitle: e.target.value })}
+                placeholder="Übergeordneter Titel..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-6 outline-none focus:border-red-500/50 focus:bg-white/[0.08] transition-all font-bold text-sm md:text-lg"
+              />
+            </div>
+          </div>
+
+          {/* Stap 1: Basic Details */}
           <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 border border-white/5 space-y-8 md:space-y-10 overflow-visible! relative z-60">
             <div className="flex items-center gap-3 md:gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
@@ -567,7 +594,7 @@ function EditDetailsContent() {
                   icon={<User className="w-[18px] h-[18px] md:w-5 md:h-5" />}
                   placeholder="Name des Erstellers"
                   value={formData.teilnehmer}
-                  onChange={(val) => setFormData({ ...formData, teilnehmer: val })}
+                  onChange={(val) => setFormData(prev => ({ ...prev, teilnehmer: val }))}
                   options={[]}
                   listType="participants"
                 />

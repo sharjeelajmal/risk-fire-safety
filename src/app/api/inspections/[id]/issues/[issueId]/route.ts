@@ -19,6 +19,7 @@ export async function PATCH(
           'issues.$.responsibleContractor': body.responsibleContractor,
           'issues.$.description': body.description,
           'issues.$.measures': body.measures,
+          'issues.$.category': body.category,
           'issues.$.priority': body.priority,
           'issues.$.images': body.images,
           'issues.$.status': body.status || 'Open',

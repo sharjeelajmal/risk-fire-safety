@@ -189,6 +189,7 @@ export default function NewInspectionPage() {
   const [formData, setFormData] = useState({
     datum: getLocalDate(),
     auftraggeber: '',
+    parentTitle: '',
     teilnehmer: 'Robin Furrer',
     documentType: 'Catalog of measures' as 'Catalog of measures' | 'QS protocol',
     participants: [{ name: '', role: '' }],
@@ -327,6 +328,7 @@ export default function NewInspectionPage() {
       const data = new FormData();
       data.append('datum', formData.datum);
       data.append('auftraggeber', formData.auftraggeber);
+      data.append('parentTitle', formData.parentTitle);
       data.append('teilnehmer', formData.teilnehmer);
       data.append('documentType', formData.documentType);
       
@@ -438,6 +440,31 @@ export default function NewInspectionPage() {
               ))}
             </div>
           </div>
+
+          {/* Overarching Title Input */}
+          <div className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-6 md:space-y-8">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <FileText className="w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Objektbezeichung</h2>
+                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Übergeordneter Titel</p>
+              </div>
+            </div>
+
+            <div className="relative group">
+              <FileText className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-red-500 transition-colors w-5 h-5 md:w-6 md:h-6" />
+              <input
+                type="text"
+                value={formData.parentTitle}
+                onChange={(e) => setFormData({ ...formData, parentTitle: e.target.value })}
+                placeholder="Übergeordneter Titel..."
+                className="w-full bg-white/5 border border-white/10 rounded-xl md:rounded-2xl py-3.5 md:py-5 pl-12 md:pl-14 pr-6 outline-none focus:border-red-500/50 focus:bg-white/[0.08] transition-all font-bold text-sm md:text-lg"
+              />
+            </div>
+          </div>
+
           {/* Stap 1: Basic Details */}
           <div className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-8 md:space-y-10 overflow-visible! relative z-60">
             <div className="flex items-center gap-3 md:gap-4">
@@ -538,7 +565,7 @@ export default function NewInspectionPage() {
                   icon={<User className="w-[18px] h-[18px] md:w-5 md:h-5" />}
                   placeholder="Name des Erstellers"
                   value={formData.teilnehmer}
-                  onChange={(val) => setFormData({ ...formData, teilnehmer: val })}
+                  onChange={(val) => setFormData(prev => ({ ...prev, teilnehmer: val }))}
                   options={[]}
                   listType="participants"
                 />
@@ -701,22 +728,22 @@ export default function NewInspectionPage() {
           </div>
 
           {/* Fixed Footer Action */}
-          <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-24 md:h-32 bg-[#050505] border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] z-50 flex items-center justify-center px-4 md:px-8">
+          <div className="fixed bottom-16 md:bottom-20 lg:bottom-0 left-0 right-0 lg:left-24 h-16 md:h-20 bg-[#050505]/90 backdrop-blur-md border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.8)] z-[999] flex items-center justify-center px-4 md:px-8">
             <motion.button
               whileHover={!loading ? { scale: 1.02 } : {}}
               whileTap={!loading ? { scale: 0.98 } : {}}
               disabled={loading}
-              className="w-full max-w-2xl bg-gradient-to-r from-red-600 to-red-900 py-4 md:py-6 rounded-xl md:rounded-[2rem] flex items-center justify-center gap-3 md:gap-4 text-white font-black uppercase tracking-[2px] md:tracking-[3px] text-xs md:text-base shadow-[0_20px_50px_rgba(239,68,68,0.3)] hover:shadow-[0_30px_70px_rgba(239,68,68,0.5)] transition-all cursor-pointer disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
+              className="w-full max-w-lg bg-gradient-to-r from-red-600 to-red-900 py-2.5 md:py-3.5 rounded-xl md:rounded-2xl flex items-center justify-center gap-2 md:gap-3 text-white font-black uppercase tracking-widest text-[10px] md:text-sm shadow-[0_20px_50px_rgba(239,68,68,0.3)] hover:shadow-[0_30px_70px_rgba(239,68,68,0.5)] transition-all cursor-pointer disabled:opacity-40 disabled:grayscale disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
-                  <Loader2 className="animate-spin w-5 h-5 md:w-6 md:h-6" />
-                  <span>Wird erstellt...</span>
+                  <Loader2 className="animate-spin w-4 h-4 md:w-5 md:h-5" />
+                  <span className="text-[10px] md:text-xs">Wird erstellt...</span>
                 </>
               ) : (
                 <>
-                  <span>Inspektion starten</span>
-                  <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+                  <span className="text-[10px] md:text-xs">Inspektion starten</span>
+                  <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 </>
               )}
             </motion.button>
