@@ -15,6 +15,8 @@ import {
   ChevronRight,
   CheckCircle2,
   Pencil,
+  Upload,
+  FileText,
 } from 'lucide-react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -178,6 +180,9 @@ function EditDetailsContent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, boolean>>({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [floorPlans, setFloorPlans] = useState<{ id: string, name: string, file: File | null, preview: string | null, url?: string }[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const clientOptions = ['Musterfirma AG', 'Immobilien Verwaltung GmbH', 'Swiss Property Management', 'City Real Estate'];
   const noteOptions = [
@@ -225,6 +230,16 @@ function EditDetailsContent() {
               : [{ name: '', role: '' }],
             generalNotes: data.generalNotes || [],
           });
+          
+          if (data.floorPlans) {
+            setFloorPlans(data.floorPlans.map((fp: any) => ({
+              id: fp.id,
+              name: fp.name,
+              file: null,
+              preview: fp.url,
+              url: fp.url
+            })));
+          }
         }
       } catch (err) {
         console.error('Error fetching inspection:', err);
@@ -267,6 +282,54 @@ function EditDetailsContent() {
     }
   };
 
+  // Floor Plan Handlers
+  const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement> | React.DragEvent) => {
+    let files: FileList | null = null;
+    
+    if ('target' in e && (e.target as HTMLInputElement).files) {
+      files = (e.target as HTMLInputElement).files;
+    } else if ('dataTransfer' in e) {
+      files = (e as React.DragEvent).dataTransfer.files;
+    }
+
+    if (files) {
+      const newPlans = Array.from(files).map(file => ({
+        id: (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2)),
+        name: file.name.split('.')[0], 
+        file: file,
+        preview: file.type.includes('pdf') ? 'pdf' : URL.createObjectURL(file)
+      }));
+      setFloorPlans(prev => [...prev, ...newPlans]);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const onDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleImagesChange(e);
+  };
+
+  const updateFloorPlanName = (index: number, name: string) => {
+    const newPlans = [...floorPlans];
+    newPlans[index].name = name;
+    setFloorPlans(newPlans);
+  };
+
+  const removeFloorPlan = (index: number) => {
+    setFloorPlans(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -283,18 +346,34 @@ function EditDetailsContent() {
     setErrors({});
     setSaving(true);
     try {
+      const data = new FormData();
+      data.append('datum', formData.datum);
+      data.append('auftraggeber', formData.auftraggeber);
+      data.append('teilnehmer', formData.teilnehmer);
+      data.append('documentType', formData.documentType);
+      
       const validParticipants = formData.participants.filter(p => p.name.trim());
+      data.append('participants', JSON.stringify(validParticipants));
+      data.append('generalNotes', JSON.stringify(formData.generalNotes));
+      
+      // Floor Plans Data
+      const floorPlansMeta = floorPlans.map(fp => ({ 
+        id: fp.id, 
+        name: fp.name,
+        url: fp.url // Keep the existing URL if it's already uploaded
+      }));
+      data.append('floorPlansData', JSON.stringify(floorPlansMeta));
+
+      // New Files
+      floorPlans.forEach((fp, index) => {
+        if (fp.file) {
+          data.append(`file_${index}`, fp.file);
+        }
+      });
+
       const res = await fetch(`/api/inspections/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          datum: formData.datum,
-          auftraggeber: formData.auftraggeber,
-          teilnehmer: formData.teilnehmer,
-          documentType: formData.documentType,
-          participants: validParticipants,
-          generalNotes: formData.generalNotes,
-        }),
+        body: data,
       });
 
       if (res.ok) {
@@ -343,7 +422,7 @@ function EditDetailsContent() {
         <div className="flex items-center gap-2">
           <Pencil className="w-4 h-4 text-red-500" />
           <h1 className="text-sm md:text-xl font-black uppercase tracking-[2px] md:tracking-[4px] text-white truncate max-w-[180px] md:max-w-none text-center">
-            Details bearbeiten
+            Inspektion bearbeiten
           </h1>
         </div>
 
@@ -493,6 +572,88 @@ function EditDetailsContent() {
                   listType="participants"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Stap 2: Map Upload / Grundriss */}
+          <div className="glass-premium rounded-2xl md:rounded-[3rem] p-4 md:p-12 space-y-8 md:space-y-10 border border-white/5">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-red-600/10 flex items-center justify-center text-red-500">
+                <Map className="w-5 h-5 md:w-6 md:h-6" />
+              </div>
+              <div>
+                <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none text-white">Grundriss</h2>
+                <p className="text-gray-500 text-[9px] md:text-[10px] uppercase font-black tracking-widest mt-1">Plan hinzufügen / bearbeiten</p>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
+                className={`w-full py-8 md:py-12 bg-white/[0.02] rounded-2xl md:rounded-[3rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 md:gap-6 group hover:border-red-500/50 hover:bg-red-500/[0.02] transition-all cursor-pointer relative ${
+                  isDragging ? 'border-red-500 bg-red-500/10' : 'border-white/10'
+                }`}
+              >
+                <motion.div
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-12 h-12 md:w-20 md:h-20 rounded-2xl md:rounded-3xl bg-red-600/10 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform"
+                >
+                  <Upload className="w-6 h-6 md:w-8 md:h-8" />
+                </motion.div>
+                <div className="text-center px-4">
+                  <p className="text-sm md:text-xl font-black uppercase tracking-tight text-white">Pläne hochladen</p>
+                  <p className="text-gray-500 text-[8px] md:text-[10px] font-black mt-2 uppercase tracking-[2px] md:tracking-[3px]">JPG, PNG, PDF (Mehrere oder Drag & Drop)</p>
+                </div>
+                <input
+                  type="file"
+                  multiple
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*,application/pdf"
+                  onChange={handleImagesChange}
+                />
+              </div>
+
+              {floorPlans.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {floorPlans.map((plan, index) => (
+                    <div key={plan.id} className="bg-[#0a0a0a] border border-white/10 md:glass-premium rounded-3xl overflow-hidden flex flex-col">
+                      <div className="relative aspect-[16/9] bg-black flex items-center justify-center">
+                        {plan.preview === 'pdf' ? (
+                          <div className="flex flex-col items-center gap-3 text-red-500">
+                            <FileText className="w-12 h-12 md:w-20 md:h-20" />
+                            <span className="text-[10px] font-black uppercase tracking-widest opacity-60">PDF Dokument</span>
+                          </div>
+                        ) : (
+                          <img src={plan.preview!} alt={plan.name} className="w-full h-full object-contain min-h-[150px] md:min-h-[200px]" />
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => removeFloorPlan(index)}
+                          className="absolute top-2 md:top-4 right-2 md:right-4 p-1.5 md:p-2 rounded-lg md:rounded-xl bg-black/60 backdrop-blur-md text-white hover:text-red-500 transition-colors"
+                        >
+                          <X className="w-4 h-4 md:w-4.5 md:h-4.5" />
+                        </button>
+                      </div>
+                      <div className="p-3 md:p-6 space-y-2 md:space-y-3">
+                        <label className="text-[9px] md:text-[10px] uppercase font-black tracking-widest text-gray-500 ml-1">Plan Bezeichnung</label>
+                        <input
+                          required
+                          type="text"
+                          placeholder="z.B. Erdgeschoss"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 md:py-4 px-4 md:px-5 focus:border-red-500/50 outline-none transition-all font-bold text-xs md:text-sm"
+                          value={plan.name}
+                          onChange={(e) => updateFloorPlanName(index, e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
