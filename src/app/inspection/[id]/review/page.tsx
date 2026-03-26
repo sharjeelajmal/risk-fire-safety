@@ -109,20 +109,24 @@ function ReviewContent() {
             </h2>
             <div className="flex flex-wrap gap-4">
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
-                <span className="block text-[8px] font-black text-red-600 uppercase mb-1">Stufe 1</span>
+                <span className="block text-[8px] font-black text-red-600 uppercase mb-1">Priorität 1</span>
                 <p className="text-[10px] font-bold text-zinc-900">Sofortmassnahmen</p>
               </div>
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
-                <span className="block text-[8px] font-black text-orange-600 uppercase mb-1">Stufe 2</span>
+                <span className="block text-[8px] font-black text-orange-600 uppercase mb-1">Priorität 2</span>
                 <p className="text-[10px] font-bold text-zinc-900">Kurzfristige Massnahmen (3 – 6 Monate)</p>
               </div>
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
-                <span className="block text-[8px] font-black text-green-600 uppercase mb-1">Stufe 3</span>
+                <span className="block text-[8px] font-black text-green-600 uppercase mb-1">Priorität 3</span>
                 <p className="text-[10px] font-bold text-zinc-900">Mittelfristige Massnahmen (12 – 24 Monate)</p>
               </div>
               <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
-                <span className="block text-[8px] font-black text-zinc-400 uppercase mb-1">Stufe 4</span>
+                <span className="block text-[8px] font-black text-zinc-400 uppercase mb-1">Priorität 4</span>
                 <p className="text-[10px] font-bold text-zinc-900">Langfristige Massnahmen (2 – 5 Jahre)</p>
+              </div>
+              <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100 w-[calc(50%-8px)]">
+                <span className="block text-[8px] font-black text-zinc-400 uppercase mb-1">n/a</span>
+                <p className="text-[10px] font-bold text-zinc-900">Nicht anwendbar</p>
               </div>
             </div>
           </div>

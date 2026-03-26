@@ -95,7 +95,6 @@ export default function CreatableMultiSelect({
 
       if (!isInsideContainer && !isInsideDropdown) {
         setIsOpen(false);
-        setSearch('');
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -242,6 +241,13 @@ export default function CreatableMultiSelect({
             onFocus={() => {
               updateCoords();
               setIsOpen(true);
+            }}
+            onBlur={() => {
+              if (search.trim()) {
+                handleSelect(search.trim());
+              }
+              setSearch('');
+              setIsOpen(false);
             }}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}

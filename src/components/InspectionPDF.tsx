@@ -4,7 +4,7 @@ import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/render
 const styles = StyleSheet.create({
   page: {
     padding: 40,
-    paddingTop: 60, // Space for fixed header
+    paddingTop: 100, // Space for fixed header
     paddingBottom: 80, // Space for footer
     fontSize: 10,
     fontFamily: 'Helvetica',
@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     position: 'absolute',
-    top: 20,
+    top: 25,
     left: 0,
     right: 0,
     textAlign: 'center',
@@ -21,9 +21,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: '#f4f4f5',
-    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e4e4e7',
+    paddingBottom: 15,
   },
   headerTitle: {
     fontSize: 9,
@@ -46,15 +46,16 @@ const styles = StyleSheet.create({
     left: 40,
     right: 40,
     borderTopWidth: 1,
-    borderTopColor: '#111111',
-    paddingTop: 5,
+    borderTopColor: '#e4e4e7',
+    paddingTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   footerText: {
     fontSize: 7,
-    color: '#111111',
+    color: '#71717a',
+    fontWeight: 'bold',
   },
   footerAddress: {
     fontSize: 6,
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 10,
+    marginTop: 15,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -237,17 +239,19 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   priorityBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 4,
     fontSize: 8,
     fontWeight: 'bold',
+    borderWidth: 1,
+    borderColor: '#e4e4e7',
   },
-  p1: { backgroundColor: '#FFEEF2', color: '#DC2626' },
-  p2: { backgroundColor: '#FFF7ED', color: '#EA580C' },
-  p3: { backgroundColor: '#F0FDF4', color: '#16A34A' },
-  p4: { backgroundColor: '#F4F4F5', color: '#71717A' },
-  pna: { backgroundColor: '#F4F4F5', color: '#71717A' },
+  p1: { backgroundColor: '#FFFFFF', color: '#18181b' },
+  p2: { backgroundColor: '#FFFFFF', color: '#18181b' },
+  p3: { backgroundColor: '#FFFFFF', color: '#18181b' },
+  p4: { backgroundColor: '#FFFFFF', color: '#18181b' },
+  pna: { backgroundColor: '#FFFFFF', color: '#18181b' },
   
   statusOpen: { backgroundColor: '#DC2626', color: '#FFFFFF' },
   statusProgress: { backgroundColor: '#F97316', color: '#FFFFFF' },
@@ -436,20 +440,24 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
           </View>
           <View style={styles.legendGrid}>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#DC2626' }]}>Stufe 1</Text>
+              <Text style={[styles.levelLabel, { color: '#DC2626' }]}>Priorität 1</Text>
               <Text style={styles.levelText}>Sofortmassnahmen</Text>
             </View>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#EA580C' }]}>Stufe 2</Text>
+              <Text style={[styles.levelLabel, { color: '#EA580C' }]}>Priorität 2</Text>
               <Text style={styles.levelText}>Kurzfristig (3 – 6 Monate)</Text>
             </View>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#16A34A' }]}>Stufe 3</Text>
+              <Text style={[styles.levelLabel, { color: '#16A34A' }]}>Priorität 3</Text>
               <Text style={styles.levelText}>Mittelfristig (12 – 24 Monate)</Text>
             </View>
             <View style={styles.legendCard}>
-              <Text style={[styles.levelLabel, { color: '#71717A' }]}>Stufe 4</Text>
+              <Text style={[styles.levelLabel, { color: '#71717A' }]}>Priorität 4</Text>
               <Text style={styles.levelText}>Langfristig (2 – 5 Jahre)</Text>
+            </View>
+            <View style={styles.legendCard}>
+              <Text style={[styles.levelLabel, { color: '#71717A' }]}>n/a</Text>
+              <Text style={styles.levelText}>Nicht anwendbar</Text>
             </View>
           </View>
         </View>
@@ -539,7 +547,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                         issue.priority === '4' ? styles.p4 :
                         styles.pna
                       ]}>
-                        <Text>{issue.priority === 'n/a' ? 'Priorität n/a' : `Priorität ${issue.priority}`}</Text>
+                        <Text>{issue.priority === 'n/a' ? 'n/a' : `Priorität ${issue.priority}`}</Text>
                       </View>
                       <View style={[
                         styles.priorityBadge, 
@@ -568,14 +576,6 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                         </View>
                       )}
                       <View style={styles.infoGroup}>
-                        <Text style={styles.label}>Problembeschreibung</Text>
-                        <Text style={styles.descriptionText}>{issue.description}</Text>
-                      </View>
-                      <View style={styles.infoGroup}>
-                        <Text style={styles.label}>Massnahmen</Text>
-                        <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>{issue.measures}</Text>
-                      </View>
-                      <View style={styles.infoGroup}>
                         <Text style={styles.label}>Verantwortlichkeit</Text>
                         <Text style={{ fontWeight: 'bold' }}>{issue.responsibleContractor}</Text>
                       </View>
@@ -585,6 +585,19 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                       {issue.images?.map((url, i) => (
                         <Image key={i} src={getFullUrl(url)} style={styles.issueImage} />
                       ))}
+                    </View>
+                  </View>
+
+                  <View style={{ marginTop: 10, gap: 10 }}>
+                    <View style={styles.infoGroup}>
+                      <Text style={styles.label}>Problembeschreibung</Text>
+                      <Text style={styles.descriptionText}>{issue.description}</Text>
+                    </View>
+                    <View style={styles.infoGroup}>
+                      <Text style={styles.label}>Massnahmen</Text>
+                      <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>
+                        {Array.isArray(issue.measures) ? issue.measures.join(', ') : (issue.measures || '-')}
+                      </Text>
                     </View>
                   </View>
                   <View style={styles.divider} />
@@ -632,7 +645,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                         issue.priority === '4' ? styles.p4 :
                         styles.pna
                       ]}>
-                        <Text>{issue.priority === 'n/a' ? 'Priorität n/a' : `Priorität ${issue.priority}`}</Text>
+                        <Text>{issue.priority === 'n/a' ? 'n/a' : `Priorität ${issue.priority}`}</Text>
                       </View>
                       <View style={[
                         styles.priorityBadge, 
@@ -651,7 +664,7 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                       </View>
                     </View>
                   </View>
-                  <View style={styles.issueContentGrid}>
+                   <View style={styles.issueContentGrid}>
                     <View style={styles.infoColumn}>
                       {issue.category && (
                         <View style={styles.infoGroup}>
@@ -659,14 +672,6 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                           <Text style={{ fontSize: 9, fontWeight: 'black', textTransform: 'uppercase' }}>{issue.category}</Text>
                         </View>
                       )}
-                      <View style={styles.infoGroup}>
-                        <Text style={styles.label}>Problembeschreibung</Text>
-                        <Text style={styles.descriptionText}>{issue.description}</Text>
-                      </View>
-                      <View style={styles.infoGroup}>
-                        <Text style={styles.label}>Massnahmen</Text>
-                        <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>{issue.measures}</Text>
-                      </View>
                       <View style={styles.infoGroup}>
                         <Text style={styles.label}>Verantwortlichkeit</Text>
                         <Text style={{ fontWeight: 'bold' }}>{issue.responsibleContractor}</Text>
@@ -676,6 +681,19 @@ export const InspectionPDF = ({ data }: InspectionPDFProps) => {
                       {issue.images?.map((url, i) => (
                         <Image key={i} src={getFullUrl(url)} style={styles.issueImage} />
                       ))}
+                    </View>
+                  </View>
+
+                  <View style={{ marginTop: 10, gap: 10 }}>
+                    <View style={styles.infoGroup}>
+                      <Text style={styles.label}>Problembeschreibung</Text>
+                      <Text style={styles.descriptionText}>{issue.description}</Text>
+                    </View>
+                    <View style={styles.infoGroup}>
+                      <Text style={styles.label}>Massnahmen</Text>
+                      <Text style={[styles.descriptionText, { fontStyle: 'italic' }]}>
+                        {Array.isArray(issue.measures) ? issue.measures.join(', ') : (issue.measures || '-')}
+                      </Text>
                     </View>
                   </View>
              </View>

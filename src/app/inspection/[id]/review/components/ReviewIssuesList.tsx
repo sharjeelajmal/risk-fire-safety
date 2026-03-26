@@ -95,14 +95,8 @@ export default function ReviewIssuesList({ issues, title }: { issues: Issue[], t
                     <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest hidden sm:inline">Delete</span>
                   </button>
                 </div>
-                <div className={`px-2.5 md:px-4 py-1 md:py-1.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest ${
-                  issue.priority === '1' ? 'bg-red-100 text-red-600' : 
-                  issue.priority === '2' ? 'bg-orange-100 text-orange-600' : 
-                  issue.priority === '3' ? 'bg-green-100 text-green-600' :
-                  issue.priority === '4' ? 'bg-zinc-100 text-zinc-400' :
-                  'bg-zinc-100 text-zinc-600'
-                }`}>
-                  {issue.priority === 'n/a' ? 'Priorität n/a' : `Priorität ${issue.priority}`}
+                <div className="px-2.5 md:px-4 py-1 md:py-1.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest border border-zinc-200 text-zinc-900 bg-white shadow-sm">
+                  {issue.priority === 'n/a' ? 'n/a' : `Priorität ${issue.priority}`}
                 </div>
                 <div className={`px-2.5 md:px-4 py-1 md:py-1.5 rounded-full font-black text-[9px] md:text-[10px] uppercase tracking-widest text-white shadow-lg ${
                   issue.status === 'Open' || issue.status === 'Offen' ? 'bg-red-600' :
